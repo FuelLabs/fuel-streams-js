@@ -3,7 +3,7 @@ const { join } = require('node:path');
 const util = require('node:util');
 const { compare } = require('compare-versions');
 const exec = util.promisify(require('node:child_process').exec);
-const { version } = require('../packages/connectors/package.json');
+const { version } = require('../packages/fuel-streams/package.json');
 
 const DELETE_TAGS = /next|preview|rc|main/;
 const CURRENT_VERSION = version;
@@ -42,7 +42,7 @@ async function main() {
       [
         '\n',
         '##############################################',
-        `➡️ ${packageName}`,
+        `➡ ${packageName}`,
         '##############################################',
         '\n',
       ].join('\n'),
@@ -62,7 +62,7 @@ async function main() {
     console.log('The following versions will be deleted:');
     console.log(versionsToDelete.map((v) => `   - ${v}`).join('\n'));
     for (const versionDelete of versionsToDelete) {
-      console.log(`\n🗑️  Deleting ${packageName}@${versionDelete}...`);
+      console.log(`\n🗑  Deleting ${packageName}@${versionDelete}...`);
       console.log(dryRun);
       const { stderr } = await exec(
         `npm unpublish ${packageName}@${versionDelete} ${dryRun}`,

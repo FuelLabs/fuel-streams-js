@@ -52,7 +52,7 @@ importers:
         specifier: 2.0.2
         version: 2.0.2(@types/node@20.12.11)(jsdom@24.0.0(bufferutil@4.0.8)(utf-8-validate@5.0.10))(terser@5.31.0)
 
-  packages/connectors:
+  packages/fuel-streams:
     devDependencies:
       terser:
         specifier: 5.31.0
