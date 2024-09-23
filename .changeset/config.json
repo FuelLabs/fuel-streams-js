@@ -1,0 +1,24 @@
+{
+  "$schema": "https://unpkg.com/@changesets/config@3.0.0/schema.json",
+  "privatePackages": {
+    "version": true,
+    "tag": false
+  },
+  "changelog": [
+    "@changesets/changelog-github",
+    {
+      "repo": "FuelLabs/fuel-streams-js"
+    }
+  ],
+  "commit": false,
+  "fixed": [["@fuels/streams"]],
+  "linked": [],
+  "access": "public",
+  "baseBranch": "main",
+  "updateInternalDependencies": "patch",
+  "ignore": [],
+  "snapshot": {
+    "useCalculatedVersion": true,
+    "prereleaseTemplate": "{tag}-{commit}"
+  }
+}

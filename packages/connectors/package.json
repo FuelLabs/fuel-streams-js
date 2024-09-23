@@ -1,0 +1,25 @@
+{
+  "name": "@fuels/streams",
+  "version": "0.0.1",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "require": "./dist/index.js",
+      "import": "./dist/index.mjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup",
+    "build:watch": "tsup --watch",
+    "ts:check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "terser": "5.31.0",
+    "tsup": "8.0.2",
+    "typescript": "5.4.5"
+  }
+}

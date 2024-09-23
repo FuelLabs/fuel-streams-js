@@ -1,0 +1,50 @@
+{
+  "name": "fuel-streams-js",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Official data streaming Typescript library for Fuel Network",
+  "author": "Fuel Labs <contact@fuel.sh> (https://fuel.network/)",
+  "homepage": "https://github.com/FuelLabs/fuel-streams-js",
+  "scripts": {
+    "build": "turbo build",
+    "build:watch": "turbo build:watch",
+    "ts:check": "turbo run ts:check",
+    "test": "vitest",
+    "test:ci": "turbo run test -- --run --coverage.enabled --coverage.reporter=json-summary --coverage.reporter=json",
+    "lint:check": "biome check --apply-unsafe .",
+    "lint:ci": "biome lint --max-diagnostics=1000 --diagnostic-level=error .",
+    "format": "biome format --write .",
+    "changeset": "changeset",
+    "changeset:next": "tsx ./scripts/changeset-next",
+    "packages:version": "node ./scripts/version.js",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "1.7.3",
+    "@changesets/changelog-github": "0.5.0",
+    "@changesets/cli": "2.27.1",
+    "@fuels/ts-config": "0.20.0",
+    "@fuels/tsup-config": "0.20.0",
+    "@vitest/coverage-v8": "2.0.2",
+    "compare-versions": "6.1.0",
+    "husky": "9.0.11",
+    "lint-staged": "15.2.2",
+    "tsx": "^4.16.2",
+    "turbo": "2.0.11",
+    "vitest": "2.0.2"
+  },
+  "engines": {
+    "node": ">=18",
+    "pnpm": ">=9"
+  },
+  "pnpm": {
+    "overrides": {
+      "braces@<3.0.3": ">=3.0.3",
+      "ws@>=8.0.0 <8.17.1": ">=8.17.1",
+      "ws@>=7.0.0 <7.5.10": ">=7.5.10",
+      "ws@>=6.0.0 <6.2.3": ">=6.2.3",
+      "fast-xml-parser@<4.4.1": ">=4.4.1"
+    }
+  },
+  "packageManager": "pnpm@9.5.0"
+}
