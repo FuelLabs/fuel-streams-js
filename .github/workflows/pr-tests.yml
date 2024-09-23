@@ -22,13 +22,13 @@ jobs:
     runs-on: buildjet-4vcpu-ubuntu-2204
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Setup Node
         uses: FuelLabs/github-actions/setups/node@master
         with:
           node-version: 20.11.0
           pnpm-version: 9.5.0
-      
+
       - uses: FuelLabs/github-actions/setups/docker@master
         with:
           username: ${{ github.repository_owner }}
@@ -49,30 +49,3 @@ jobs:
       - name: Run Vitest
         run: |
           pnpm test:ci
-
-      - name: Publish Fuel Wallet Coverage
-        uses: davelosert/vitest-coverage-report-action@v2
-        if: ${{ always() && steps.findPr.outputs.number }}
-        with:
-          name: 'Fuel Wallet'
-          working-directory: ./packages/fuel-wallet
-          json-summary-path: ./coverage/coverage-summary.json
-          json-final-path: ./coverage/coverage-final.json
-
-      - name: Publish Fuel Development Wallet Coverage
-        uses: davelosert/vitest-coverage-report-action@v2
-        if: ${{ always() && steps.findPr.outputs.number }}
-        with:
-          name: 'Fuel Development Wallet'
-          working-directory: ./packages/fuel-development-wallet
-          json-summary-path: ./coverage/coverage-summary.json
-          json-final-path: ./coverage/coverage-final.json
-
-      - name: Publish Fuelet Wallet Coverage
-        uses: davelosert/vitest-coverage-report-action@v2
-        if: ${{ always() && steps.findPr.outputs.number }}
-        with:
-          name: 'Fuelet Wallet'
-          working-directory: ./packages/fuelet-wallet
-          json-summary-path: ./coverage/coverage-summary.json
-          json-final-path: ./coverage/coverage-final.json
