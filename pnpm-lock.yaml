@@ -53,6 +53,19 @@ importers:
         version: 2.0.2(@types/node@20.12.11)(jsdom@24.0.0(bufferutil@4.0.8)(utf-8-validate@5.0.10))(terser@5.31.0)
 
   packages/fuel-streams:
+    dependencies:
+      '@nats-io/jetstream':
+        specifier: 3.0.0-10
+        version: 3.0.0-10
+      '@nats-io/kv':
+        specifier: 3.0.0-8
+        version: 3.0.0-8
+      '@nats-io/nats-core':
+        specifier: 3.0.0-27
+        version: 3.0.0-27
+      '@nats-io/obj':
+        specifier: 3.0.0-6
+        version: 3.0.0-6
     devDependencies:
       terser:
         specifier: 5.31.0
@@ -700,6 +713,26 @@ packages:
 
   '@microsoft/tsdoc@0.14.2':
     resolution: {integrity: sha512-9b8mPpKrfeGRuhFH5iO1iwCLeIIsV6+H1sRfxbkoGXIyQE2BTsPd9zqSqQJ+pv5sJ/hT5M1zvOFL02MnEezFug==}
+
+  '@nats-io/jetstream@3.0.0-10':
+    resolution: {integrity: sha512-FOdwBximucQszBAsSAckqhXxh0WZozKbRTMzODCudcHpOEv0jUwnoqFLG/8r607pJDX1gdiYADF5hpeV3gvh7A==}
+
+  '@nats-io/kv@3.0.0-8':
+    resolution: {integrity: sha512-hwG65AViKnx2LhnU0e+6qkbPIrbpLTUouvOL2eOv/oUIZszKD1YN6OBvKBWkYXFAssVmlk7BD/OuHTkCMcnH+w==}
+
+  '@nats-io/nats-core@3.0.0-27':
+    resolution: {integrity: sha512-xJvUWoRvUTG/3K4Ppf5KXTZezicbvd2o/psMyI7YPtIxKZsZALXL/bLoNb7FB/Hw4jECioZE7LZCSK41npFD2A==}
+
+  '@nats-io/nkeys@1.2.0-4':
+    resolution: {integrity: sha512-61R4SO9059AyZBhoZRECHobHsY6mBOGwB5ewBrbnDKVtTehnFwyMNaORHhksFmu9K0zyUtwBWyffzKpibp2Cew==}
+    engines: {node: '>=16.0.0'}
+
+  '@nats-io/nuid@2.0.1-2':
+    resolution: {integrity: sha512-oXJiWXH87FjcPAXVVkoY+o7z9YFuOvsVlUlvB4h/QsoC1hp63lB18YOMHmKxVNO7BzvwzJh3SKLlIlsQrEwaxg==}
+    engines: {node: '>= 18.x'}
+
+  '@nats-io/obj@3.0.0-6':
+    resolution: {integrity: sha512-Xl0WttNds3YPWKQSwnm6bTLryngLTAzEIPuqJ1cVDsC6DNtoBuQgQ1de/e5B39tk9+wSX15aK142vqAE6ltgSw==}
 
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
@@ -2538,6 +2571,9 @@ packages:
     resolution: {integrity: sha512-imDlFFAvitbCm1JtDFJ6eG882qwxHUmVT2noPb3p2jq5o5DuXOchMbkVS9kUeC3/4WpY5N0GBZ3RvqNyjHZw1Q==}
     hasBin: true
 
+  tweetnacl@1.0.3:
+    resolution: {integrity: sha512-6rt+RN7aOi1nGMyC4Xa5DdYiukl2UWCbcJft7YhxReBGQD7OAM8Pbxw6YMo4r2diNEA8FEmu32YOn9rhaiE5yw==}
+
   type-fest@0.13.1:
     resolution: {integrity: sha512-34R7HTnG0XIJcBSn5XhDd7nNFPRcXYRZrBB2O2jdKqYODldSzBAqzsWoZYYvduky73toYS/ESqxPvkDf/F0XMg==}
     engines: {node: '>=10'}
@@ -3381,6 +3417,31 @@ snapshots:
 
   '@microsoft/tsdoc@0.14.2':
     optional: true
+
+  '@nats-io/jetstream@3.0.0-10':
+    dependencies:
+      '@nats-io/nats-core': 3.0.0-27
+
+  '@nats-io/kv@3.0.0-8':
+    dependencies:
+      '@nats-io/jetstream': 3.0.0-10
+      '@nats-io/nats-core': 3.0.0-27
+
+  '@nats-io/nats-core@3.0.0-27':
+    dependencies:
+      '@nats-io/nkeys': 1.2.0-4
+      '@nats-io/nuid': 2.0.1-2
+
+  '@nats-io/nkeys@1.2.0-4':
+    dependencies:
+      tweetnacl: 1.0.3
+
+  '@nats-io/nuid@2.0.1-2': {}
+
+  '@nats-io/obj@3.0.0-6':
+    dependencies:
+      '@nats-io/jetstream': 3.0.0-10
+      '@nats-io/nats-core': 3.0.0-27
 
   '@nodelib/fs.scandir@2.1.5':
     dependencies:
@@ -5392,6 +5453,8 @@ snapshots:
       turbo-linux-arm64: 2.0.11
       turbo-windows-64: 2.0.11
       turbo-windows-arm64: 2.0.11
+
+  tweetnacl@1.0.3: {}
 
   type-fest@0.13.1: {}
 
