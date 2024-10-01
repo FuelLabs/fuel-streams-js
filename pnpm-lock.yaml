@@ -25,14 +25,14 @@ importers:
         specifier: 2.27.1
         version: 2.27.1
       '@fuels/ts-config':
-        specifier: 0.20.0
-        version: 0.20.0(typescript@5.4.5)
+        specifier: 0.23.0
+        version: 0.23.0(typescript@5.6.2)
       '@fuels/tsup-config':
-        specifier: 0.20.0
-        version: 0.20.0(tsup@8.0.2(@microsoft/api-extractor@7.43.0(@types/node@20.12.11))(postcss@8.4.41)(ts-node@10.9.2(@types/node@20.12.11)(typescript@5.4.5))(typescript@5.4.5))
+        specifier: 0.23.0
+        version: 0.23.0(tsup@8.0.2(@microsoft/api-extractor@7.43.0(@types/node@22.7.4))(postcss@8.4.41)(ts-node@10.9.2(@types/node@22.7.4)(typescript@5.6.2))(typescript@5.6.2))
       '@vitest/coverage-v8':
         specifier: 2.0.2
-        version: 2.0.2(vitest@2.0.2(@types/node@20.12.11)(jsdom@24.0.0(bufferutil@4.0.8)(utf-8-validate@5.0.10))(terser@5.31.0))
+        version: 2.0.2(vitest@2.0.2(@types/node@22.7.4)(jsdom@24.0.0(bufferutil@4.0.8)(utf-8-validate@5.0.10))(terser@5.31.0))
       compare-versions:
         specifier: 6.1.0
         version: 6.1.0
@@ -48,9 +48,12 @@ importers:
       turbo:
         specifier: 2.0.11
         version: 2.0.11
+      typescript:
+        specifier: ~5.6.2
+        version: 5.6.2
       vitest:
         specifier: 2.0.2
-        version: 2.0.2(@types/node@20.12.11)(jsdom@24.0.0(bufferutil@4.0.8)(utf-8-validate@5.0.10))(terser@5.31.0)
+        version: 2.0.2(@types/node@22.7.4)(jsdom@24.0.0(bufferutil@4.0.8)(utf-8-validate@5.0.10))(terser@5.31.0)
 
   packages/fuel-streams:
     dependencies:
@@ -63,16 +66,34 @@ importers:
       '@nats-io/nats-core':
         specifier: 3.0.0-27
         version: 3.0.0-27
+      '@nats-io/nuid':
+        specifier: 2.0.1-2
+        version: 2.0.1-2
       '@nats-io/obj':
         specifier: 3.0.0-6
         version: 3.0.0-6
+      '@nats-io/transport-node':
+        specifier: 3.0.0-12
+        version: 3.0.0-12
+      chalk:
+        specifier: ^4.1.0
+        version: 4.1.2
+      dotenv:
+        specifier: ^16.0.3
+        version: 16.4.5
     devDependencies:
+      '@types/dotenv':
+        specifier: 8.2.0
+        version: 8.2.0
+      '@types/node':
+        specifier: 22.7.4
+        version: 22.7.4
       terser:
         specifier: 5.31.0
         version: 5.31.0
       tsup:
         specifier: 8.0.2
-        version: 8.0.2(@microsoft/api-extractor@7.43.0(@types/node@20.12.11))(postcss@8.4.41)(ts-node@10.9.2(@types/node@20.12.11)(typescript@5.4.5))(typescript@5.4.5)
+        version: 8.0.2(@microsoft/api-extractor@7.43.0(@types/node@22.7.4))(postcss@8.4.41)(ts-node@10.9.2(@types/node@22.7.4)(typescript@5.4.5))(typescript@5.4.5)
       typescript:
         specifier: 5.4.5
         version: 5.4.5
@@ -653,13 +674,13 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@fuels/ts-config@0.20.0':
-    resolution: {integrity: sha512-wFPifVVz2z/YXuYJ/qLFRKIAVq98ZtrrX9TlcKuL5E4ar32VGLRFTtoujEwFVcWRWmdkxA9ulcCiV3fEojdqlQ==}
+  '@fuels/ts-config@0.23.0':
+    resolution: {integrity: sha512-9wfQTBKZSuF+8mByCLOVK7vpT56+kxcuzVLUl1unYGAtm0vWJhX0OPjkM2G9H6ZeUG2EJXoZzY8GGqZNjRjv8A==}
     peerDependencies:
       typescript: 5.2.2
 
-  '@fuels/tsup-config@0.20.0':
-    resolution: {integrity: sha512-KCoD35LqdMF6wcsVYLoUfaOoOtBPyxhw4qJ1vCyGltmOHiOUcgRoa/TvuMDv08uhc72c4VofPVuNlyE0JeU6tw==}
+  '@fuels/tsup-config@0.23.0':
+    resolution: {integrity: sha512-E7d3bnBQe0qemxgh6aBmHth6yCXA+KvgRFq2BcADaIIyNPtMg+FHNMii4bGULQ/JAB0y8yY6QFeDnzYj5uOi5g==}
     peerDependencies:
       tsup: ^7.2.0
 
@@ -733,6 +754,10 @@ packages:
 
   '@nats-io/obj@3.0.0-6':
     resolution: {integrity: sha512-Xl0WttNds3YPWKQSwnm6bTLryngLTAzEIPuqJ1cVDsC6DNtoBuQgQ1de/e5B39tk9+wSX15aK142vqAE6ltgSw==}
+
+  '@nats-io/transport-node@3.0.0-12':
+    resolution: {integrity: sha512-TWBlZULn02iY3A3+MrC5CztQ4YclFQPiQrH56fToC68NA1rfqWw54RPWaUVrbjgg5u6dX1CH6yuNZImdZV5HGA==}
+    engines: {node: '>= 18.0.0'}
 
   '@nodelib/fs.scandir@2.1.5':
     resolution: {integrity: sha512-vq24Bq3ym5HEQm2NKCr3yXDwjc7vTsEThRDnkp2DK9p1uqLR+DHurm/NOTo0KG7HYHU7eppKZj3MyqYuMBf62g==}
@@ -867,6 +892,10 @@ packages:
   '@types/argparse@1.0.38':
     resolution: {integrity: sha512-ebDJ9b0e702Yr7pWgB0jzm+CX4Srzz8RcXtLJDJB+BSccqMa36uyH/zUsSYao5+BD1ytv3k3rPYCq4mAE1hsXA==}
 
+  '@types/dotenv@8.2.0':
+    resolution: {integrity: sha512-ylSC9GhfRH7m1EUXBXofhgx4lUWmFeQDINW5oLuS+gxWdfUeW4zJdeVTYVkexEW+e2VUvlZR2kGnGGipAWR7kw==}
+    deprecated: This is a stub types definition. dotenv provides its own type definitions, so you do not need this installed.
+
   '@types/estree@1.0.5':
     resolution: {integrity: sha512-/kYRxGDLWzHOB7q+wtSUQlFrtcdUccpfy+X+9iMBpHK8QLLhx2wIPYuS5DYtR9Wa/YlZAbIovy7qVdB1Aq6Lyw==}
 
@@ -876,8 +905,8 @@ packages:
   '@types/node@12.20.55':
     resolution: {integrity: sha512-J8xLz7q2OFulZ2cyGTLE1TbbZcjpno7FaN6zdJNrgAdrJ+DZzh/uFR6YrTb4C+nXakvud8Q4+rbhoIWlYQbUFQ==}
 
-  '@types/node@20.12.11':
-    resolution: {integrity: sha512-vDg9PZ/zi+Nqp6boSOT7plNuthRugEKixDv5sFTIpkE89MmNtEArAShI4mxuX2+UrLEe9pxC1vm2cjm9YlWbJw==}
+  '@types/node@22.7.4':
+    resolution: {integrity: sha512-y+NPi1rFzDs1NdQHHToqeiX2TIS79SWEAw9GYhkkx8bD0ChpfqC+n2j5OXOCpzfojBEBt6DnEnnG9MY0zk1XLg==}
 
   '@types/normalize-package-data@2.4.4':
     resolution: {integrity: sha512-37i+OaWTh9qeK4LSHPsyRC7NahnGotNuZvjLSgcPzblpHB3rrCJxAOgI5gCdKm7coonsaX1Of0ILiTcnZjbfxA==}
@@ -2612,11 +2641,16 @@ packages:
     engines: {node: '>=14.17'}
     hasBin: true
 
+  typescript@5.6.2:
+    resolution: {integrity: sha512-NW8ByodCSNCwZeghjN3o+JX5OFH0Ojg6sadjEKY4huZ52TqbJTJnDo5+Tw98lSy63NZvi4n+ez5m2u5d4PkZyw==}
+    engines: {node: '>=14.17'}
+    hasBin: true
+
   unbox-primitive@1.0.2:
     resolution: {integrity: sha512-61pPlCD9h51VoreyJ0BReideM3MDKMKnh6+V9L08331ipq6Q8OFXZYiqP6n/tbHx4s5I9uRhcye6BrbkizkBDw==}
 
-  undici-types@5.26.5:
-    resolution: {integrity: sha512-JlCMO+ehdEIKqlFxk6IfVoAUVmgz7cU7zD/h9XZ0qzeosSHmUJVOzSQvvYSYWXkFXC+IfLKSIffhv0sVZup6pA==}
+  undici-types@6.19.8:
+    resolution: {integrity: sha512-ve2KP6f/JnbPBFyobGHuerC9g1FYGn/F8n1LWTwNxCEzd6IfqTwUQcNXgEtmmQ6DlRrC1hrSrBnCZPokRrDHjw==}
 
   universalify@0.1.2:
     resolution: {integrity: sha512-rBJeI5CXAlmy1pV+617WB9J63U6XcazHHF2f2dbJix4XzpUF0RS3Zbj0FGIOCAva5P/d/GBOYaACQ1w+0azUkg==}
@@ -3313,16 +3347,16 @@ snapshots:
   '@esbuild/win32-x64@0.23.0':
     optional: true
 
-  '@fuels/ts-config@0.20.0(typescript@5.4.5)':
+  '@fuels/ts-config@0.23.0(typescript@5.6.2)':
     dependencies:
-      typescript: 5.4.5
+      typescript: 5.6.2
 
-  '@fuels/tsup-config@0.20.0(tsup@8.0.2(@microsoft/api-extractor@7.43.0(@types/node@20.12.11))(postcss@8.4.41)(ts-node@10.9.2(@types/node@20.12.11)(typescript@5.4.5))(typescript@5.4.5))':
+  '@fuels/tsup-config@0.23.0(tsup@8.0.2(@microsoft/api-extractor@7.43.0(@types/node@22.7.4))(postcss@8.4.41)(ts-node@10.9.2(@types/node@22.7.4)(typescript@5.6.2))(typescript@5.6.2))':
     dependencies:
       dotenv: 16.4.5
       react: 18.3.1
       react-dom: 18.3.1(react@18.3.1)
-      tsup: 8.0.2(@microsoft/api-extractor@7.43.0(@types/node@20.12.11))(postcss@8.4.41)(ts-node@10.9.2(@types/node@20.12.11)(typescript@5.4.5))(typescript@5.4.5)
+      tsup: 8.0.2(@microsoft/api-extractor@7.43.0(@types/node@22.7.4))(postcss@8.4.41)(ts-node@10.9.2(@types/node@22.7.4)(typescript@5.6.2))(typescript@5.6.2)
 
   '@isaacs/cliui@8.0.2':
     dependencies:
@@ -3379,24 +3413,24 @@ snapshots:
       globby: 11.1.0
       read-yaml-file: 1.1.0
 
-  '@microsoft/api-extractor-model@7.28.13(@types/node@20.12.11)':
+  '@microsoft/api-extractor-model@7.28.13(@types/node@22.7.4)':
     dependencies:
       '@microsoft/tsdoc': 0.14.2
       '@microsoft/tsdoc-config': 0.16.2
-      '@rushstack/node-core-library': 4.0.2(@types/node@20.12.11)
+      '@rushstack/node-core-library': 4.0.2(@types/node@22.7.4)
     transitivePeerDependencies:
       - '@types/node'
     optional: true
 
-  '@microsoft/api-extractor@7.43.0(@types/node@20.12.11)':
+  '@microsoft/api-extractor@7.43.0(@types/node@22.7.4)':
     dependencies:
-      '@microsoft/api-extractor-model': 7.28.13(@types/node@20.12.11)
+      '@microsoft/api-extractor-model': 7.28.13(@types/node@22.7.4)
       '@microsoft/tsdoc': 0.14.2
       '@microsoft/tsdoc-config': 0.16.2
-      '@rushstack/node-core-library': 4.0.2(@types/node@20.12.11)
+      '@rushstack/node-core-library': 4.0.2(@types/node@22.7.4)
       '@rushstack/rig-package': 0.5.2
-      '@rushstack/terminal': 0.10.0(@types/node@20.12.11)
-      '@rushstack/ts-command-line': 4.19.1(@types/node@20.12.11)
+      '@rushstack/terminal': 0.10.0(@types/node@22.7.4)
+      '@rushstack/ts-command-line': 4.19.1(@types/node@22.7.4)
       lodash: 4.17.21
       minimatch: 3.0.8
       resolve: 1.22.8
@@ -3442,6 +3476,12 @@ snapshots:
     dependencies:
       '@nats-io/jetstream': 3.0.0-10
       '@nats-io/nats-core': 3.0.0-27
+
+  '@nats-io/transport-node@3.0.0-12':
+    dependencies:
+      '@nats-io/nats-core': 3.0.0-27
+      '@nats-io/nkeys': 1.2.0-4
+      '@nats-io/nuid': 2.0.1-2
 
   '@nodelib/fs.scandir@2.1.5':
     dependencies:
@@ -3506,7 +3546,7 @@ snapshots:
   '@rollup/rollup-win32-x64-msvc@4.20.0':
     optional: true
 
-  '@rushstack/node-core-library@4.0.2(@types/node@20.12.11)':
+  '@rushstack/node-core-library@4.0.2(@types/node@22.7.4)':
     dependencies:
       fs-extra: 7.0.1
       import-lazy: 4.0.0
@@ -3515,7 +3555,7 @@ snapshots:
       semver: 7.5.4
       z-schema: 5.0.5
     optionalDependencies:
-      '@types/node': 20.12.11
+      '@types/node': 22.7.4
     optional: true
 
   '@rushstack/rig-package@0.5.2':
@@ -3524,17 +3564,17 @@ snapshots:
       strip-json-comments: 3.1.1
     optional: true
 
-  '@rushstack/terminal@0.10.0(@types/node@20.12.11)':
+  '@rushstack/terminal@0.10.0(@types/node@22.7.4)':
     dependencies:
-      '@rushstack/node-core-library': 4.0.2(@types/node@20.12.11)
+      '@rushstack/node-core-library': 4.0.2(@types/node@22.7.4)
       supports-color: 8.1.1
     optionalDependencies:
-      '@types/node': 20.12.11
+      '@types/node': 22.7.4
     optional: true
 
-  '@rushstack/ts-command-line@4.19.1(@types/node@20.12.11)':
+  '@rushstack/ts-command-line@4.19.1(@types/node@22.7.4)':
     dependencies:
-      '@rushstack/terminal': 0.10.0(@types/node@20.12.11)
+      '@rushstack/terminal': 0.10.0(@types/node@22.7.4)
       '@types/argparse': 1.0.38
       argparse: 1.0.10
       string-argv: 0.3.2
@@ -3557,22 +3597,25 @@ snapshots:
   '@types/argparse@1.0.38':
     optional: true
 
+  '@types/dotenv@8.2.0':
+    dependencies:
+      dotenv: 16.4.5
+
   '@types/estree@1.0.5': {}
 
   '@types/minimist@1.2.5': {}
 
   '@types/node@12.20.55': {}
 
-  '@types/node@20.12.11':
+  '@types/node@22.7.4':
     dependencies:
-      undici-types: 5.26.5
-    optional: true
+      undici-types: 6.19.8
 
   '@types/normalize-package-data@2.4.4': {}
 
   '@types/semver@7.5.8': {}
 
-  '@vitest/coverage-v8@2.0.2(vitest@2.0.2(@types/node@20.12.11)(jsdom@24.0.0(bufferutil@4.0.8)(utf-8-validate@5.0.10))(terser@5.31.0))':
+  '@vitest/coverage-v8@2.0.2(vitest@2.0.2(@types/node@22.7.4)(jsdom@24.0.0(bufferutil@4.0.8)(utf-8-validate@5.0.10))(terser@5.31.0))':
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@bcoe/v8-coverage': 0.2.3
@@ -3587,7 +3630,7 @@ snapshots:
       strip-literal: 2.1.0
       test-exclude: 7.0.1
       tinyrainbow: 1.2.0
-      vitest: 2.0.2(@types/node@20.12.11)(jsdom@24.0.0(bufferutil@4.0.8)(utf-8-validate@5.0.10))(terser@5.31.0)
+      vitest: 2.0.2(@types/node@22.7.4)(jsdom@24.0.0(bufferutil@4.0.8)(utf-8-validate@5.0.10))(terser@5.31.0)
     transitivePeerDependencies:
       - supports-color
 
@@ -4917,13 +4960,21 @@ snapshots:
 
   possible-typed-array-names@1.0.0: {}
 
-  postcss-load-config@4.0.2(postcss@8.4.41)(ts-node@10.9.2(@types/node@20.12.11)(typescript@5.4.5)):
+  postcss-load-config@4.0.2(postcss@8.4.41)(ts-node@10.9.2(@types/node@22.7.4)(typescript@5.4.5)):
     dependencies:
       lilconfig: 3.1.2
       yaml: 2.5.0
     optionalDependencies:
       postcss: 8.4.41
-      ts-node: 10.9.2(@types/node@20.12.11)(typescript@5.4.5)
+      ts-node: 10.9.2(@types/node@22.7.4)(typescript@5.4.5)
+
+  postcss-load-config@4.0.2(postcss@8.4.41)(ts-node@10.9.2(@types/node@22.7.4)(typescript@5.6.2)):
+    dependencies:
+      lilconfig: 3.1.2
+      yaml: 2.5.0
+    optionalDependencies:
+      postcss: 8.4.41
+      ts-node: 10.9.2(@types/node@22.7.4)(typescript@5.6.2)
 
   postcss@8.4.38:
     dependencies:
@@ -5367,14 +5418,14 @@ snapshots:
 
   ts-interface-checker@0.1.13: {}
 
-  ts-node@10.9.2(@types/node@20.12.11)(typescript@5.4.5):
+  ts-node@10.9.2(@types/node@22.7.4)(typescript@5.4.5):
     dependencies:
       '@cspotcode/source-map-support': 0.8.1
       '@tsconfig/node10': 1.0.11
       '@tsconfig/node12': 1.0.11
       '@tsconfig/node14': 1.0.3
       '@tsconfig/node16': 1.0.4
-      '@types/node': 20.12.11
+      '@types/node': 22.7.4
       acorn: 8.12.1
       acorn-walk: 8.3.3
       arg: 4.1.3
@@ -5386,7 +5437,26 @@ snapshots:
       yn: 3.1.1
     optional: true
 
-  tsup@8.0.2(@microsoft/api-extractor@7.43.0(@types/node@20.12.11))(postcss@8.4.41)(ts-node@10.9.2(@types/node@20.12.11)(typescript@5.4.5))(typescript@5.4.5):
+  ts-node@10.9.2(@types/node@22.7.4)(typescript@5.6.2):
+    dependencies:
+      '@cspotcode/source-map-support': 0.8.1
+      '@tsconfig/node10': 1.0.11
+      '@tsconfig/node12': 1.0.11
+      '@tsconfig/node14': 1.0.3
+      '@tsconfig/node16': 1.0.4
+      '@types/node': 22.7.4
+      acorn: 8.12.1
+      acorn-walk: 8.3.3
+      arg: 4.1.3
+      create-require: 1.1.1
+      diff: 4.0.2
+      make-error: 1.3.6
+      typescript: 5.6.2
+      v8-compile-cache-lib: 3.0.1
+      yn: 3.1.1
+    optional: true
+
+  tsup@8.0.2(@microsoft/api-extractor@7.43.0(@types/node@22.7.4))(postcss@8.4.41)(ts-node@10.9.2(@types/node@22.7.4)(typescript@5.4.5))(typescript@5.4.5):
     dependencies:
       bundle-require: 4.2.1(esbuild@0.19.12)
       cac: 6.7.14
@@ -5396,16 +5466,40 @@ snapshots:
       execa: 5.1.1
       globby: 11.1.0
       joycon: 3.1.1
-      postcss-load-config: 4.0.2(postcss@8.4.41)(ts-node@10.9.2(@types/node@20.12.11)(typescript@5.4.5))
+      postcss-load-config: 4.0.2(postcss@8.4.41)(ts-node@10.9.2(@types/node@22.7.4)(typescript@5.4.5))
       resolve-from: 5.0.0
       rollup: 4.20.0
       source-map: 0.8.0-beta.0
       sucrase: 3.35.0
       tree-kill: 1.2.2
     optionalDependencies:
-      '@microsoft/api-extractor': 7.43.0(@types/node@20.12.11)
+      '@microsoft/api-extractor': 7.43.0(@types/node@22.7.4)
       postcss: 8.4.41
       typescript: 5.4.5
+    transitivePeerDependencies:
+      - supports-color
+      - ts-node
+
+  tsup@8.0.2(@microsoft/api-extractor@7.43.0(@types/node@22.7.4))(postcss@8.4.41)(ts-node@10.9.2(@types/node@22.7.4)(typescript@5.6.2))(typescript@5.6.2):
+    dependencies:
+      bundle-require: 4.2.1(esbuild@0.19.12)
+      cac: 6.7.14
+      chokidar: 3.6.0
+      debug: 4.3.6
+      esbuild: 0.19.12
+      execa: 5.1.1
+      globby: 11.1.0
+      joycon: 3.1.1
+      postcss-load-config: 4.0.2(postcss@8.4.41)(ts-node@10.9.2(@types/node@22.7.4)(typescript@5.6.2))
+      resolve-from: 5.0.0
+      rollup: 4.20.0
+      source-map: 0.8.0-beta.0
+      sucrase: 3.35.0
+      tree-kill: 1.2.2
+    optionalDependencies:
+      '@microsoft/api-extractor': 7.43.0(@types/node@22.7.4)
+      postcss: 8.4.41
+      typescript: 5.6.2
     transitivePeerDependencies:
       - supports-color
       - ts-node
@@ -5499,6 +5593,8 @@ snapshots:
 
   typescript@5.4.5: {}
 
+  typescript@5.6.2: {}
+
   unbox-primitive@1.0.2:
     dependencies:
       call-bind: 1.0.7
@@ -5506,8 +5602,7 @@ snapshots:
       has-symbols: 1.0.3
       which-boxed-primitive: 1.0.2
 
-  undici-types@5.26.5:
-    optional: true
+  undici-types@6.19.8: {}
 
   universalify@0.1.2: {}
 
@@ -5541,13 +5636,13 @@ snapshots:
   validator@13.12.0:
     optional: true
 
-  vite-node@2.0.2(@types/node@20.12.11)(terser@5.31.0):
+  vite-node@2.0.2(@types/node@22.7.4)(terser@5.31.0):
     dependencies:
       cac: 6.7.14
       debug: 4.3.6
       pathe: 1.1.2
       tinyrainbow: 1.2.0
-      vite: 5.2.11(@types/node@20.12.11)(terser@5.31.0)
+      vite: 5.2.11(@types/node@22.7.4)(terser@5.31.0)
     transitivePeerDependencies:
       - '@types/node'
       - less
@@ -5558,17 +5653,17 @@ snapshots:
       - supports-color
       - terser
 
-  vite@5.2.11(@types/node@20.12.11)(terser@5.31.0):
+  vite@5.2.11(@types/node@22.7.4)(terser@5.31.0):
     dependencies:
       esbuild: 0.20.2
       postcss: 8.4.38
       rollup: 4.20.0
     optionalDependencies:
-      '@types/node': 20.12.11
+      '@types/node': 22.7.4
       fsevents: 2.3.3
       terser: 5.31.0
 
-  vitest@2.0.2(@types/node@20.12.11)(jsdom@24.0.0(bufferutil@4.0.8)(utf-8-validate@5.0.10))(terser@5.31.0):
+  vitest@2.0.2(@types/node@22.7.4)(jsdom@24.0.0(bufferutil@4.0.8)(utf-8-validate@5.0.10))(terser@5.31.0):
     dependencies:
       '@ampproject/remapping': 2.3.0
       '@vitest/expect': 2.0.2
@@ -5586,11 +5681,11 @@ snapshots:
       tinybench: 2.9.0
       tinypool: 1.0.0
       tinyrainbow: 1.2.0
-      vite: 5.2.11(@types/node@20.12.11)(terser@5.31.0)
-      vite-node: 2.0.2(@types/node@20.12.11)(terser@5.31.0)
+      vite: 5.2.11(@types/node@22.7.4)(terser@5.31.0)
+      vite-node: 2.0.2(@types/node@22.7.4)(terser@5.31.0)
       why-is-node-running: 2.3.0
     optionalDependencies:
-      '@types/node': 20.12.11
+      '@types/node': 22.7.4
       jsdom: 24.0.0(bufferutil@4.0.8)(utf-8-validate@5.0.10)
     transitivePeerDependencies:
       - less

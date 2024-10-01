@@ -4,6 +4,7 @@
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
+  "type": "module",
   "exports": {
     ".": {
       "require": "./dist/index.js",
@@ -13,11 +14,14 @@
   },
   "files": ["dist"],
   "scripts": {
+    "test-consume": "tsx ./examples/consume/index.ts",
     "build": "tsup",
     "build:watch": "tsup --watch",
     "ts:check": "tsc --noEmit"
   },
   "devDependencies": {
+    "@types/dotenv": "8.2.0",
+    "@types/node": "22.7.4",
     "terser": "5.31.0",
     "tsup": "8.0.2",
     "typescript": "5.4.5"
@@ -26,6 +30,10 @@
     "@nats-io/jetstream": "3.0.0-10",
     "@nats-io/kv": "3.0.0-8",
     "@nats-io/nats-core": "3.0.0-27",
-    "@nats-io/obj": "3.0.0-6"
+    "@nats-io/nuid": "2.0.1-2",
+    "@nats-io/obj": "3.0.0-6",
+    "@nats-io/transport-node": "3.0.0-12",
+    "chalk": "^4.1.0",
+    "dotenv": "^16.0.3"
   }
 }
