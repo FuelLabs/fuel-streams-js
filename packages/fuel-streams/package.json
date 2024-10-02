@@ -4,7 +4,6 @@
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
-  "type": "module",
   "exports": {
     ".": {
       "require": "./dist/index.js",
@@ -20,10 +19,12 @@
     "ts:check": "tsc --noEmit"
   },
   "devDependencies": {
+    "@types/mocha": "10.0.8",
     "@types/node": "22.7.4",
     "terser": "5.31.0",
     "tsup": "8.0.2",
-    "typescript": "5.4.5"
+    "typescript": "5.4.5",
+    "vitest": "~2.1.1"
   },
   "dependencies": {
     "@nats-io/jetstream": "3.0.0-10",

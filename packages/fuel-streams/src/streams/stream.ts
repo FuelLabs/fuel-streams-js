@@ -1,6 +1,5 @@
 import { StorageType } from '@nats-io/jetstream';
 import type { KV, KvEntry, KvWatchOptions } from '@nats-io/kv';
-import { kvPrefix } from '@nats-io/kv/lib/types';
 import type { QueuedIterator } from '@nats-io/nats-core';
 import type { NatsClient } from '../client/natsClient';
 

@@ -1,6 +1,10 @@
 import type { Block as FuelBlock } from 'fuels';
 
-export class BlocksSubject {
+export interface Subject {
+  parse(): string;
+}
+
+export class BlocksSubject implements Subject {
   producer: string | null;
   height: number | null;
 
