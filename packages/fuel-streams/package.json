@@ -20,7 +20,6 @@
     "ts:check": "tsc --noEmit"
   },
   "devDependencies": {
-    "@types/dotenv": "8.2.0",
     "@types/node": "22.7.4",
     "terser": "5.31.0",
     "tsup": "8.0.2",
@@ -34,6 +33,8 @@
     "@nats-io/obj": "3.0.0-6",
     "@nats-io/transport-node": "3.0.0-12",
     "chalk": "^4.1.0",
-    "dotenv": "^16.0.3"
+    "dotenv": "^16.0.3",
+    "fuels": "^0.94.8",
+    "pako": "2.1.0"
   }
 }

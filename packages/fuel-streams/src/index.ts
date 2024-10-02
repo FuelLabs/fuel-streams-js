@@ -1,12 +1,4 @@
-export {
-  ClientOpts,
-  DefaultProviderUrls,
-  NatsNamespace,
-  NatsUserRole,
-} from './clientOpts';
-export {
-  NatsClient,
-  INatsClient,
-  NatsClientStatus,
-  StatusStreamCallback,
-} from './natsClient';
+export * from './data/block';
+export * from './client';
+export * from './parser';
+export * from './streams';
