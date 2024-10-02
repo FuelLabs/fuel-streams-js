@@ -20,6 +20,25 @@ export enum IdentifierKind {
   ContractID = 'contract_id',
 }
 
+export enum TransactionKind {
+  Create = 'create',
+  Mint = 'mint',
+  Script = 'script',
+  Upgrade = 'ugrade',
+  Upload = 'upload',
+  Blob = 'blob',
+}
+
+export enum TransactionStatus {
+  Failed = 'failed',
+  Submitted = 'submitted',
+  SqueezedOut = 'squeezedOut',
+  Success = 'success',
+  None = 'none',
+}
+
 export * from './block';
 export * from './logs';
 export * from './inputs';
+export * from './outputs';
+export * from './transactions';
