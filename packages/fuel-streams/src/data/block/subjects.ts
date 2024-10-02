@@ -1,8 +1,5 @@
 import type { Block as FuelBlock } from 'fuels';
-
-export interface Subject {
-  parse(): string;
-}
+import type { Subject } from '..';
 
 export class BlocksSubject implements Subject {
   producer: string | null;

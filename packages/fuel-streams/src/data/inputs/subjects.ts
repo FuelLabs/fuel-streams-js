@@ -1,20 +1,11 @@
 import type {
-  AddressLike,
-  BytesLike,
-  ContractIdLike,
-  AssetId as FuelAssetId,
-  Input as FuelInput,
-  InputType as FuelInputType,
-} from 'fuels';
-
-export interface Subject {
-  parse(): string;
-}
-
-type Bytes32 = BytesLike;
-type Address = AddressLike;
-type AssetId = FuelAssetId;
-type ContractId = ContractIdLike;
+  Address,
+  AssetId,
+  Bytes32,
+  ContractId,
+  IdentifierKind,
+  Subject,
+} from '..';
 
 export class InputsCoinSubject implements Subject {
   static WILDCARD = 'inputs.>';
@@ -164,12 +155,6 @@ export class InputsMessageSubject implements Subject {
 }
 
 // =============================================
-
-// Enum or type alias for IdentifierKind if required
-enum IdentifierKind {
-  AssetID = 'asset_id',
-  ContractID = 'contract_id',
-}
 
 export class InputsByIdSubject implements Subject {
   static WILDCARD = 'by_id.inputs.>';
