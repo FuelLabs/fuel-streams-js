@@ -52,13 +52,22 @@ export class ClientOpts {
     return new ClientOpts(url).withRole(NatsUserRole.Default);
   }
 
+  static adminOpts(url: string): ClientOpts {
+    return new ClientOpts(url).withRole(NatsUserRole.Admin);
+  }
+
   public withRole(role: NatsUserRole): ClientOpts {
     this.role = role;
     return this;
   }
 
-  public withNamespace(namespace?: string): ClientOpts {
+  public withCustomNamespace(namespace: string): ClientOpts {
     this.namespace = new NatsNamespace(namespace);
+    return this;
+  }
+
+  public withDefaultNamespace(): ClientOpts {
+    this.namespace = new NatsNamespace();
     return this;
   }
 
