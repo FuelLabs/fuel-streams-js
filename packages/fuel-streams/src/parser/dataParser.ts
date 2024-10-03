@@ -1,3 +1,4 @@
+import type { StreamData } from '../streams';
 import { type CompressionStrategy, defaultStrategy } from './strategies';
 
 export interface DataParseable {
@@ -37,12 +38,12 @@ export class DataParser {
     return this;
   }
 
-  public encode<T>(data: T): Uint8Array {
+  public encode<T>(data: StreamData<T>): Uint8Array {
     const serializedData = this.serialize(data);
     return this.compressionStrategy.compress(serializedData);
   }
 
-  private serialize<T>(data: T): Uint8Array {
+  private serialize<T>(data: StreamData<T>): Uint8Array {
     switch (this.serializationType) {
       case SerializationType.Bincode:
         throw new Error('Bincode serialization not supported');

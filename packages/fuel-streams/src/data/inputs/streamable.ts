@@ -1,4 +1,5 @@
-import type { Streamable } from '../../streams/stream';
+import type { Input } from 'fuels';
+import { Streameable } from '../../streams/stream';
 import type { StreamData } from '../../streams/streamData';
 import { StreamEncoder } from '../../streams/streamEncoder';
 import {
@@ -7,8 +8,7 @@ import {
   InputsMessageSubject,
 } from './subjects';
 
-export class StreamedInput implements Streamable {
-  data: string;
+export class StreamedInput extends Streameable<Input> {
   NAME = 'inputs';
   WILDCARD_LIST: string[] = [
     InputsCoinSubject.WILDCARD,
@@ -16,17 +16,16 @@ export class StreamedInput implements Streamable {
     InputsMessageSubject.WILDCARD,
   ];
 
-  constructor(data: string) {
-    this.data = data;
+  constructor(public payload: Input) {
+    super();
   }
 
   async encode(): Promise<Uint8Array> {
-    const encoder = new StreamEncoder(this);
+    const encoder = new StreamEncoder(this.payload);
     return encoder.encode(this.NAME);
   }
 
-  static async decode(encoded: Uint8Array): Promise<StreamData<StreamedInput>> {
-    const encoder = new StreamEncoder(StreamedInput);
-    return encoder.decode<StreamedInput>(encoded);
+  async decode(encoded: Uint8Array): Promise<StreamData<Input>> {
+    return StreamEncoder.decode(encoded);
   }
 }

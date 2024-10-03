@@ -12,7 +12,7 @@ enum CompressionLevel {
   Default = 'default',
 }
 
-class ZLibCompressionStrategy implements CompressionStrategy {
+export class ZLibCompressionStrategy implements CompressionStrategy {
   private compressionLevel: CompressionLevel;
 
   constructor(compressionLevel = CompressionLevel.Fastest) {

@@ -1,12 +1,7 @@
 import { DataParser } from '../parser/dataParser';
 import { StreamData } from './streamData';
 
-export interface IStreamEncoder<T> {
-  encode(subject: string, payload: T): Uint8Array;
-  decode(encoded: Uint8Array): StreamData<T>;
-}
-
-export class StreamEncoder<T> implements IStreamEncoder<T> {
+export class StreamEncoder<T> {
   private payload: T;
   private dataParser: DataParser;
 
@@ -24,13 +19,7 @@ export class StreamEncoder<T> implements IStreamEncoder<T> {
     return this.dataParser.encode(data);
   }
 
-  public decode<T>(encoded: Uint8Array): StreamData<T> {
-    return this.dataParser.decode<StreamData<T>>(encoded);
+  public static decode<T>(encoded: Uint8Array): StreamData<T> {
+    return DataParser.default().decode<StreamData<T>>(encoded);
   }
-
-  // public decodeRaw<T>(
-  //   encoded: Uint8Array,
-  // ): StreamData<T> {
-  //   return this.dataParser.decode<StreamData<T>>(encoded);
-  // }
 }

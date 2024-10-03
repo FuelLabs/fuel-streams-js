@@ -2,34 +2,36 @@ import { StorageType } from '@nats-io/jetstream';
 import type { KV, KvEntry, KvWatchOptions } from '@nats-io/kv';
 import type { QueuedIterator } from '@nats-io/nats-core';
 import type { NatsClient } from '../client/natsClient';
+import type { StreamData } from './streamData';
 
-export interface Streamable {
+export abstract class Streameable<T> {
   NAME: string;
   WILDCARD_LIST: string[];
-  encode(): Promise<Uint8Array>;
+  abstract encode(): Promise<Uint8Array>;
+  abstract decode(encoded: Uint8Array): Promise<StreamData<T>>;
 }
 
-export class Stream<T extends Streamable> {
+export class Stream<T> {
   private store: KV;
-  private static instance: Stream<Streamable> | null = null;
+  private static instance: Stream<undefined> | null = null;
 
   private constructor(store: KV) {
     this.store = store;
   }
 
-  public static async getOrInit<T extends Streamable>(
+  public static async getOrInit<T>(
     client: NatsClient,
-    streamable: T,
+    streamable: Streameable<T>,
   ): Promise<Stream<T>> {
     if (!Stream.instance) {
-      Stream.instance = await Stream.new<T>(client, streamable);
+      Stream.instance = await Stream.new<unknown>(client, streamable);
     }
     return Stream.instance as Stream<T>;
   }
 
-  private static async new<T extends Streamable>(
+  private static async new<T>(
     client: NatsClient,
-    streamable: T,
+    streamable: Streameable<T>,
   ): Promise<Stream<T>> {
     const namespace = client.getClientOpts().getNamespace();
     const bucketName = namespace.streamName(streamable.NAME);
@@ -41,13 +43,19 @@ export class Stream<T extends Streamable> {
     return new Stream<T>(store);
   }
 
-  public async publishMany(subjects: string[], payload: T): Promise<void> {
+  public async publishMany(
+    subjects: string[],
+    payload: Streameable<T>,
+  ): Promise<void> {
     await Promise.all(
       subjects.map((subject) => this.publish(subject, payload)),
     );
   }
 
-  public async publish(subject: string, payload: T): Promise<number> {
+  public async publish(
+    subject: string,
+    payload: Streameable<T>,
+  ): Promise<number> {
     const encodedPayload = await payload.encode();
     try {
       const dataSize = await this.store.create(subject, encodedPayload);
