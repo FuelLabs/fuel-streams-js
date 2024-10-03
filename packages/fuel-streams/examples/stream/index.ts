@@ -4,9 +4,9 @@ import {
   ClientOpts,
   DefaultProviderUrls,
   NatsClient,
-  Stream,
   StreamedBlock,
 } from '../../src/index';
+import { FuelStream } from '../../src/streams/fuelStream';
 const path = require('node:path');
 
 require('dotenv').config({
@@ -34,11 +34,19 @@ require('dotenv').config({
     const client = new NatsClient();
     await client.connect(opts);
 
-    const blocksStream = await Stream.getOrInit(
+    const blocksStream = await FuelStream.getOrInit(
       client,
       StreamedBlock.prototype,
     );
-    const _streamName = await blocksStream.getStreamName();
+    const streamName = await blocksStream.getStreamName();
+    console.log('Stream name', streamName);
+    const subscription = blocksStream.subscribe(
+      StreamedBlock.prototype.WILDCARD_LIST[0],
+    );
+
+    for await (const msg of await subscription) {
+      console.log('Received message', msg);
+    }
 
     await blocksStream.flushAwait();
 

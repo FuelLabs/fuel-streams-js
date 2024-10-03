@@ -27,7 +27,7 @@ export abstract class Streameable<T> {
 export class Stream<T> {
   private store: KV;
   private client: NatsClient;
-  private static instance: Stream<undefined> | null = null;
+  private static instance: Stream<undefined>;
 
   private constructor(store: KV, client: NatsClient) {
     this.store = store;
