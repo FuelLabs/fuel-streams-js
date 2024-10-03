@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 import 'dotenv/config';
 import chalk from 'chalk';
 import {
@@ -20,6 +19,15 @@ require('dotenv').config({
   console.log(`${chalk.green.bold('Streams Example')}`);
   console.log(header);
 
+  if (!process.env.NATS_ADMIN_PASS) {
+    console.error(
+      chalk.red(
+        'Error: NATS_ADMIN_PASS environment variable not set. Please set the NATS_ADMIN_PASS environment variable and try again.',
+      ),
+    );
+    process.exit(-1);
+  }
+
   try {
     // initialize a default client with all default settings
     const opts = ClientOpts.adminOpts(DefaultProviderUrls.Localnet);
@@ -32,7 +40,7 @@ require('dotenv').config({
     );
     const _streamName = await blocksStream.getStreamName();
 
-    await client.closeSafely();
+    await blocksStream.flushAwait();
 
     process.exit(0);
   } catch (ex) {

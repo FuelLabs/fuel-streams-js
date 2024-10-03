@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-var-requires */
 import 'dotenv/config';
 import chalk from 'chalk';
 import { ClientOpts, DefaultProviderUrls, NatsClient } from '../../src/index';

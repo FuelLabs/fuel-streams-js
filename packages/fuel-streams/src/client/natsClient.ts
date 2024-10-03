@@ -68,6 +68,18 @@ export class NatsClient implements INatsClient {
     this.opts = opts;
   }
 
+  public getNatsConnection(): NatsConnection {
+    return this.natsConnection as NatsConnection;
+  }
+
+  public getJetstream(): JetStreamClient {
+    return this.jetstream as JetStreamClient;
+  }
+
+  public getJetstreamManager(): JetStreamManager {
+    return this.jetstreamManager as JetStreamManager;
+  }
+
   public getClientOpts(): ClientOpts {
     if (!this.opts) {
       throw new Error('Client options are not set.');
