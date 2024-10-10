@@ -6,8 +6,8 @@ export {
 } from './clientOpts';
 
 export {
-  NatsClient,
-  INatsClient,
-  NatsClientStatus,
+  Client as NatsClient,
+  NatsClient as INatsClient,
+  ClientStatus as NatsClientStatus,
   StatusStreamCallback,
 } from './natsClient';

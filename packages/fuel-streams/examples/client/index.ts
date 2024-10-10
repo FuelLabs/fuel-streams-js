@@ -1,9 +1,9 @@
-import 'dotenv/config';
+import path from 'node:path';
 import chalk from 'chalk';
+import { config } from 'dotenv';
 import { ClientOpts, DefaultProviderUrls, NatsClient } from '../../src/index';
-const path = require('node:path');
 
-require('dotenv').config({
+config({
   path: path.resolve(__dirname, '..', '.env'),
 });
 
@@ -15,24 +15,8 @@ require('dotenv').config({
 
   try {
     // initialize a default client with all default settings
-    let opts = ClientOpts.defaultOpts(DefaultProviderUrls.Localnet);
-    let client = new NatsClient();
-    await client.connect(opts);
-    await client.closeSafely();
-
-    // initialize a default client with some user options
-    opts = ClientOpts.defaultOpts(DefaultProviderUrls.Localnet)
-      .withCustomNamespace('fuel')
-      .withTimeout(5);
-    client = new NatsClient();
-    await client.connect(opts);
-    await client.closeSafely();
-
-    // initialize an admin client with admin settings
-    opts = ClientOpts.adminOpts(DefaultProviderUrls.Localnet)
-      .withCustomNamespace('fuel')
-      .withTimeout(5);
-    client = new NatsClient();
+    const opts = new ClientOpts(DefaultProviderUrls.Testnet);
+    const client = new NatsClient();
     await client.connect(opts);
     await client.closeSafely();
 

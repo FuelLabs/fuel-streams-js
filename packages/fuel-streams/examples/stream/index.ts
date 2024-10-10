@@ -1,15 +1,15 @@
-import 'dotenv/config';
+import path from 'node:path';
 import chalk from 'chalk';
+import { config } from 'dotenv';
 import {
+  BlockStream,
+  BlocksSubject,
   ClientOpts,
   DefaultProviderUrls,
   NatsClient,
-  StreamedBlock,
 } from '../../src/index';
-import { FuelStream } from '../../src/streams/fuelStream';
-const path = require('node:path');
 
-require('dotenv').config({
+config({
   path: path.resolve(__dirname, '..', '.env'),
 });
 
@@ -30,25 +30,18 @@ require('dotenv').config({
 
   try {
     // initialize a default client with all default settings
-    const opts = ClientOpts.adminOpts(DefaultProviderUrls.Localnet);
+    const opts = new ClientOpts(DefaultProviderUrls.Testnet);
     const client = new NatsClient();
     await client.connect(opts);
 
-    const blocksStream = await FuelStream.getOrInit(
-      client,
-      StreamedBlock.prototype,
-    );
-    const streamName = await blocksStream.getStreamName();
-    console.log('Stream name', streamName);
-    const subscription = blocksStream.subscribe(
-      StreamedBlock.prototype.WILDCARD_LIST[0],
-    );
+    const stream = await BlockStream.init(client);
+    const subscription = stream.subscribe(BlocksSubject.wildcard());
 
     for await (const msg of await subscription) {
-      console.log('Received message', msg);
+      console.log('Received message', msg.key);
     }
 
-    await blocksStream.flushAwait();
+    await stream.flushAwait();
 
     process.exit(0);
   } catch (ex) {

@@ -1,22 +1,27 @@
-import type { AssetId, Bytes32, ContractId } from '..';
+import type { AssetId, Bytes32, ContractId, IdentifierKind } from '..';
+
+export enum ReceiptsWildcard {
+  All = 'receipts.>',
+  ById = 'by_id.receipts.>',
+}
 
 export class ReceiptsByIdSubject {
-  idKind?: string;
+  idKind?: IdentifierKind;
   idValue?: Bytes32;
 
-  static readonly WILDCARD = 'by_id.receipts.>';
-
-  constructor(idKind?: string, idValue?: Bytes32) {
+  constructor(idKind?: IdentifierKind, idValue?: Bytes32) {
     this.idKind = idKind;
     this.idValue = idValue;
   }
 
-  parse(): string {
-    return `by_id.receipts.${this.idKind || '*'}.${this.idValue || '*'}`;
+  parse() {
+    return `by_id.receipts.${this.idKind || '*'}.${
+      this.idValue || '*'
+    }` as const;
   }
 
-  static wildcard(idKind?: string, idValue?: Bytes32): string {
-    return `by_id.receipts.${idKind || '*'}.${idValue || '*'}`;
+  static wildcard(idKind?: IdentifierKind, idValue?: Bytes32) {
+    return `by_id.receipts.${idKind || '*'}.${idValue || '*'}` as const;
   }
 }
 
@@ -27,8 +32,6 @@ export class ReceiptsCallSubject {
   to?: ContractId;
   assetId?: AssetId;
 
-  static readonly WILDCARD = 'receipts.>';
-
   constructor(
     txId?: Bytes32,
     index?: number,
@@ -43,14 +46,14 @@ export class ReceiptsCallSubject {
     this.assetId = assetId;
   }
 
-  parse(): string {
+  parse() {
     return `receipts.${this.txId || '*'}.${this.index || '*'}.call.${
       this.from || '*'
-    }.${this.to || '*'}.${this.assetId || '*'}`;
+    }.${this.to || '*'}.${this.assetId || '*'}` as const;
   }
 
-  static wildcard(txId?: Bytes32, index?: number): string {
-    return `receipts.${txId || '*'}.${index || '*'}.call.*.*.*`;
+  static wildcard(txId?: Bytes32, index?: number) {
+    return `receipts.${txId || '*'}.${index || '*'}.call.*.*.*` as const;
   }
 }
 
@@ -59,22 +62,20 @@ export class ReceiptsReturnSubject {
   index?: number;
   id?: ContractId;
 
-  static readonly WILDCARD = 'receipts.>';
-
   constructor(txId?: Bytes32, index?: number, id?: ContractId) {
     this.txId = txId;
     this.index = index;
     this.id = id;
   }
 
-  parse(): string {
+  parse() {
     return `receipts.${this.txId || '*'}.${this.index || '*'}.return.${
       this.id || '*'
-    }`;
+    }` as const;
   }
 
-  static wildcard(txId?: Bytes32, index?: number): string {
-    return `receipts.${txId || '*'}.${index || '*'}.return.*`;
+  static wildcard(txId?: Bytes32, index?: number) {
+    return `receipts.${txId || '*'}.${index || '*'}.return.*` as const;
   }
 }
 
@@ -85,8 +86,6 @@ export class ReceiptsTransferSubject {
   to?: ContractId;
   assetId?: AssetId;
 
-  static readonly WILDCARD = 'receipts.>';
-
   constructor(
     txId?: Bytes32,
     index?: number,
@@ -101,13 +100,13 @@ export class ReceiptsTransferSubject {
     this.assetId = assetId;
   }
 
-  parse(): string {
+  parse() {
     return `receipts.${this.txId || '*'}.${this.index || '*'}.transfer.${
       this.from || '*'
-    }.${this.to || '*'}.${this.assetId || '*'}`;
+    }.${this.to || '*'}.${this.assetId || '*'}` as const;
   }
 
-  static wildcard(txId?: Bytes32, index?: number): string {
-    return `receipts.${txId || '*'}.${index || '*'}.transfer.*.*.*`;
+  static wildcard(txId?: Bytes32, index?: number) {
+    return `receipts.${txId || '*'}.${index || '*'}.transfer.*.*.*` as const;
   }
 }

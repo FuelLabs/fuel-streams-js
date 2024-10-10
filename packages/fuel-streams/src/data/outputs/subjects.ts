@@ -1,27 +1,31 @@
 import type { Address, AssetId, Bytes32, ContractId, IdentifierKind } from '..';
 
+export enum OutputsWildcard {
+  All = 'outputs.>',
+  ById = 'by_id.outputs.>',
+}
+
 export class OutputsByIdSubject {
   idKind?: IdentifierKind;
   idValue?: Bytes32;
-
-  static readonly WILDCARD = 'by_id.outputs.>';
 
   constructor(idKind?: IdentifierKind, idValue?: Bytes32) {
     this.idKind = idKind;
     this.idValue = idValue;
   }
 
-  parse(): string {
-    const parts = ['by_id.outputs', this.idKind || '*', this.idValue || '*'];
-    return parts.join('.');
+  parse() {
+    return `by_id.outputs.${this.idKind || '*'}.${
+      this.idValue || '*'
+    }` as const;
   }
 
-  withIdKind(idKind?: IdentifierKind): this {
+  withIdKind(idKind?: IdentifierKind) {
     this.idKind = idKind;
     return this;
   }
 
-  withIdValue(idValue?: Bytes32): this {
+  withIdValue(idValue?: Bytes32) {
     this.idValue = idValue;
     return this;
   }
@@ -33,8 +37,6 @@ export class OutputsCoinSubject {
   to?: Address;
   assetId?: AssetId;
 
-  static readonly WILDCARD = 'outputs.>';
-
   constructor(txId?: Bytes32, index?: number, to?: Address, assetId?: AssetId) {
     this.txId = txId;
     this.index = index;
@@ -42,33 +44,28 @@ export class OutputsCoinSubject {
     this.assetId = assetId;
   }
 
-  parse(): string {
-    const parts = [
-      'outputs.coin',
-      this.txId || '*',
-      this.index?.toString() || '*',
-      this.to || '*',
-      this.assetId || '*',
-    ];
-    return parts.join('.');
+  parse() {
+    return `outputs.coin.${this.txId || '*'}.${this.index || '*'}.${
+      this.to || '*'
+    }.${this.assetId || '*'}` as const;
   }
 
-  withTxId(txId?: Bytes32): this {
+  withTxId(txId?: Bytes32) {
     this.txId = txId;
     return this;
   }
 
-  withIndex(index?: number): this {
+  withIndex(index?: number) {
     this.index = index;
     return this;
   }
 
-  withTo(to?: Address): this {
+  withTo(to?: Address) {
     this.to = to;
     return this;
   }
 
-  withAssetId(assetId?: AssetId): this {
+  withAssetId(assetId?: AssetId) {
     this.assetId = assetId;
     return this;
   }
@@ -79,35 +76,29 @@ export class OutputsContractSubject {
   index?: number;
   contractId?: ContractId;
 
-  static readonly WILDCARD = 'outputs.>';
-
   constructor(txId?: Bytes32, index?: number, contractId?: ContractId) {
     this.txId = txId;
     this.index = index;
     this.contractId = contractId;
   }
 
-  parse(): string {
-    const parts = [
-      'outputs.contract',
-      this.txId || '*',
-      this.index?.toString() || '*',
-      this.contractId || '*',
-    ];
-    return parts.join('.');
+  parse() {
+    return `outputs.contract.${this.txId || '*'}.${this.index || '*'}.${
+      this.contractId || '*'
+    }` as const;
   }
 
-  withTxId(txId?: Bytes32): this {
+  withTxId(txId?: Bytes32) {
     this.txId = txId;
     return this;
   }
 
-  withIndex(index?: number): this {
+  withIndex(index?: number) {
     this.index = index;
     return this;
   }
 
-  withContractId(contractId?: ContractId): this {
+  withContractId(contractId?: ContractId) {
     this.contractId = contractId;
     return this;
   }
@@ -119,8 +110,6 @@ export class OutputsChangeSubject {
   to?: Address;
   assetId?: AssetId;
 
-  static readonly WILDCARD = 'outputs.>';
-
   constructor(txId?: Bytes32, index?: number, to?: Address, assetId?: AssetId) {
     this.txId = txId;
     this.index = index;
@@ -128,15 +117,10 @@ export class OutputsChangeSubject {
     this.assetId = assetId;
   }
 
-  parse(): string {
-    const parts = [
-      'outputs.change',
-      this.txId || '*',
-      this.index?.toString() || '*',
-      this.to || '*',
-      this.assetId || '*',
-    ];
-    return parts.join('.');
+  parse() {
+    return `outputs.change.${this.txId || '*'}.${this.index || '*'}.${
+      this.to || '*'
+    }.${this.assetId || '*'}` as const;
   }
 
   withTxId(txId?: Bytes32): this {
@@ -159,14 +143,11 @@ export class OutputsChangeSubject {
     return this;
   }
 }
-
 export class OutputsVariableSubject {
   txId?: Bytes32;
   index?: number;
   to?: Address;
   assetId?: AssetId;
-
-  static readonly WILDCARD = 'outputs.>';
 
   constructor(txId?: Bytes32, index?: number, to?: Address, assetId?: AssetId) {
     this.txId = txId;
@@ -175,33 +156,28 @@ export class OutputsVariableSubject {
     this.assetId = assetId;
   }
 
-  parse(): string {
-    const parts = [
-      'outputs.variable',
-      this.txId || '*',
-      this.index?.toString() || '*',
-      this.to || '*',
-      this.assetId || '*',
-    ];
-    return parts.join('.');
+  parse() {
+    return `outputs.variable.${this.txId || '*'}.${this.index || '*'}.${
+      this.to || '*'
+    }.${this.assetId || '*'}` as const;
   }
 
-  withTxId(txId?: Bytes32): this {
+  withTxId(txId?: Bytes32) {
     this.txId = txId;
     return this;
   }
 
-  withIndex(index?: number): this {
+  withIndex(index?: number) {
     this.index = index;
     return this;
   }
 
-  withTo(to?: Address): this {
+  withTo(to?: Address) {
     this.to = to;
     return this;
   }
 
-  withAssetId(assetId?: AssetId): this {
+  withAssetId(assetId?: AssetId) {
     this.assetId = assetId;
     return this;
   }
@@ -212,35 +188,29 @@ export class OutputsContractCreatedSubject {
   index?: number;
   contractId?: ContractId;
 
-  static readonly WILDCARD = 'outputs.>';
-
   constructor(txId?: Bytes32, index?: number, contractId?: ContractId) {
     this.txId = txId;
     this.index = index;
     this.contractId = contractId;
   }
 
-  parse(): string {
-    const parts = [
-      'outputs.contract_created',
-      this.txId || '*',
-      this.index?.toString() || '*',
-      this.contractId || '*',
-    ];
-    return parts.join('.');
+  parse() {
+    return `outputs.contract_created.${this.txId || '*'}.${this.index || '*'}.${
+      this.contractId || '*'
+    }` as const;
   }
 
-  withTxId(txId?: Bytes32): this {
+  withTxId(txId?: Bytes32) {
     this.txId = txId;
     return this;
   }
 
-  withIndex(index?: number): this {
+  withIndex(index?: number) {
     this.index = index;
     return this;
   }
 
-  withContractId(contractId?: ContractId): this {
+  withContractId(contractId?: ContractId) {
     this.contractId = contractId;
     return this;
   }

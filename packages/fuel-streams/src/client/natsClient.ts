@@ -11,9 +11,9 @@ import { DebugEvents, Events, type NatsConnection } from '@nats-io/nats-core';
 import { connect } from '@nats-io/transport-node';
 import type { ClientOpts } from './clientOpts';
 
-export type StatusStreamCallback = (status: NatsClientStatus) => void;
+export type StatusStreamCallback = (status: ClientStatus) => void;
 
-export enum NatsClientStatus {
+export enum ClientStatus {
   Connected = 0,
   Disconnected = 1,
   Reconnecting = 2,
@@ -22,26 +22,26 @@ export enum NatsClientStatus {
   Stale = 5,
 }
 
-const mapEventStatus = (status: Events | DebugEvents): NatsClientStatus => {
+const mapEventStatus = (status: Events | DebugEvents): ClientStatus => {
   switch (status) {
     case Events.Disconnect:
-      return NatsClientStatus.Disconnected;
+      return ClientStatus.Disconnected;
     case Events.Reconnect:
-      return NatsClientStatus.Connected;
+      return ClientStatus.Connected;
     case Events.Error:
-      return NatsClientStatus.Errored;
+      return ClientStatus.Errored;
     case DebugEvents.Reconnecting:
-      return NatsClientStatus.Reconnecting;
+      return ClientStatus.Reconnecting;
     case DebugEvents.ClientInitiatedReconnect:
-      return NatsClientStatus.Reconnecting;
+      return ClientStatus.Reconnecting;
     case DebugEvents.StaleConnection:
-      return NatsClientStatus.Stale;
+      return ClientStatus.Stale;
     default:
-      return NatsClientStatus.Connected;
+      return ClientStatus.Connected;
   }
 };
 
-export interface INatsClient {
+interface NatsClient {
   connect(opts: ClientOpts): Promise<void>;
   getClientOpts(): ClientOpts;
   closeSafely(): Promise<boolean>;
@@ -49,14 +49,14 @@ export interface INatsClient {
   getOrCreateKvStore(storeName: string, opts: Partial<KvOptions>): Promise<KV>;
 }
 
-export class NatsClient implements INatsClient {
-  private opts?: ClientOpts;
+export class Client implements NatsClient {
+  opts?: ClientOpts;
   private natsConnection?: NatsConnection;
   private jetstreamManager?: JetStreamManager;
   private jetstream?: JetStreamClient;
   private kvm?: Kvm;
 
-  public async connect(opts: ClientOpts): Promise<void> {
+  async connect(opts: ClientOpts): Promise<void> {
     const nc = await connect(opts.connectOpts());
     console.info(`Successfully connected to ${nc.getServer()} !`);
     this.jetstreamManager = await jetstreamManager(nc);
@@ -68,26 +68,26 @@ export class NatsClient implements INatsClient {
     this.opts = opts;
   }
 
-  public getNatsConnection(): NatsConnection {
+  getNatsConnection() {
     return this.natsConnection as NatsConnection;
   }
 
-  public getJetstream(): JetStreamClient {
+  getJetstream() {
     return this.jetstream as JetStreamClient;
   }
 
-  public getJetstreamManager(): JetStreamManager {
+  getJetstreamManager() {
     return this.jetstreamManager as JetStreamManager;
   }
 
-  public getClientOpts(): ClientOpts {
+  getClientOpts() {
     if (!this.opts) {
       throw new Error('Client options are not set.');
     }
     return this.opts;
   }
 
-  public async closeSafely(): Promise<boolean> {
+  async closeSafely() {
     if (!this.natsConnection) {
       throw new Error('Nats client is not set.');
     }
@@ -98,7 +98,7 @@ export class NatsClient implements INatsClient {
     return this.natsConnection.isClosed();
   }
 
-  isConnectionClosing(): boolean {
+  isConnectionClosing() {
     return (
       this.natsConnection?.isClosed() ||
       this.natsConnection?.isDraining() ||
@@ -106,7 +106,7 @@ export class NatsClient implements INatsClient {
     );
   }
 
-  public getStatusSteam(callback: StatusStreamCallback): void {
+  getStatusSteam(callback: StatusStreamCallback) {
     if (!this.natsConnection) {
       throw new Error('Client options are not set.');
     }
@@ -122,15 +122,11 @@ export class NatsClient implements INatsClient {
     }
   }
 
-  public async getOrCreateKvStore(
-    storeName: string,
-    opts: Partial<KvOptions>,
-  ): Promise<KV> {
+  async getOrCreateKvStore(storeName: string, opts: Partial<KvOptions>) {
     if (!this.kvm) {
       throw new Error('Kvm client is not set.');
     }
     // open or create the kv store
-    const kvStore = await this.kvm?.create(storeName, opts);
-    return kvStore;
+    return this.kvm?.create(storeName, opts);
   }
 }

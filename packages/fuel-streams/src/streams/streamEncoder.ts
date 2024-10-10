@@ -10,11 +10,11 @@ export class StreamEncoder<T> {
     this.dataParser = StreamEncoder.defaultDataParser();
   }
 
-  static defaultDataParser(): DataParser {
+  static defaultDataParser() {
     return DataParser.default();
   }
 
-  public encode(subject: string): Uint8Array {
+  public encode(subject: string) {
     const data = new StreamData(subject, this.payload);
     return this.dataParser.encode(data);
   }

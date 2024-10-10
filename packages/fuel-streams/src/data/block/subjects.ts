@@ -1,6 +1,10 @@
 import type { Block as FuelBlock } from 'fuels';
 import type { Subject } from '..';
 
+export enum BlocksWildcard {
+  All = 'blocks.>',
+}
+
 export class BlocksSubject implements Subject {
   producer: string | null;
   height: number | null;
@@ -10,34 +14,28 @@ export class BlocksSubject implements Subject {
     this.height = height;
   }
 
-  static WILDCARD = 'blocks.>';
-
-  withProducer(producer: string | null): BlocksSubject {
+  withProducer(producer: string | null) {
     this.producer = producer;
     return this;
   }
 
-  withHeight(height: number | null): BlocksSubject {
+  withHeight(height: number | null) {
     this.height = height;
     return this;
   }
 
-  parse(): string {
-    const producerStr = this.producer ? this.producer : '*';
-    const heightStr = this.height ? this.height.toString() : '*';
-    return `blocks.${producerStr}.${heightStr}`;
+  parse() {
+    return `blocks.${this.producer ?? '*'}.${this.height ?? '*'}` as const;
   }
 
   static wildcard(
     producer: string | null = null,
     height: number | null = null,
-  ): string {
-    const producerStr = producer ? producer : '*';
-    const heightStr = height ? height.toString() : '*';
-    return `blocks.${producerStr}.${heightStr}`;
+  ) {
+    return `blocks.${producer ?? '*'}.${height ?? '*'}` as const;
   }
 
-  static fromFuelBlock(block: FuelBlock): BlocksSubject {
+  static fromFuelBlock(block: FuelBlock) {
     const blockHeight = block.header.daHeight.toNumber();
     return new BlocksSubject(null, blockHeight);
   }
