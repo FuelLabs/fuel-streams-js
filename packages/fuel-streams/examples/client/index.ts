@@ -1,7 +1,7 @@
 import path from 'node:path';
 import chalk from 'chalk';
 import { config } from 'dotenv';
-import { ClientOpts, DefaultProviderUrls, NatsClient } from '../../src/index';
+import { Client, ClientOpts, DefaultProviderUrls } from '../../src/index';
 
 config({
   path: path.resolve(__dirname, '..', '.env'),
@@ -16,8 +16,7 @@ config({
   try {
     // initialize a default client with all default settings
     const opts = new ClientOpts(DefaultProviderUrls.Testnet);
-    const client = new NatsClient();
-    await client.connect(opts);
+    const client = await Client.connect(opts);
     await client.closeSafely();
 
     process.exit(0);

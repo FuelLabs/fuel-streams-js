@@ -4,10 +4,10 @@ import { config } from 'dotenv';
 import {
   BlockStream,
   BlocksSubject,
+  Client,
   ClientOpts,
   DefaultProviderUrls,
-  NatsClient,
-} from '../../src/index';
+} from '../../src';
 
 config({
   path: path.resolve(__dirname, '..', '.env'),
@@ -29,12 +29,9 @@ config({
   }
 
   try {
-    // initialize a default client with all default settings
     const opts = new ClientOpts(DefaultProviderUrls.Testnet);
-    const client = new NatsClient();
-    await client.connect(opts);
-
-    const stream = await BlockStream.init(client);
+    const client = await Client.connect(opts);
+    const stream = await BlockStream.start(client);
     const subscription = stream.subscribe(BlocksSubject.wildcard());
 
     for await (const msg of await subscription) {

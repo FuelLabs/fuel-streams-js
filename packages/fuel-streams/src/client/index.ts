@@ -2,12 +2,10 @@ export {
   ClientOpts,
   DefaultProviderUrls,
   NatsNamespace,
-  NatsUserRole,
 } from './clientOpts';
 
 export {
-  Client as NatsClient,
-  NatsClient as INatsClient,
-  ClientStatus as NatsClientStatus,
+  Client,
+  ClientStatus,
   StatusStreamCallback,
 } from './natsClient';

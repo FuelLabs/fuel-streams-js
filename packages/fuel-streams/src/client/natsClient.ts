@@ -42,7 +42,7 @@ const mapEventStatus = (status: Events | DebugEvents): ClientStatus => {
 };
 
 interface NatsClient {
-  connect(opts: ClientOpts): Promise<void>;
+  start(opts: ClientOpts): Promise<void>;
   getClientOpts(): ClientOpts;
   closeSafely(): Promise<boolean>;
   getStatusSteam(callback: StatusStreamCallback): void;
@@ -56,7 +56,15 @@ export class Client implements NatsClient {
   private jetstream?: JetStreamClient;
   private kvm?: Kvm;
 
-  async connect(opts: ClientOpts): Promise<void> {
+  private constructor() {}
+
+  static async connect(opts: ClientOpts) {
+    const client = new Client();
+    await client.start(opts);
+    return client;
+  }
+
+  async start(opts: ClientOpts): Promise<void> {
     const nc = await connect(opts.connectOpts());
     console.info(`Successfully connected to ${nc.getServer()} !`);
     this.jetstreamManager = await jetstreamManager(nc);
