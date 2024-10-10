@@ -12,7 +12,7 @@ import { FuelStream } from './fuelStream';
 
 // biome-ignore lint/complexity/noStaticOnlyClass: <explanation>
 export class BlockStream {
-  static async start(client: Client) {
+  static async init(client: Client) {
     const stream = FuelStream.get<StreamedBlock>(StreamNames.Blocks);
     return stream.init(client);
   }
@@ -20,7 +20,7 @@ export class BlockStream {
 
 // biome-ignore lint/complexity/noStaticOnlyClass: <explanation>
 export class TransactionStream {
-  static async start(client: Client) {
+  static async init(client: Client) {
     const stream = FuelStream.get<StreamedTransaction>(
       StreamNames.Transactions,
     );
@@ -30,7 +30,7 @@ export class TransactionStream {
 
 // biome-ignore lint/complexity/noStaticOnlyClass: <explanation>
 export class InputStream {
-  static async start(client: Client) {
+  static async init(client: Client) {
     const stream = FuelStream.get<StreamedInput>(StreamNames.Inputs);
     return stream.init(client);
   }
@@ -38,7 +38,7 @@ export class InputStream {
 
 // biome-ignore lint/complexity/noStaticOnlyClass: <explanation>
 export class OutputStream {
-  static async start(client: Client) {
+  static async init(client: Client) {
     const stream = FuelStream.get<StreamedOutput>(StreamNames.Outputs);
     return stream.init(client);
   }
@@ -46,7 +46,7 @@ export class OutputStream {
 
 // biome-ignore lint/complexity/noStaticOnlyClass: <explanation>
 export class ReceiptStream {
-  static async start(client: Client) {
+  static async init(client: Client) {
     const stream = FuelStream.get<StreamedReceipt>(StreamNames.Receipts);
     return stream.init(client);
   }
@@ -54,7 +54,7 @@ export class ReceiptStream {
 
 // biome-ignore lint/complexity/noStaticOnlyClass: <explanation>
 export class LogStream {
-  static async start(client: Client) {
+  static async init(client: Client) {
     const stream = FuelStream.get<StreamedLog>(StreamNames.Logs);
     return stream.init(client);
   }

@@ -31,7 +31,7 @@ config({
   try {
     const opts = new ClientOpts(DefaultProviderUrls.Testnet);
     const client = await Client.connect(opts);
-    const stream = await BlockStream.start(client);
+    const stream = await BlockStream.init(client);
     const subscription = stream.subscribe(BlocksSubject.wildcard());
 
     for await (const msg of await subscription) {
