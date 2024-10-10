@@ -7,9 +7,12 @@ import type {
   Subject,
 } from '..';
 
-export class InputsCoinSubject implements Subject {
-  static WILDCARD = 'inputs.>';
+export enum InputsWildcard {
+  All = 'inputs.>',
+  ById = 'by_id.inputs.>',
+}
 
+export class InputsCoinSubject implements Subject {
   constructor(
     public tx_id: Bytes32 | null = null,
     public index: number | null = null,
@@ -17,10 +20,10 @@ export class InputsCoinSubject implements Subject {
     public asset_id: AssetId | null = null,
   ) {}
 
-  parse(): string {
+  parse() {
     return `inputs.${this.tx_id || '*'}.${this.index || '*'}.coin.${
       this.owner || '*'
-    }.${this.asset_id || '*'}`;
+    }.${this.asset_id || '*'}` as const;
   }
 
   static wildcard(
@@ -28,30 +31,30 @@ export class InputsCoinSubject implements Subject {
     index: number | null,
     owner: Address | null,
     asset_id: AssetId | null,
-  ): string {
+  ) {
     return new InputsCoinSubject(tx_id, index, owner, asset_id).parse();
   }
 
-  static new(): InputsCoinSubject {
+  static new() {
     return new InputsCoinSubject();
   }
 
-  with_tx_id(tx_id: Bytes32 | null): this {
+  with_tx_id(tx_id: Bytes32 | null) {
     this.tx_id = tx_id;
     return this;
   }
 
-  with_index(index: number | null): this {
+  with_index(index: number | null) {
     this.index = index;
     return this;
   }
 
-  with_owner(owner: Address | null): this {
+  with_owner(owner: Address | null) {
     this.owner = owner;
     return this;
   }
 
-  with_asset_id(asset_id: AssetId | null): this {
+  with_asset_id(asset_id: AssetId | null) {
     this.asset_id = asset_id;
     return this;
   }
@@ -60,43 +63,41 @@ export class InputsCoinSubject implements Subject {
 // =============================================
 
 export class InputsContractSubject implements Subject {
-  static WILDCARD = 'inputs.>';
-
   constructor(
     public tx_id: Bytes32 | null = null,
     public index: number | null = null,
     public contract_id: ContractId | null = null,
   ) {}
 
-  parse(): string {
+  parse() {
     return `inputs.${this.tx_id || '*'}.${this.index || '*'}.contract.${
       this.contract_id || '*'
-    }`;
+    }` as const;
   }
 
   static wildcard(
     tx_id: Bytes32 | null,
     index: number | null,
     contract_id: ContractId | null,
-  ): string {
+  ) {
     return new InputsContractSubject(tx_id, index, contract_id).parse();
   }
 
-  static new(): InputsContractSubject {
+  static new() {
     return new InputsContractSubject();
   }
 
-  with_tx_id(tx_id: Bytes32 | null): this {
+  with_tx_id(tx_id: Bytes32 | null) {
     this.tx_id = tx_id;
     return this;
   }
 
-  with_index(index: number | null): this {
+  with_index(index: number | null) {
     this.index = index;
     return this;
   }
 
-  with_contract_id(contract_id: ContractId | null): this {
+  with_contract_id(contract_id: ContractId | null) {
     this.contract_id = contract_id;
     return this;
   }
@@ -105,8 +106,6 @@ export class InputsContractSubject implements Subject {
 // =============================================
 
 export class InputsMessageSubject implements Subject {
-  static WILDCARD = 'inputs.>';
-
   constructor(
     public tx_id: Bytes32 | null = null,
     public index: number | null = null,
@@ -114,10 +113,10 @@ export class InputsMessageSubject implements Subject {
     public recipient: Address | null = null,
   ) {}
 
-  parse(): string {
+  parse() {
     return `inputs.${this.tx_id || '*'}.${this.index || '*'}.message.${
       this.sender || '*'
-    }.${this.recipient || '*'}`;
+    }.${this.recipient || '*'}` as const;
   }
 
   static wildcard(
@@ -125,30 +124,30 @@ export class InputsMessageSubject implements Subject {
     index: number | null,
     sender: Address | null,
     recipient: Address | null,
-  ): string {
+  ) {
     return new InputsMessageSubject(tx_id, index, sender, recipient).parse();
   }
 
-  static new(): InputsMessageSubject {
+  static new() {
     return new InputsMessageSubject();
   }
 
-  with_tx_id(tx_id: Bytes32 | null): this {
+  with_tx_id(tx_id: Bytes32 | null) {
     this.tx_id = tx_id;
     return this;
   }
 
-  with_index(index: number | null): this {
+  with_index(index: number | null) {
     this.index = index;
     return this;
   }
 
-  with_sender(sender: Address | null): this {
+  with_sender(sender: Address | null) {
     this.sender = sender;
     return this;
   }
 
-  with_recipient(recipient: Address | null): this {
+  with_recipient(recipient: Address | null) {
     this.recipient = recipient;
     return this;
   }
@@ -157,43 +156,32 @@ export class InputsMessageSubject implements Subject {
 // =============================================
 
 export class InputsByIdSubject implements Subject {
-  static WILDCARD = 'by_id.inputs.>';
-
   constructor(
     public id_kind: IdentifierKind | null = null,
     public id_value: Bytes32 | null = null,
   ) {}
 
-  parse(): string {
-    return `by_id.inputs.${this.id_kind || '*'}.${this.id_value || '*'}`;
+  parse() {
+    return `by_id.inputs.${this.id_kind || '*'}.${
+      this.id_value || '*'
+    }` as const;
   }
 
-  static wildcard(
-    id_kind: IdentifierKind | null,
-    id_value: Bytes32 | null,
-  ): string {
+  static wildcard(id_kind: IdentifierKind | null, id_value: Bytes32 | null) {
     return new InputsByIdSubject(id_kind, id_value).parse();
   }
 
-  static new(): InputsByIdSubject {
+  static new() {
     return new InputsByIdSubject();
   }
 
-  with_id_kind(id_kind: IdentifierKind | null): this {
+  with_id_kind(id_kind: IdentifierKind | null) {
     this.id_kind = id_kind;
     return this;
   }
 
-  with_id_value(id_value: Bytes32 | null): this {
+  with_id_value(id_value: Bytes32 | null) {
     this.id_value = id_value;
     return this;
   }
-
-  // static fromFuelInput(_input: FuelInput): InputsByIdSubject {
-  //   if (input.type === FuelInputType.Coin) {
-  //     return new InputsByIdSubject(IdentifierKind.AssetID, input.asset_id);
-  //   }
-  //   const blockHeight = block.header.daHeight.toNumber();
-  //   return new InputsByIdSubject(null, blockHeight);
-  // }
 }

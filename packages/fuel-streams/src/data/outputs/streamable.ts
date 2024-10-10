@@ -1,34 +1,30 @@
 import type { Output } from 'fuels';
+import { StreamNames } from '../../constants';
 import { Streameable } from '../../streams/stream';
 import type { StreamData } from '../../streams/streamData';
 import { StreamEncoder } from '../../streams/streamEncoder';
-import {
-  OutputsByIdSubject,
-  OutputsChangeSubject,
-  OutputsCoinSubject,
-  OutputsContractCreatedSubject,
-  OutputsContractSubject,
-  OutputsVariableSubject,
-} from './subjects';
+import { OutputsWildcard } from './subjects';
 
 export class StreamedOutput extends Streameable<Output> {
-  NAME = 'outputs';
-  WILDCARD_LIST: string[] = [
-    OutputsByIdSubject.WILDCARD,
-    OutputsChangeSubject.WILDCARD,
-    OutputsCoinSubject.WILDCARD,
-    OutputsContractCreatedSubject.WILDCARD,
-    OutputsContractSubject.WILDCARD,
-    OutputsVariableSubject.WILDCARD,
-  ];
-
   constructor(public payload: Output) {
     super();
   }
 
-  async encode(): Promise<Uint8Array> {
+  name() {
+    return StreamNames.Outputs;
+  }
+
+  queryAll() {
+    return OutputsWildcard.All;
+  }
+
+  wildcards() {
+    return Object.values(OutputsWildcard);
+  }
+
+  async encode() {
     const encoder = new StreamEncoder(this.payload);
-    return encoder.encode(this.NAME);
+    return encoder.encode(this.name());
   }
 
   async decode(encoded: Uint8Array): Promise<StreamData<Output>> {

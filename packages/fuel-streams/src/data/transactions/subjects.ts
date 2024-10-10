@@ -7,14 +7,17 @@ import type {
   TransactionStatus,
 } from '..';
 
+export enum TransactionsWildcard {
+  All = 'transactions.>',
+  ById = 'by_id.transactions.>',
+}
+
 export class TransactionsSubject {
   blockHeight?: BlockHeight;
   txIndex?: number;
   txId?: Bytes32;
   status?: TransactionStatus;
   kind?: TransactionKind;
-
-  static readonly WILDCARD = 'transactions.>';
 
   constructor(
     blockHeight?: BlockHeight,
@@ -30,16 +33,10 @@ export class TransactionsSubject {
     this.kind = kind;
   }
 
-  parse(): string {
-    const parts = [
-      'transactions',
-      this.blockHeight?.toString() || '*',
-      this.txIndex?.toString() || '*',
-      this.txId || '*',
-      this.status || '*',
-      this.kind || '*',
-    ];
-    return parts.join('.');
+  parse() {
+    return `transactions.${this.blockHeight || '*'}.${this.txIndex || '*'}.${
+      this.txId || '*'
+    }.${this.status || '*'}.${this.kind || '*'}` as const;
   }
 
   static wildcard(
@@ -48,44 +45,42 @@ export class TransactionsSubject {
     txId?: Bytes32,
     status?: TransactionStatus,
     kind?: TransactionKind,
-  ): string {
-    const parts = [
-      'transactions',
-      blockHeight?.toString() || '*',
-      txIndex?.toString() || '*',
-      txId || '*',
-      status || '*',
-      kind || '*',
-    ];
-    return parts.join('.');
+  ) {
+    return new TransactionsSubject(
+      blockHeight,
+      txIndex,
+      txId,
+      status,
+      kind,
+    ).parse();
   }
 
-  withBlockHeight(blockHeight?: BlockHeight): this {
+  withBlockHeight(blockHeight?: BlockHeight) {
     this.blockHeight = blockHeight;
     return this;
   }
 
-  withTxIndex(txIndex?: number): this {
+  withTxIndex(txIndex?: number) {
     this.txIndex = txIndex;
     return this;
   }
 
-  withTxId(txId?: Bytes32): this {
+  withTxId(txId?: Bytes32) {
     this.txId = txId;
     return this;
   }
 
-  withStatus(status?: TransactionStatus): this {
+  withStatus(status?: TransactionStatus) {
     this.status = status;
     return this;
   }
 
-  withKind(kind?: TransactionKind): this {
+  withKind(kind?: TransactionKind) {
     this.kind = kind;
     return this;
   }
 
-  static new(): TransactionsSubject {
+  static new() {
     return new TransactionsSubject();
   }
 }
@@ -94,38 +89,32 @@ export class TransactionsByIdSubject {
   idKind?: IdentifierKind;
   idValue?: Address;
 
-  static readonly WILDCARD = 'by_id.transactions.>';
-
   constructor(idKind?: IdentifierKind, idValue?: Address) {
     this.idKind = idKind;
     this.idValue = idValue;
   }
 
-  parse(): string {
-    const parts = [
-      'by_id.transactions',
-      this.idKind || '*',
-      this.idValue || '*',
-    ];
-    return parts.join('.');
+  parse() {
+    return `by_id.transactions.${this.idKind || '*'}.${
+      this.idValue || '*'
+    }` as const;
   }
 
-  static wildcard(idKind?: IdentifierKind, idValue?: Address): string {
-    const parts = ['by_id.transactions', idKind || '*', idValue || '*'];
-    return parts.join('.');
+  static wildcard(idKind?: IdentifierKind, idValue?: Address) {
+    return new TransactionsByIdSubject(idKind, idValue).parse();
   }
 
-  withIdKind(idKind?: IdentifierKind): this {
+  withIdKind(idKind?: IdentifierKind) {
     this.idKind = idKind;
     return this;
   }
 
-  withIdValue(idValue?: Address): this {
+  withIdValue(idValue?: Address) {
     this.idValue = idValue;
     return this;
   }
 
-  static new(): TransactionsByIdSubject {
+  static new() {
     return new TransactionsByIdSubject();
   }
 }

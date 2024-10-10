@@ -1,46 +1,50 @@
-import type { Consumer } from '@nats-io/jetstream';
-import type { KvEntry } from '@nats-io/kv';
-import type { QueuedIterator } from '@nats-io/nats-core';
-import type { NatsClient } from '../client/natsClient';
+import type { Client } from '../client/natsClient';
 import {
   Stream,
   type Streameable,
   type SubscribeConsumerConfig,
 } from './stream';
 
-export class FuelStream<_S extends Streameable<_S>> {
-  private static stream: Stream<unknown>;
-  private filterSubjects: Array<string> = [];
+export class FuelStream<S extends Streameable<unknown>> {
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  private static instance: FuelStream<any>;
+  #stream: Stream<S>;
+  #filterSubjects: Array<string> = [];
 
-  private constructor() {}
+  private constructor(readonly bucketName: string) {}
 
-  public static async getOrInit<S>(
-    client: NatsClient,
-    streamable: S,
-  ): Promise<Stream<S>> {
-    FuelStream.stream = await Stream.getOrInit<S>(
-      client,
-      streamable as Streameable<S>,
-    );
-    return FuelStream.stream as Stream<S>;
+  public static get<S extends Streameable<unknown>>(
+    name: string,
+  ): FuelStream<S> {
+    if (!FuelStream.instance) {
+      FuelStream.instance = new FuelStream<S>(name);
+    }
+    return FuelStream.instance as FuelStream<S>;
   }
 
-  public async subscribe(wildcard: string): Promise<QueuedIterator<KvEntry>> {
-    const subscription = await FuelStream.stream?.subscribe(wildcard);
+  async init(client: Client) {
+    this.#stream = await Stream.create<S>(client, this.bucketName);
+    return this.#stream;
+  }
+
+  async subscribe(wildcard: string) {
+    const subscription = await this.#stream?.subscribe(wildcard);
     return subscription;
   }
 
-  public async subscribeWithConfig(
-    userConfig: Partial<SubscribeConsumerConfig>,
-  ): Promise<Consumer> {
-    return await FuelStream.stream?.subscribeConsumer(userConfig);
+  async subscribeWithConfig(config: Partial<SubscribeConsumerConfig>) {
+    return await this.#stream?.subscribeConsumer(config);
   }
 
-  public withFilter(filter: Array<string>) {
-    this.filterSubjects.push(...filter);
+  withFilter(filter: Array<string>) {
+    this.#filterSubjects.push(...filter);
   }
 
-  public getStream<T>(): Stream<T> {
-    return FuelStream.stream as Stream<T>;
+  getStream() {
+    return this.#stream;
+  }
+
+  getStreamName() {
+    return this.bucketName;
   }
 }
