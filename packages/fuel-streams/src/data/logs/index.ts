@@ -1,0 +1,1 @@
+export { StreamedLog } from './streamable';
