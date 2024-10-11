@@ -1,26 +1,35 @@
 import {
   type ConnectionOptions,
-  usernamePasswordAuthenticator,
+  usernamePasswordAuthenticator as connector,
 } from '@nats-io/nats-core';
+import { DefaultProviderUrls } from '../constants';
 
-export enum DefaultProviderUrls {
-  Testnet = 'nats:://fuel-streaming.testnet:4222',
-  Localnet = 'nats://127.0.0.1:4222',
-}
-
-export enum NatsUserRole {
-  Admin = 'Admin',
-  Default = 'Default',
-}
-
+/**
+ * Represents a namespace for NATS subjects and streams.
+ *
+ * @remarks
+ * This class is used to manage namespaces for NATS subjects and streams,
+ * providing methods to generate subject and stream names with the namespace prefix.
+ */
 export class NatsNamespace {
+  /** Default namespace for Fuel-related subjects and streams. */
   static Fuel = 'fuel';
   private namespace: string;
 
-  public static default(): NatsNamespace {
+  /**
+   * Creates a default NatsNamespace instance.
+   *
+   * @returns A new {@link NatsNamespace} instance with the default Fuel namespace.
+   */
+  static default() {
     return new NatsNamespace(NatsNamespace.Fuel);
   }
 
+  /**
+   * Creates a new NatsNamespace instance.
+   *
+   * @param namespace - The namespace to use. If not provided, defaults to 'fuel'.
+   */
   constructor(namespace?: string) {
     if (namespace) {
       this.namespace = namespace;
@@ -29,113 +38,128 @@ export class NatsNamespace {
     }
   }
 
-  public subjectName(value: string): string {
+  /**
+   * Generates a subject name with the current namespace.
+   *
+   * @param value - The subject name to append to the namespace.
+   * @returns The full subject name including the namespace.
+   */
+  subjectName(value: string) {
     return `${this.namespace}.${value}`;
   }
 
-  public streamName(value: string): string {
+  /**
+   * Generates a stream name with the current namespace.
+   *
+   * @param value - The stream name to append to the namespace.
+   * @returns The full stream name including the namespace.
+   */
+  streamName(value: string) {
     return `${this.namespace}_${value}`;
   }
 }
 
+/**
+ * Represents the client options for connecting to a NATS server.
+ *
+ * @remarks
+ * This class provides methods to configure and retrieve connection options
+ * for a NATS client, including URL, timeout, and namespace settings.
+ */
 export class ClientOpts {
-  private url: string = DefaultProviderUrls.Testnet.toString();
+  private url = DefaultProviderUrls.testnet;
   private timeoutSecs = 5;
-  private role: NatsUserRole = NatsUserRole.Default;
-  private namespace: NatsNamespace = NatsNamespace.default();
+  private namespace = NatsNamespace.default();
 
-  constructor(url: DefaultProviderUrls | string) {
-    this.url = url.toString();
+  /**
+   * Creates a new ClientOpts instance.
+   *
+   * @param url - The key of the default provider URL to use.
+   */
+  constructor(url: keyof typeof DefaultProviderUrls) {
+    this.url = DefaultProviderUrls[url];
   }
 
-  static defaultOpts(url: string): ClientOpts {
-    return new ClientOpts(url).withRole(NatsUserRole.Default);
+  /**
+   * Gets the provider URL.
+   *
+   * @returns The current provider URL.
+   */
+  getProviderUrl() {
+    return this.url;
   }
 
-  static adminOpts(url: string): ClientOpts {
-    return new ClientOpts(url).withRole(NatsUserRole.Admin);
+  /**
+   * Gets the timeout in seconds.
+   *
+   * @returns The current timeout in seconds.
+   */
+  getTimeoutSecs() {
+    return this.timeoutSecs;
   }
 
-  public withRole(role: NatsUserRole): ClientOpts {
-    this.role = role;
-    return this;
+  /**
+   * Generates a unique connection ID.
+   *
+   * @returns A unique connection ID.
+   */
+  static connId() {
+    return `connection-${ClientOpts.randomInt()}`;
   }
 
-  public withCustomNamespace(namespace: string): ClientOpts {
+  /**
+   * Generates a random integer between 0 and 999999.
+   *
+   * @returns A random integer.
+   */
+  static randomInt() {
+    return Math.floor(Math.random() * 1000000);
+  }
+
+  /**
+   * Sets a custom namespace for the client options.
+   *
+   * @param namespace - The custom namespace to set.
+   * @returns The current {@link ClientOpts} instance for chaining.
+   */
+  withCustomNamespace(namespace: string) {
     this.namespace = new NatsNamespace(namespace);
     return this;
   }
 
-  public withDefaultNamespace(): ClientOpts {
+  /**
+   * Sets the default namespace for the client options.
+   *
+   * @returns The current {@link ClientOpts} instance for chaining.
+   */
+  withDefaultNamespace() {
     this.namespace = new NatsNamespace();
     return this;
   }
 
-  public withTimeout(secs: number): ClientOpts {
-    this.timeoutSecs = secs;
-    return this;
-  }
-
-  public getProviderUrl(): string {
-    return this.url;
-  }
-
-  public getTimeoutSecs(): number {
-    return this.timeoutSecs;
-  }
-
-  public getRole(): NatsUserRole {
-    return this.role;
-  }
-
-  public getNamespace(): NatsNamespace {
+  /**
+   * Gets the current namespace.
+   *
+   * @returns The current {@link NatsNamespace} instance.
+   */
+  getNamespace() {
     return this.namespace;
   }
 
-  static connId(): string {
-    return `connection-${ClientOpts.randomInt()}`;
-  }
-
-  static randomInt(): number {
-    return Math.floor(Math.random() * 1000000);
-  }
-
-  public connectOpts(): ConnectionOptions {
-    switch (this.role) {
-      case NatsUserRole.Admin: {
-        const username = 'admin';
-        const natsAdminPass = process.env.NATS_ADMIN_PASS;
-        if (!natsAdminPass) {
-          throw new Error('Missing NATS_ADMIN_PASS env variable');
-        }
-        const authenticator = usernamePasswordAuthenticator(
-          username,
-          natsAdminPass,
-        );
-        return {
-          servers: this.url,
-          timeout: this.timeoutSecs * 1000,
-          authenticator,
-          maxReconnectAttempts: 3,
-        } as ConnectionOptions;
-      }
-      case NatsUserRole.Default: {
-        const username = 'default_user';
-        const natsDefaultUserPassword = '';
-        const authenticator = usernamePasswordAuthenticator(
-          username,
-          natsDefaultUserPassword,
-        );
-        return {
-          servers: this.url,
-          timeout: this.timeoutSecs * 1000,
-          authenticator,
-          maxReconnectAttempts: 3,
-        } as ConnectionOptions;
-      }
-      default: {
-        throw new Error('Unknown role');
-      }
-    }
+  /**
+   * Generates the connection options for the NATS client.
+   *
+   * @returns The connection options for the NATS client.
+   */
+  connectOpts() {
+    const username = 'public';
+    const password = 'temp-public-pass';
+    const authenticator = connector(username, password);
+    return {
+      servers: this.url,
+      timeout: this.timeoutSecs * 1000,
+      authenticator,
+      maxReconnectAttempts: 3,
+    } as ConnectionOptions;
   }
 }

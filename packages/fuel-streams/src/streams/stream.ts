@@ -1,163 +1,263 @@
+/**
+ * @module Stream
+ */
+
 import {
   AckPolicy,
-  type Consumer,
   type ConsumerConfig,
   type ConsumerInfo,
   DeliverPolicy,
-  StorageType,
-  type StreamState,
 } from '@nats-io/jetstream';
-import type { KV, KvEntry, KvWatchOptions } from '@nats-io/kv';
-import type { QueuedIterator } from '@nats-io/nats-core';
-import type { NatsClient } from '../client/natsClient';
-import type { StreamData } from './streamData';
+import type { KV, KvWatchOptions } from '@nats-io/kv';
+import type { Client } from '../client/natsClient';
+import type { Subject } from '../data';
+import { StreamData } from './streamData';
 
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+type GenericRecord = Record<string, any>;
+export { DeliverPolicy };
+
+/**
+ * Abstract base class for streamable objects.
+ * @template T - Type extending GenericRecord
+ */
+export abstract class Streameable<T extends GenericRecord> {
+  /**
+   * Get the name of the stream.
+   * @returns The name of the stream
+   */
+  abstract name(): string;
+
+  /**
+   * Get the wildcards for the stream.
+   * @returns Array of wildcards
+   */
+  abstract wildcards(): string[];
+
+  /**
+   * Decode the encoded data.
+   * @param {Uint8Array} encoded - The encoded data
+   * @returns The decoded data
+   */
+  decode(encoded: Uint8Array): T {
+    const data = new StreamData(encoded);
+    return data.decode() as T;
+  }
+}
+
+/**
+ * Abstract base class extending {@link Streameable} with additional functionality.
+ * @template T - Type extending GenericRecord
+ * @template W - Type extending Record<string, string>
+ * @extends {Streameable<T>}
+ */
+export abstract class BaseStreameable<
+  T extends GenericRecord,
+  W extends Record<string, string>,
+> extends Streameable<T> {
+  /**
+   * @param {T} payload - The payload data
+   * @param {string} streamName - The name of the stream
+   * @param {W} wildcardEnum - The wildcard enum
+   */
+  constructor(
+    public payload: T,
+    private streamName: string,
+    private wildcardEnum: W,
+  ) {
+    super();
+  }
+
+  /**
+   * @inheritdoc
+   */
+  name(): string {
+    return this.streamName;
+  }
+
+  /**
+   * @inheritdoc
+   */
+  wildcards(): string[] {
+    return Object.values(this.wildcardEnum);
+  }
+}
+
+/**
+ * Factory class for creating {@link Stream} instances.
+ * @template S - Type extending {@link Streameable}<GenericRecord>
+ */
+export class StreamFactory<S extends Streameable<GenericRecord>> {
+  stream: Stream<S>;
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  private static instance: StreamFactory<any>;
+  private constructor(readonly bucketName: string) {}
+
+  /**
+   * Get or create a StreamFactory instance.
+   * @template S - Type extending {@link Streameable}<GenericRecord>
+   * @param {string} name - The name of the bucket
+   * @returns The StreamFactory instance
+   */
+  public static get<S extends Streameable<GenericRecord>>(
+    name: string,
+  ): StreamFactory<S> {
+    if (!StreamFactory.instance) {
+      StreamFactory.instance = new StreamFactory<S>(name);
+    }
+    return StreamFactory.instance as StreamFactory<S>;
+  }
+
+  /**
+   * Initialize the stream.
+   * @param {Client} client - The client instance
+   * @returns The initialized stream
+   */
+  async init(client: Client) {
+    this.stream = await Stream.create<S>(client, this.bucketName);
+    return this.stream;
+  }
+}
+
+/**
+ * Interface for subscribe consumer configuration.
+ */
 export interface SubscribeConsumerConfig {
-  filterSubjects: Array<string>;
+  /** Array of filter subjects */
+  filterSubjects: Array<Subject>;
+  /** Delivery policy */
   deliverPolicy: DeliverPolicy;
 }
 
-export abstract class Streameable<T> {
-  NAME: string;
-  WILDCARD_LIST: string[];
-  abstract encode(): Promise<Uint8Array>;
-  abstract decode(encoded: Uint8Array): Promise<StreamData<T>>;
-}
+/**
+ * Class representing a stream.
+ * @template _T - Type extending {@link Streameable}<GenericRecord>
+ */
+export class Stream<_T extends Streameable<GenericRecord>> {
+  #store: KV;
+  #client: Client;
+  #name: string;
 
-export class Stream<T> {
-  private store: KV;
-  private client: NatsClient;
-  private static instance: Stream<undefined>;
-
-  private constructor(store: KV, client: NatsClient) {
-    this.store = store;
-    this.client = client;
+  /**
+   * @param {string} name - The name of the stream
+   * @param {KV} store - The KV store
+   * @param {Client} client - The client instance
+   */
+  constructor(name: string, store: KV, client: Client) {
+    this.#name = name;
+    this.#store = store;
+    this.#client = client;
   }
 
-  public static async getOrInit<T>(
-    client: NatsClient,
-    streamable: Streameable<T>,
-  ): Promise<Stream<T>> {
-    if (!Stream.instance) {
-      Stream.instance = await Stream.new<unknown>(client, streamable);
-    }
-    return Stream.instance as Stream<T>;
+  /**
+   * Create a new Stream instance.
+   * @template _T - Type extending {@link Streameable}<GenericRecord>
+   * @param {Client} client - The client instance
+   * @param {string} bucketName - The name of the bucket
+   * @returns The created Stream instance
+   */
+  static async create<_T extends Streameable<GenericRecord>>(
+    client: Client,
+    bucketName: string,
+  ) {
+    const namespace = client.opts?.getNamespace();
+    const storeName = namespace?.streamName(bucketName) ?? bucketName;
+    const store = await client.getOrCreateKvStore(storeName, { history: 1 });
+    return new Stream(storeName, store, client);
   }
 
-  private static async new<T>(
-    client: NatsClient,
-    streamable: Streameable<T>,
-  ): Promise<Stream<T>> {
-    const namespace = client.getClientOpts().getNamespace();
-    const bucketName = namespace.streamName(streamable.NAME);
-    const store = await client.getOrCreateKvStore(bucketName, {
-      storage: StorageType.File,
-      history: 1,
-      compression: true,
-    });
-    return new Stream<T>(store, client);
+  /**
+   * Get the KV store.
+   * @returns The KV store
+   */
+  getStore(): KV {
+    return this.#store;
   }
 
-  public getStore(): KV {
-    return this.store;
-  }
-
-  private prefixFilterSubject(subject: string): string {
+  private prefixFilterSubject(subject: string) {
     return `$KV.*.${subject}`;
   }
 
-  private prefixFilterSubjects(
-    config: Partial<ConsumerConfig>,
-  ): Partial<ConsumerConfig> {
+  private prefixFilterSubjects(config: Partial<ConsumerConfig>) {
     config.filter_subjects = config.filter_subjects?.map((subject) =>
       this.prefixFilterSubject(subject),
     );
     return config;
   }
 
-  public async publishMany(
-    subjects: string[],
-    payload: Streameable<T>,
-  ): Promise<void> {
-    await Promise.all(
-      subjects.map((subject) => this.publish(subject, payload)),
-    );
-  }
-
-  public async publish(
-    subject: string,
-    payload: Streameable<T>,
-  ): Promise<number> {
-    const encodedPayload = await payload.encode();
-    try {
-      const dataSize = await this.store.create(subject, encodedPayload);
-      return dataSize;
-    } catch (_e) {
-      throw new Error(`Failed to publish data for subject: ${subject}`);
-    }
-  }
-
-  public async getConsumersAndState(): Promise<{
-    streamName: string;
-    consumers: Array<ConsumerInfo>;
-    state: StreamState;
-  }> {
-    const status = await this.store.status();
+  /**
+   * Get consumers and state information.
+   * @returns The consumers and state information
+   */
+  async getConsumersAndState() {
+    const status = await this.#store.status();
     const state = status.streamInfo.state;
-    const streamName = status.streamInfo.config.name;
+    const streamName = this.#name;
     const consumers: Array<ConsumerInfo> = [];
-    for await (const cons of this.client
-      .getJetstreamManager()
-      .consumers.list(streamName)) {
-      consumers.push(cons);
+    const list = this.#client.getJetstreamManager().consumers.list(streamName);
+
+    for await (const item of list) {
+      consumers.push(item);
     }
+
     return { streamName, consumers, state };
   }
 
-  public async getStreamName(): Promise<string> {
-    return (await this.store.status()).streamInfo.config.name;
+  /**
+   * Get the stream name.
+   * @returns The stream name
+   */
+  async getStreamName() {
+    return this.#name;
   }
 
-  public async subscribe(wildcard: string): Promise<QueuedIterator<KvEntry>> {
-    const kvOpts = { key: wildcard } as KvWatchOptions;
-    const subscription = await this.store.watch(kvOpts);
-    return subscription;
+  /**
+   * Subscribe to a subject.
+   * @template S - Type extending Subject
+   * @param {S} subject - The subject to subscribe to
+   * @returns An async iterable of KV entries
+   */
+  async subscribe<S extends Subject>(subject: S) {
+    const kvOpts = { key: subject.parse() } as KvWatchOptions;
+    return this.#store.watch(kvOpts);
   }
 
-  public async subscribeConsumer(
-    userConfig: Partial<SubscribeConsumerConfig>,
-  ): Promise<Consumer> {
+  /**
+   * Subscribe to a consumer.
+   * @param {Partial<SubscribeConsumerConfig>} userConfig - The user configuration
+   * @returns The JetStream pull subscription
+   */
+  async subscribeConsumer(userConfig: Partial<SubscribeConsumerConfig>) {
     const config = this.extendConsumerConfig(userConfig);
     const consumer = await this.createConsumer(config);
-    const consumerHandle = await this.client
-      .getJetstream()
-      .consumers.get(consumer.name);
-    return consumerHandle;
+    return this.#client.getJetstream().consumers.get(consumer.name);
   }
 
-  private extendConsumerConfig(
-    userConfig: Partial<SubscribeConsumerConfig>,
-  ): Partial<ConsumerConfig> {
+  private extendConsumerConfig(userConfig: Partial<SubscribeConsumerConfig>) {
     return {
-      filter_subjects: userConfig.filterSubjects,
-      deliver_policy: userConfig.deliverPolicy || DeliverPolicy.All,
+      filter_subjects: userConfig.filterSubjects?.map((i) => i.parse()),
+      deliver_policy: userConfig.deliverPolicy ?? DeliverPolicy.All,
       ack_policy: AckPolicy.None,
     } as ConsumerConfig;
   }
 
-  public async createConsumer(
-    config: Partial<ConsumerConfig>,
-  ): Promise<ConsumerInfo> {
+  /**
+   * Create a consumer.
+   * @param {Partial<ConsumerConfig>} config - The consumer configuration
+   * @returns The created consumer info
+   */
+  async createConsumer(config: Partial<ConsumerConfig>) {
     const extendedConfig = this.prefixFilterSubjects(config);
-    const status = await this.store.status();
-    const streamName = status.streamInfo.config.name;
-    const consumerInfo = await this.client
+    const streamName = `KV_${this.#name}`;
+    return this.#client
       .getJetstreamManager()
       .consumers.add(streamName, extendedConfig);
-    return consumerInfo;
   }
 
-  public async flushAwait(): Promise<boolean> {
-    return await this.client.closeSafely();
+  /**
+   * Flush and await completion.
+   */
+  async flushAwait() {
+    return this.#client.closeSafely();
   }
 }

@@ -13,11 +13,12 @@
   },
   "files": ["dist"],
   "scripts": {
-    "test-client": "tsx ./examples/client/index.ts",
-    "test-stream": "tsx ./examples/stream/index.ts",
+    "example:blocks": "tsx ./examples/stream/blocks.ts",
+    "example:blocks_filtered": "tsx ./examples/stream/blocks_filtered.ts",
     "build": "tsup",
     "build:watch": "tsup --watch",
-    "ts:check": "tsc --noEmit"
+    "ts:check": "tsc --noEmit",
+    "test": "vitest"
   },
   "devDependencies": {
     "@types/mocha": "10.0.8",
