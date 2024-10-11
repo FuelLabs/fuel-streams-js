@@ -1,217 +1,170 @@
 import type { Address, AssetId, Bytes32, ContractId, IdentifierKind } from '..';
+import { SubjectBase } from '../subject';
 
 export enum OutputsWildcard {
   All = 'outputs.>',
   ById = 'by_id.outputs.>',
 }
 
-export class OutputsByIdSubject {
-  idKind?: IdentifierKind;
-  idValue?: Bytes32;
+interface OutputsByIdFields {
+  idKind: IdentifierKind;
+  idValue: Bytes32;
+}
 
-  constructor(idKind?: IdentifierKind, idValue?: Bytes32) {
-    this.idKind = idKind;
-    this.idValue = idValue;
+export class OutputsByIdSubject extends SubjectBase<OutputsByIdFields> {
+  parse() {
+    const { idKind, idValue } = this.fields;
+    return `by_id.outputs.${idKind ?? '*'}.${idValue ?? '*'}` as const;
   }
 
+  withIdKind(idKind: IdentifierKind | null) {
+    return this.with('idKind', idKind);
+  }
+
+  withIdValue(idValue: Bytes32 | null) {
+    return this.with('idValue', idValue);
+  }
+}
+
+export interface OutputsFields {
+  txId: Bytes32;
+  index: number;
+}
+
+export class OutputsSubject<T extends OutputsFields> extends SubjectBase<T> {
   parse() {
-    return `by_id.outputs.${this.idKind || '*'}.${
-      this.idValue || '*'
+    const { txId, index } = this.fields;
+    return `outputs.${txId ?? '*'}.${index ?? '*'}.>` as const;
+  }
+
+  withTxId(txId: Bytes32 | null) {
+    return this.with('txId', txId);
+  }
+
+  withIndex(index: number | null) {
+    return this.with('index', index);
+  }
+}
+
+interface OutputsCoinFields {
+  txId: Bytes32;
+  index: number;
+  to: Address;
+  assetId: AssetId;
+}
+
+export class OutputsCoinSubject extends SubjectBase<OutputsCoinFields> {
+  parse() {
+    const { txId, index, to, assetId } = this.fields;
+    return `outputs.coin.${txId ?? '*'}.${index ?? '*'}.${to ?? '*'}.${
+      assetId ?? '*'
     }` as const;
   }
 
-  withIdKind(idKind?: IdentifierKind) {
-    this.idKind = idKind;
-    return this;
+  withTxId(txId: Bytes32 | null) {
+    return this.with('txId', txId);
   }
 
-  withIdValue(idValue?: Bytes32) {
-    this.idValue = idValue;
-    return this;
-  }
-}
-
-export class OutputsCoinSubject {
-  txId?: Bytes32;
-  index?: number;
-  to?: Address;
-  assetId?: AssetId;
-
-  constructor(txId?: Bytes32, index?: number, to?: Address, assetId?: AssetId) {
-    this.txId = txId;
-    this.index = index;
-    this.to = to;
-    this.assetId = assetId;
+  withIndex(index: number | null) {
+    return this.with('index', index);
   }
 
-  parse() {
-    return `outputs.coin.${this.txId || '*'}.${this.index || '*'}.${
-      this.to || '*'
-    }.${this.assetId || '*'}` as const;
+  withTo(to: Address | null) {
+    return this.with('to', to);
   }
 
-  withTxId(txId?: Bytes32) {
-    this.txId = txId;
-    return this;
-  }
-
-  withIndex(index?: number) {
-    this.index = index;
-    return this;
-  }
-
-  withTo(to?: Address) {
-    this.to = to;
-    return this;
-  }
-
-  withAssetId(assetId?: AssetId) {
-    this.assetId = assetId;
-    return this;
+  withAssetId(assetId: AssetId | null) {
+    return this.with('assetId', assetId);
   }
 }
 
-export class OutputsContractSubject {
-  txId?: Bytes32;
-  index?: number;
-  contractId?: ContractId;
+interface OutputsContractFields {
+  txId: Bytes32;
+  index: number;
+  contractId: ContractId;
+}
 
-  constructor(txId?: Bytes32, index?: number, contractId?: ContractId) {
-    this.txId = txId;
-    this.index = index;
-    this.contractId = contractId;
-  }
-
+export class OutputsContractSubject extends SubjectBase<OutputsContractFields> {
   parse() {
-    return `outputs.contract.${this.txId || '*'}.${this.index || '*'}.${
-      this.contractId || '*'
+    const { txId, index, contractId } = this.fields;
+    return `outputs.contract.${txId ?? '*'}.${index ?? '*'}.${
+      contractId ?? '*'
     }` as const;
   }
 
-  withTxId(txId?: Bytes32) {
-    this.txId = txId;
-    return this;
+  withTxId(txId: Bytes32 | null) {
+    return this.with('txId', txId);
   }
 
-  withIndex(index?: number) {
-    this.index = index;
-    return this;
+  withIndex(index: number | null) {
+    return this.with('index', index);
   }
 
-  withContractId(contractId?: ContractId) {
-    this.contractId = contractId;
-    return this;
+  withContractId(contractId: ContractId | null) {
+    return this.with('contractId', contractId);
   }
 }
 
-export class OutputsChangeSubject {
-  txId?: Bytes32;
-  index?: number;
-  to?: Address;
-  assetId?: AssetId;
-
-  constructor(txId?: Bytes32, index?: number, to?: Address, assetId?: AssetId) {
-    this.txId = txId;
-    this.index = index;
-    this.to = to;
-    this.assetId = assetId;
-  }
-
-  parse() {
-    return `outputs.change.${this.txId || '*'}.${this.index || '*'}.${
-      this.to || '*'
-    }.${this.assetId || '*'}` as const;
-  }
-
-  withTxId(txId?: Bytes32): this {
-    this.txId = txId;
-    return this;
-  }
-
-  withIndex(index?: number): this {
-    this.index = index;
-    return this;
-  }
-
-  withTo(to?: Address): this {
-    this.to = to;
-    return this;
-  }
-
-  withAssetId(assetId?: AssetId): this {
-    this.assetId = assetId;
-    return this;
-  }
-}
-export class OutputsVariableSubject {
-  txId?: Bytes32;
-  index?: number;
-  to?: Address;
-  assetId?: AssetId;
-
-  constructor(txId?: Bytes32, index?: number, to?: Address, assetId?: AssetId) {
-    this.txId = txId;
-    this.index = index;
-    this.to = to;
-    this.assetId = assetId;
-  }
-
-  parse() {
-    return `outputs.variable.${this.txId || '*'}.${this.index || '*'}.${
-      this.to || '*'
-    }.${this.assetId || '*'}` as const;
-  }
-
-  withTxId(txId?: Bytes32) {
-    this.txId = txId;
-    return this;
-  }
-
-  withIndex(index?: number) {
-    this.index = index;
-    return this;
-  }
-
-  withTo(to?: Address) {
-    this.to = to;
-    return this;
-  }
-
-  withAssetId(assetId?: AssetId) {
-    this.assetId = assetId;
-    return this;
-  }
+interface OutputsChangeFields {
+  txId: Bytes32;
+  index: number;
+  to: Address;
+  assetId: AssetId;
 }
 
-export class OutputsContractCreatedSubject {
-  txId?: Bytes32;
-  index?: number;
-  contractId?: ContractId;
-
-  constructor(txId?: Bytes32, index?: number, contractId?: ContractId) {
-    this.txId = txId;
-    this.index = index;
-    this.contractId = contractId;
-  }
-
+export class OutputsChangeSubject extends SubjectBase<OutputsChangeFields> {
   parse() {
-    return `outputs.contract_created.${this.txId || '*'}.${this.index || '*'}.${
-      this.contractId || '*'
+    const { txId, index, to, assetId } = this.fields;
+    return `outputs.change.${txId ?? '*'}.${index ?? '*'}.${to ?? '*'}.${
+      assetId ?? '*'
     }` as const;
   }
 
-  withTxId(txId?: Bytes32) {
-    this.txId = txId;
-    return this;
+  withTxId(txId: Bytes32 | null) {
+    return this.with('txId', txId);
   }
 
-  withIndex(index?: number) {
-    this.index = index;
-    return this;
+  withIndex(index: number | null) {
+    return this.with('index', index);
   }
 
-  withContractId(contractId?: ContractId) {
-    this.contractId = contractId;
-    return this;
+  withTo(to: Address | null) {
+    return this.with('to', to);
+  }
+
+  withAssetId(assetId: AssetId | null) {
+    return this.with('assetId', assetId);
+  }
+}
+
+interface OutputsVariableFields {
+  txId: Bytes32;
+  index: number;
+  to: Address;
+  assetId: AssetId;
+}
+
+export class OutputsVariableSubject extends SubjectBase<OutputsVariableFields> {
+  parse() {
+    const { txId, index, to, assetId } = this.fields;
+    return `outputs.variable.${txId ?? '*'}.${index ?? '*'}.${to ?? '*'}.${
+      assetId ?? '*'
+    }` as const;
+  }
+
+  withTxId(txId: Bytes32 | null) {
+    return this.with('txId', txId);
+  }
+
+  withIndex(index: number | null) {
+    return this.with('index', index);
+  }
+
+  withTo(to: Address | null) {
+    return this.with('to', to);
+  }
+
+  withAssetId(assetId: AssetId | null) {
+    return this.with('assetId', assetId);
   }
 }

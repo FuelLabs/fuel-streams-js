@@ -1,73 +1,38 @@
-import type { BytesLike } from 'fuels';
-
-type BlockHeight = number;
-type Bytes32 = BytesLike;
+import type { BlockHeight, Bytes32 } from '..';
+import { SubjectBase } from '../subject';
 
 export enum LogsWildcard {
   All = 'logs.>',
 }
 
-export class LogsSubject {
-  blockHeight?: BlockHeight;
-  txId?: Bytes32;
-  receiptIndex?: number;
-  logId?: Bytes32;
+interface LogsFields {
+  blockHeight: BlockHeight;
+  txId: Bytes32;
+  receiptIndex: number;
+  logId: Bytes32;
+}
 
-  constructor(
-    blockHeight?: BlockHeight,
-    txId?: Bytes32,
-    receiptIndex?: number,
-    logId?: Bytes32,
-  ) {
-    this.blockHeight = blockHeight;
-    this.txId = txId;
-    this.receiptIndex = receiptIndex;
-    this.logId = logId;
-  }
-
-  static wildcard(
-    blockHeight?: BlockHeight,
-    txId?: Bytes32,
-    receiptIndex?: number,
-    logId?: Bytes32,
-  ) {
-    return new LogsSubject(
-      blockHeight,
-      txId,
-      receiptIndex,
-      logId,
-    ).parseWildcard();
-  }
-
+export class LogsSubject extends SubjectBase<LogsFields> {
   parse() {
-    return `logs.${this.blockHeight || '*'}.${this.txId || '*'}.${
-      this.receiptIndex || '*'
-    }.${this.logId || '*'}` as const;
+    const { blockHeight, txId, receiptIndex, logId } = this.fields;
+    return `logs.${blockHeight ?? '*'}.${txId ?? '*'}.${receiptIndex ?? '*'}.${
+      logId ?? '*'
+    }` as const;
   }
 
-  parseWildcard() {
-    return `logs.${this.blockHeight || '*'}.${this.txId || '*'}.${
-      this.receiptIndex || '*'
-    }.${this.logId || '*'}` as const;
+  withBlockHeight(blockHeight: BlockHeight | null) {
+    return this.with('blockHeight', blockHeight);
   }
 
-  withBlockHeight(blockHeight?: BlockHeight) {
-    this.blockHeight = blockHeight;
-    return this;
+  withTxId(txId: Bytes32 | null) {
+    return this.with('txId', txId);
   }
 
-  withTxId(txId?: Bytes32) {
-    this.txId = txId;
-    return this;
+  withReceiptIndex(receiptIndex: number | null) {
+    return this.with('receiptIndex', receiptIndex);
   }
 
-  withReceiptIndex(receiptIndex?: number) {
-    this.receiptIndex = receiptIndex;
-    return this;
-  }
-
-  withLogId(logId?: Bytes32) {
-    this.logId = logId;
-    return this;
+  withLogId(logId: Bytes32 | null) {
+    return this.with('logId', logId);
   }
 }

@@ -1,24 +1,25 @@
-export interface IStreamData<T> {
-  subject: string;
+export interface IStreamData<_T> {
   timestamp: string;
-  payload: T;
+  payload: Uint8Array;
 }
 
-export class StreamData<T> {
-  private timestamp: string;
+export class StreamData<T> implements IStreamData<T> {
+  public readonly timestamp: string;
 
-  constructor(
-    public subject: string,
-    public payload: T,
-  ) {
+  constructor(public readonly payload: Uint8Array) {
     const now = new Date();
-    // ISO 8601 timestamp in JavaScript
     this.timestamp = now.toISOString();
   }
 
-  // Optional helper function to get timestamp in milliseconds
   public tsAsMillis() {
     const parsedDate = Date.parse(this.timestamp);
     return Number.isNaN(parsedDate) ? Date.now() : parsedDate;
+  }
+
+  public decode(): T {
+    const decoder = new TextDecoder();
+    const jsonString = decoder.decode(this.payload);
+    const data = JSON.parse(jsonString);
+    return data as T;
   }
 }

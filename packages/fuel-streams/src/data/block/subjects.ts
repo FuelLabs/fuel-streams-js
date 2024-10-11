@@ -1,42 +1,31 @@
 import type { Block as FuelBlock } from 'fuels';
-import type { Subject } from '..';
+import { SubjectBase } from '../subject';
 
 export enum BlocksWildcard {
   All = 'blocks.>',
 }
 
-export class BlocksSubject implements Subject {
-  producer: string | null;
-  height: number | null;
+interface BlocksFields {
+  producer: string;
+  height: number;
+}
 
-  constructor(producer: string | null = null, height: number | null = null) {
-    this.producer = producer;
-    this.height = height;
-  }
-
-  withProducer(producer: string | null) {
-    this.producer = producer;
-    return this;
-  }
-
-  withHeight(height: number | null) {
-    this.height = height;
-    return this;
-  }
-
+export class BlocksSubject extends SubjectBase<BlocksFields> {
   parse() {
-    return `blocks.${this.producer ?? '*'}.${this.height ?? '*'}` as const;
-  }
-
-  static wildcard(
-    producer: string | null = null,
-    height: number | null = null,
-  ) {
+    const { producer, height } = this.fields;
     return `blocks.${producer ?? '*'}.${height ?? '*'}` as const;
   }
 
   static fromFuelBlock(block: FuelBlock) {
     const blockHeight = block.header.daHeight.toNumber();
-    return new BlocksSubject(null, blockHeight);
+    return new BlocksSubject().withHeight(blockHeight);
+  }
+
+  withProducer(producer: string | null) {
+    return this.with('producer', producer);
+  }
+
+  withHeight(height: number | null) {
+    return this.with('height', height);
   }
 }

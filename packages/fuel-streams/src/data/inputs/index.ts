@@ -1,2 +1,2 @@
-export { StreamedInput } from './streamable';
+export { InputStream } from './stream';
 export * from './subjects';

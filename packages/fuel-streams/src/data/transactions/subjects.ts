@@ -6,115 +6,66 @@ import type {
   TransactionKind,
   TransactionStatus,
 } from '..';
+import { SubjectBase } from '../subject';
 
 export enum TransactionsWildcard {
   All = 'transactions.>',
   ById = 'by_id.transactions.>',
 }
 
-export class TransactionsSubject {
-  blockHeight?: BlockHeight;
-  txIndex?: number;
-  txId?: Bytes32;
-  status?: TransactionStatus;
-  kind?: TransactionKind;
+interface TransactionsFields {
+  blockHeight: BlockHeight;
+  txIndex: number;
+  txId: Bytes32;
+  status: TransactionStatus;
+  kind: TransactionKind;
+}
 
-  constructor(
-    blockHeight?: BlockHeight,
-    txIndex?: number,
-    txId?: Bytes32,
-    status?: TransactionStatus,
-    kind?: TransactionKind,
-  ) {
-    this.blockHeight = blockHeight;
-    this.txIndex = txIndex;
-    this.txId = txId;
-    this.status = status;
-    this.kind = kind;
-  }
-
+export class TransactionsSubject extends SubjectBase<TransactionsFields> {
   parse() {
-    return `transactions.${this.blockHeight || '*'}.${this.txIndex || '*'}.${
-      this.txId || '*'
-    }.${this.status || '*'}.${this.kind || '*'}` as const;
+    const { blockHeight, txIndex, txId, status, kind } = this.fields;
+    return `transactions.${blockHeight ?? '*'}.${txIndex ?? '*'}.${
+      txId ?? '*'
+    }.${status ?? '*'}.${kind ?? '*'}` as const;
   }
 
-  static wildcard(
-    blockHeight?: BlockHeight,
-    txIndex?: number,
-    txId?: Bytes32,
-    status?: TransactionStatus,
-    kind?: TransactionKind,
-  ) {
-    return new TransactionsSubject(
-      blockHeight,
-      txIndex,
-      txId,
-      status,
-      kind,
-    ).parse();
+  withBlockHeight(blockHeight: BlockHeight | null) {
+    return this.with('blockHeight', blockHeight);
   }
 
-  withBlockHeight(blockHeight?: BlockHeight) {
-    this.blockHeight = blockHeight;
-    return this;
+  withTxIndex(txIndex: number | null) {
+    return this.with('txIndex', txIndex);
   }
 
-  withTxIndex(txIndex?: number) {
-    this.txIndex = txIndex;
-    return this;
+  withTxId(txId: Bytes32 | null) {
+    return this.with('txId', txId);
   }
 
-  withTxId(txId?: Bytes32) {
-    this.txId = txId;
-    return this;
+  withStatus(status: TransactionStatus | null) {
+    return this.with('status', status);
   }
 
-  withStatus(status?: TransactionStatus) {
-    this.status = status;
-    return this;
-  }
-
-  withKind(kind?: TransactionKind) {
-    this.kind = kind;
-    return this;
-  }
-
-  static new() {
-    return new TransactionsSubject();
+  withKind(kind: TransactionKind | null) {
+    return this.with('kind', kind);
   }
 }
 
-export class TransactionsByIdSubject {
-  idKind?: IdentifierKind;
-  idValue?: Address;
+interface TransactionsByIdFields {
+  idKind: IdentifierKind;
+  idValue: Address;
+}
 
-  constructor(idKind?: IdentifierKind, idValue?: Address) {
-    this.idKind = idKind;
-    this.idValue = idValue;
-  }
-
+export class TransactionsByIdSubject extends SubjectBase<TransactionsByIdFields> {
   parse() {
-    return `by_id.transactions.${this.idKind || '*'}.${
-      this.idValue || '*'
-    }` as const;
+    const { idKind, idValue } = this.fields;
+    return `by_id.transactions.${idKind ?? '*'}.${idValue ?? '*'}` as const;
   }
 
-  static wildcard(idKind?: IdentifierKind, idValue?: Address) {
-    return new TransactionsByIdSubject(idKind, idValue).parse();
+  withIdKind(idKind: IdentifierKind | null) {
+    return this.with('idKind', idKind);
   }
 
-  withIdKind(idKind?: IdentifierKind) {
-    this.idKind = idKind;
-    return this;
-  }
-
-  withIdValue(idValue?: Address) {
-    this.idValue = idValue;
-    return this;
-  }
-
-  static new() {
-    return new TransactionsByIdSubject();
+  withIdValue(idValue: Address | null) {
+    return this.with('idValue', idValue);
   }
 }

@@ -1,2 +1,2 @@
-export { StreamedTransaction } from './streamable';
+export { TransactionStream } from './stream';
 export * from './subjects';

@@ -1,2 +1,2 @@
-export { StreamedBlock } from './streamable';
+export { BlockStream } from './stream';
 export * from './subjects';

@@ -1,187 +1,138 @@
-import type {
-  Address,
-  AssetId,
-  Bytes32,
-  ContractId,
-  IdentifierKind,
-  Subject,
-} from '..';
+import type { Address, AssetId, Bytes32, ContractId, IdentifierKind } from '..';
+import { SubjectBase } from '../subject';
 
 export enum InputsWildcard {
   All = 'inputs.>',
   ById = 'by_id.inputs.>',
 }
 
-export class InputsCoinSubject implements Subject {
-  constructor(
-    public tx_id: Bytes32 | null = null,
-    public index: number | null = null,
-    public owner: Address | null = null,
-    public asset_id: AssetId | null = null,
-  ) {}
+interface InputsByIdFields {
+  idKind: IdentifierKind;
+  idValue: Bytes32;
+}
 
+export class InputsByIdSubject extends SubjectBase<InputsByIdFields> {
   parse() {
-    return `inputs.${this.tx_id || '*'}.${this.index || '*'}.coin.${
-      this.owner || '*'
-    }.${this.asset_id || '*'}` as const;
+    const { idKind, idValue } = this.fields;
+    return `by_id.inputs.${idKind ?? '*'}.${idValue ?? '*'}` as const;
   }
 
-  static wildcard(
-    tx_id: Bytes32 | null,
-    index: number | null,
-    owner: Address | null,
-    asset_id: AssetId | null,
-  ) {
-    return new InputsCoinSubject(tx_id, index, owner, asset_id).parse();
+  withIdKind(idKind: IdentifierKind | null) {
+    return this.with('idKind', idKind);
   }
 
-  static new() {
-    return new InputsCoinSubject();
-  }
-
-  with_tx_id(tx_id: Bytes32 | null) {
-    this.tx_id = tx_id;
-    return this;
-  }
-
-  with_index(index: number | null) {
-    this.index = index;
-    return this;
-  }
-
-  with_owner(owner: Address | null) {
-    this.owner = owner;
-    return this;
-  }
-
-  with_asset_id(asset_id: AssetId | null) {
-    this.asset_id = asset_id;
-    return this;
+  withIdValue(idValue: Bytes32 | null) {
+    return this.with('idValue', idValue);
   }
 }
 
-// =============================================
+interface InputsFields {
+  txId: Bytes32;
+  index: number;
+}
 
-export class InputsContractSubject implements Subject {
-  constructor(
-    public tx_id: Bytes32 | null = null,
-    public index: number | null = null,
-    public contract_id: ContractId | null = null,
-  ) {}
-
+export class InputsSubject<T extends InputsFields> extends SubjectBase<T> {
   parse() {
-    return `inputs.${this.tx_id || '*'}.${this.index || '*'}.contract.${
-      this.contract_id || '*'
+    const { txId, index } = this.fields;
+    return `inputs.${txId ?? '*'}.${index ?? '*'}.>` as const;
+  }
+
+  withTxId(txId: Bytes32 | null) {
+    return this.with('txId', txId);
+  }
+
+  withIndex(index: number | null) {
+    return this.with('index', index);
+  }
+}
+
+interface InputsCoinFields {
+  txId: Bytes32;
+  index: number;
+  owner: Address;
+  assetId: AssetId;
+}
+
+export class InputsCoinSubject extends SubjectBase<InputsCoinFields> {
+  parse() {
+    const { txId, index, owner, assetId } = this.fields;
+    return `inputs.${txId ?? '*'}.${index ?? '*'}.coin.${owner ?? '*'}.${
+      assetId ?? '*'
     }` as const;
   }
 
-  static wildcard(
-    tx_id: Bytes32 | null,
-    index: number | null,
-    contract_id: ContractId | null,
-  ) {
-    return new InputsContractSubject(tx_id, index, contract_id).parse();
+  withTxId(txId: Bytes32 | null) {
+    return this.with('txId', txId);
   }
 
-  static new() {
-    return new InputsContractSubject();
+  withIndex(index: number | null) {
+    return this.with('index', index);
   }
 
-  with_tx_id(tx_id: Bytes32 | null) {
-    this.tx_id = tx_id;
-    return this;
+  withOwner(owner: Address | null) {
+    return this.with('owner', owner);
   }
 
-  with_index(index: number | null) {
-    this.index = index;
-    return this;
-  }
-
-  with_contract_id(contract_id: ContractId | null) {
-    this.contract_id = contract_id;
-    return this;
+  withAssetId(assetId: AssetId | null) {
+    return this.with('assetId', assetId);
   }
 }
 
-// =============================================
-
-export class InputsMessageSubject implements Subject {
-  constructor(
-    public tx_id: Bytes32 | null = null,
-    public index: number | null = null,
-    public sender: Address | null = null,
-    public recipient: Address | null = null,
-  ) {}
-
-  parse() {
-    return `inputs.${this.tx_id || '*'}.${this.index || '*'}.message.${
-      this.sender || '*'
-    }.${this.recipient || '*'}` as const;
-  }
-
-  static wildcard(
-    tx_id: Bytes32 | null,
-    index: number | null,
-    sender: Address | null,
-    recipient: Address | null,
-  ) {
-    return new InputsMessageSubject(tx_id, index, sender, recipient).parse();
-  }
-
-  static new() {
-    return new InputsMessageSubject();
-  }
-
-  with_tx_id(tx_id: Bytes32 | null) {
-    this.tx_id = tx_id;
-    return this;
-  }
-
-  with_index(index: number | null) {
-    this.index = index;
-    return this;
-  }
-
-  with_sender(sender: Address | null) {
-    this.sender = sender;
-    return this;
-  }
-
-  with_recipient(recipient: Address | null) {
-    this.recipient = recipient;
-    return this;
-  }
+interface InputsContractFields {
+  txId: Bytes32;
+  index: number;
+  contractId: ContractId;
 }
 
-// =============================================
-
-export class InputsByIdSubject implements Subject {
-  constructor(
-    public id_kind: IdentifierKind | null = null,
-    public id_value: Bytes32 | null = null,
-  ) {}
-
+export class InputsContractSubject extends SubjectBase<InputsContractFields> {
   parse() {
-    return `by_id.inputs.${this.id_kind || '*'}.${
-      this.id_value || '*'
+    const { txId, index, contractId } = this.fields;
+    return `inputs.${txId ?? '*'}.${index ?? '*'}.contract.${
+      contractId ?? '*'
     }` as const;
   }
 
-  static wildcard(id_kind: IdentifierKind | null, id_value: Bytes32 | null) {
-    return new InputsByIdSubject(id_kind, id_value).parse();
+  withTxId(txId: Bytes32 | null) {
+    return this.with('txId', txId);
   }
 
-  static new() {
-    return new InputsByIdSubject();
+  withIndex(index: number | null) {
+    return this.with('index', index);
   }
 
-  with_id_kind(id_kind: IdentifierKind | null) {
-    this.id_kind = id_kind;
-    return this;
+  withContractId(contractId: ContractId | null) {
+    return this.with('contractId', contractId);
+  }
+}
+
+interface InputsMessageFields {
+  txId: Bytes32;
+  index: number;
+  sender: Address;
+  recipient: Address;
+}
+
+export class InputsMessageSubject extends SubjectBase<InputsMessageFields> {
+  parse() {
+    const { txId, index, sender, recipient } = this.fields;
+    return `inputs.${txId ?? '*'}.${index ?? '*'}.message.${sender ?? '*'}.${
+      recipient ?? '*'
+    }` as const;
   }
 
-  with_id_value(id_value: Bytes32 | null) {
-    this.id_value = id_value;
-    return this;
+  withTxId(txId: Bytes32 | null) {
+    return this.with('txId', txId);
+  }
+
+  withIndex(index: number | null) {
+    return this.with('index', index);
+  }
+
+  withSender(sender: Address | null) {
+    return this.with('sender', sender);
+  }
+
+  withRecipient(recipient: Address | null) {
+    return this.with('recipient', recipient);
   }
 }

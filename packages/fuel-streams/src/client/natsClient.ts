@@ -9,18 +9,10 @@ import {
 import { type KV, type KvOptions, Kvm } from '@nats-io/kv';
 import { DebugEvents, Events, type NatsConnection } from '@nats-io/nats-core';
 import { connect } from '@nats-io/transport-node';
+import { ClientStatus } from '../constants';
 import type { ClientOpts } from './clientOpts';
 
 export type StatusStreamCallback = (status: ClientStatus) => void;
-
-export enum ClientStatus {
-  Connected = 0,
-  Disconnected = 1,
-  Reconnecting = 2,
-  Disconnecting = 3,
-  Errored = 4,
-  Stale = 5,
-}
 
 const mapEventStatus = (status: Events | DebugEvents): ClientStatus => {
   switch (status) {
@@ -64,7 +56,7 @@ export class Client implements NatsClient {
     return client;
   }
 
-  async start(opts: ClientOpts): Promise<void> {
+  async start(opts: ClientOpts) {
     const nc = await connect(opts.connectOpts());
     console.info(`Successfully connected to ${nc.getServer()} !`);
     this.jetstreamManager = await jetstreamManager(nc);
