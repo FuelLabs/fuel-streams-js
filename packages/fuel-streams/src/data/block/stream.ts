@@ -41,7 +41,7 @@ export class BlockStream {
   /**
    * Initializes a new block stream.
    * @param {Client} client - The NATS client used for streaming.
-   * @returns {Promise<Stream<StreamedBlock>>} A promise that resolves to the initialized block stream.
+   * @returns A promise that resolves to the initialized block stream.
    *
    * @example
    * ```typescript

@@ -44,7 +44,7 @@ export class ReceiptStream {
   /**
    * Initializes a new receipt stream.
    * @param {Client} client - The NATS client used for streaming.
-   * @returns {Promise<Stream<StreamedReceipt>>} A promise that resolves to the initialized receipt stream.
+   * @returns A promise that resolves to the initialized receipt stream.
    *
    * @example
    * ```typescript

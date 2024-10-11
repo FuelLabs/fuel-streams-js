@@ -41,7 +41,7 @@ interface InputsByIdFields {
 export class InputsByIdSubject extends SubjectBase<InputsByIdFields> {
   /**
    * Parses the fields into a subject string.
-   * @returns {string} The parsed subject string.
+   * @returns The parsed subject string.
    */
   parse() {
     const { idKind, idValue } = this.fields;
@@ -51,7 +51,7 @@ export class InputsByIdSubject extends SubjectBase<InputsByIdFields> {
   /**
    * Sets the ID kind for the subject.
    * @param {IdentifierKind | null} idKind - The ID kind to set.
-   * @returns {InputsByIdSubject} The updated {@link InputsByIdSubject} instance.
+   * @returns instance.
    */
   withIdKind(idKind: IdentifierKind | null) {
     return this.with('idKind', idKind);
@@ -60,7 +60,7 @@ export class InputsByIdSubject extends SubjectBase<InputsByIdFields> {
   /**
    * Sets the ID value for the subject.
    * @param {Bytes32 | null} idValue - The ID value to set.
-   * @returns {InputsByIdSubject} The updated {@link InputsByIdSubject} instance.
+   * @returns instance.
    */
   withIdValue(idValue: Bytes32 | null) {
     return this.with('idValue', idValue);
@@ -92,7 +92,7 @@ interface InputsFields {
 export class InputsSubject<T extends InputsFields> extends SubjectBase<T> {
   /**
    * Parses the fields into a subject string.
-   * @returns {string} The parsed subject string.
+   * @returns The parsed subject string.
    */
   parse() {
     const { txId, index } = this.fields;
@@ -102,7 +102,7 @@ export class InputsSubject<T extends InputsFields> extends SubjectBase<T> {
   /**
    * Sets the transaction ID for the subject.
    * @param {Bytes32 | null} txId - The transaction ID to set.
-   * @returns {InputsSubject<T>} The updated {@link InputsSubject} instance.
+   * @returns instance.
    */
   withTxId(txId: Bytes32 | null) {
     return this.with('txId', txId);
@@ -111,7 +111,7 @@ export class InputsSubject<T extends InputsFields> extends SubjectBase<T> {
   /**
    * Sets the index for the subject.
    * @param {number | null} index - The index to set.
-   * @returns {InputsSubject<T>} The updated {@link InputsSubject} instance.
+   * @returns instance.
    */
   withIndex(index: number | null) {
     return this.with('index', index);
@@ -145,7 +145,7 @@ interface InputsCoinFields extends InputsFields {
 export class InputsCoinSubject extends SubjectBase<InputsCoinFields> {
   /**
    * Parses the fields into a subject string.
-   * @returns {string} The parsed subject string.
+   * @returns The parsed subject string.
    */
   parse() {
     const { txId, index, owner, assetId } = this.fields;
@@ -157,7 +157,7 @@ export class InputsCoinSubject extends SubjectBase<InputsCoinFields> {
   /**
    * Sets the transaction ID for the subject.
    * @param {Bytes32 | null} txId - The transaction ID to set.
-   * @returns {InputsCoinSubject} The updated {@link InputsCoinSubject} instance.
+   * @returns instance.
    */
   withTxId(txId: Bytes32 | null) {
     return this.with('txId', txId);
@@ -166,7 +166,7 @@ export class InputsCoinSubject extends SubjectBase<InputsCoinFields> {
   /**
    * Sets the index for the subject.
    * @param {number | null} index - The index to set.
-   * @returns {InputsCoinSubject} The updated {@link InputsCoinSubject} instance.
+   * @returns instance.
    */
   withIndex(index: number | null) {
     return this.with('index', index);
@@ -175,7 +175,7 @@ export class InputsCoinSubject extends SubjectBase<InputsCoinFields> {
   /**
    * Sets the owner for the subject.
    * @param {Address | null} owner - The owner to set.
-   * @returns {InputsCoinSubject} The updated {@link InputsCoinSubject} instance.
+   * @returns instance.
    */
   withOwner(owner: Address | null) {
     return this.with('owner', owner);
@@ -184,7 +184,7 @@ export class InputsCoinSubject extends SubjectBase<InputsCoinFields> {
   /**
    * Sets the asset ID for the subject.
    * @param {AssetId | null} assetId - The asset ID to set.
-   * @returns {InputsCoinSubject} The updated {@link InputsCoinSubject} instance.
+   * @returns instance.
    */
   withAssetId(assetId: AssetId | null) {
     return this.with('assetId', assetId);
@@ -215,7 +215,7 @@ interface InputsContractFields extends InputsFields {
 export class InputsContractSubject extends SubjectBase<InputsContractFields> {
   /**
    * Parses the fields into a subject string.
-   * @returns {string} The parsed subject string.
+   * @returns The parsed subject string.
    */
   parse() {
     const { txId, index, contractId } = this.fields;
@@ -227,7 +227,7 @@ export class InputsContractSubject extends SubjectBase<InputsContractFields> {
   /**
    * Sets the transaction ID for the subject.
    * @param {Bytes32 | null} txId - The transaction ID to set.
-   * @returns {InputsContractSubject} The updated {@link InputsContractSubject} instance.
+   * @returns instance.
    */
   withTxId(txId: Bytes32 | null) {
     return this.with('txId', txId);
@@ -236,7 +236,7 @@ export class InputsContractSubject extends SubjectBase<InputsContractFields> {
   /**
    * Sets the index for the subject.
    * @param {number | null} index - The index to set.
-   * @returns {InputsContractSubject} The updated {@link InputsContractSubject} instance.
+   * @returns instance.
    */
   withIndex(index: number | null) {
     return this.with('index', index);
@@ -245,7 +245,7 @@ export class InputsContractSubject extends SubjectBase<InputsContractFields> {
   /**
    * Sets the contract ID for the subject.
    * @param {ContractId | null} contractId - The contract ID to set.
-   * @returns {InputsContractSubject} The updated {@link InputsContractSubject} instance.
+   * @returns instance.
    */
   withContractId(contractId: ContractId | null) {
     return this.with('contractId', contractId);
@@ -279,7 +279,7 @@ interface InputsMessageFields extends InputsFields {
 export class InputsMessageSubject extends SubjectBase<InputsMessageFields> {
   /**
    * Parses the fields into a subject string.
-   * @returns {string} The parsed subject string.
+   * @returns The parsed subject string.
    */
   parse() {
     const { txId, index, sender, recipient } = this.fields;
@@ -291,7 +291,7 @@ export class InputsMessageSubject extends SubjectBase<InputsMessageFields> {
   /**
    * Sets the transaction ID for the subject.
    * @param {Bytes32 | null} txId - The transaction ID to set.
-   * @returns {InputsMessageSubject} The updated {@link InputsMessageSubject} instance.
+   * @returns instance.
    */
   withTxId(txId: Bytes32 | null) {
     return this.with('txId', txId);
@@ -300,7 +300,7 @@ export class InputsMessageSubject extends SubjectBase<InputsMessageFields> {
   /**
    * Sets the index for the subject.
    * @param {number | null} index - The index to set.
-   * @returns {InputsMessageSubject} The updated {@link InputsMessageSubject} instance.
+   * @returns instance.
    */
   withIndex(index: number | null) {
     return this.with('index', index);
@@ -309,7 +309,7 @@ export class InputsMessageSubject extends SubjectBase<InputsMessageFields> {
   /**
    * Sets the sender for the subject.
    * @param {Address | null} sender - The sender to set.
-   * @returns {InputsMessageSubject} The updated {@link InputsMessageSubject} instance.
+   * @returns instance.
    */
   withSender(sender: Address | null) {
     return this.with('sender', sender);
@@ -318,7 +318,7 @@ export class InputsMessageSubject extends SubjectBase<InputsMessageFields> {
   /**
    * Sets the recipient for the subject.
    * @param {Address | null} recipient - The recipient to set.
-   * @returns {InputsMessageSubject} The updated {@link InputsMessageSubject} instance.
+   * @returns instance.
    */
   withRecipient(recipient: Address | null) {
     return this.with('recipient', recipient);

@@ -45,7 +45,7 @@ interface OutputsByIdFields {
 export class OutputsByIdSubject extends SubjectBase<OutputsByIdFields> {
   /**
    * Parses the fields into a string representation.
-   * @returns {string} A string representation of the outputs by ID.
+   * @returns A string representation of the outputs by ID.
    */
   parse() {
     const { idKind, idValue } = this.fields;
@@ -55,7 +55,7 @@ export class OutputsByIdSubject extends SubjectBase<OutputsByIdFields> {
   /**
    * Sets the ID kind for the subject.
    * @param {IdentifierKind | null} idKind - The ID kind to set, or null to unset.
-   * @returns {OutputsByIdSubject} A new instance of OutputsByIdSubject with the updated ID kind.
+   * @returns A new instance of OutputsByIdSubject with the updated ID kind.
    */
   withIdKind(idKind: IdentifierKind | null) {
     return this.with('idKind', idKind);
@@ -64,7 +64,7 @@ export class OutputsByIdSubject extends SubjectBase<OutputsByIdFields> {
   /**
    * Sets the ID value for the subject.
    * @param {Bytes32 | null} idValue - The ID value to set, or null to unset.
-   * @returns {OutputsByIdSubject} A new instance of OutputsByIdSubject with the updated ID value.
+   * @returns A new instance of OutputsByIdSubject with the updated ID value.
    */
   withIdValue(idValue: Bytes32 | null) {
     return this.with('idValue', idValue);
@@ -96,7 +96,7 @@ export interface OutputsFields {
 export class OutputsSubject<T extends OutputsFields> extends SubjectBase<T> {
   /**
    * Parses the fields into a string representation.
-   * @returns {string} A string representation of the outputs.
+   * @returns A string representation of the outputs.
    */
   parse() {
     const { txId, index } = this.fields;
@@ -106,7 +106,7 @@ export class OutputsSubject<T extends OutputsFields> extends SubjectBase<T> {
   /**
    * Sets the transaction ID for the subject.
    * @param {Bytes32 | null} txId - The transaction ID to set, or null to unset.
-   * @returns {OutputsSubject<T>} A new instance of OutputsSubject with the updated transaction ID.
+   * @returns A new instance of OutputsSubject with the updated transaction ID.
    */
   withTxId(txId: Bytes32 | null) {
     return this.with('txId', txId);
@@ -115,7 +115,7 @@ export class OutputsSubject<T extends OutputsFields> extends SubjectBase<T> {
   /**
    * Sets the index for the subject.
    * @param {number | null} index - The index to set, or null to unset.
-   * @returns {OutputsSubject<T>} A new instance of OutputsSubject with the updated index.
+   * @returns A new instance of OutputsSubject with the updated index.
    */
   withIndex(index: number | null) {
     return this.with('index', index);
@@ -149,7 +149,7 @@ interface OutputsCoinFields extends OutputsFields {
 export class OutputsCoinSubject extends SubjectBase<OutputsCoinFields> {
   /**
    * Parses the fields into a string representation.
-   * @returns {string} A string representation of the coin outputs.
+   * @returns A string representation of the coin outputs.
    */
   parse() {
     const { txId, index, to, assetId } = this.fields;
@@ -161,7 +161,7 @@ export class OutputsCoinSubject extends SubjectBase<OutputsCoinFields> {
   /**
    * Sets the transaction ID for the subject.
    * @param {Bytes32 | null} txId - The transaction ID to set, or null to unset.
-   * @returns {OutputsCoinSubject} A new instance of OutputsCoinSubject with the updated transaction ID.
+   * @returns A new instance of OutputsCoinSubject with the updated transaction ID.
    */
   withTxId(txId: Bytes32 | null) {
     return this.with('txId', txId);
@@ -170,7 +170,7 @@ export class OutputsCoinSubject extends SubjectBase<OutputsCoinFields> {
   /**
    * Sets the index for the subject.
    * @param {number | null} index - The index to set, or null to unset.
-   * @returns {OutputsCoinSubject} A new instance of OutputsCoinSubject with the updated index.
+   * @returns A new instance of OutputsCoinSubject with the updated index.
    */
   withIndex(index: number | null) {
     return this.with('index', index);
@@ -179,7 +179,7 @@ export class OutputsCoinSubject extends SubjectBase<OutputsCoinFields> {
   /**
    * Sets the recipient address for the subject.
    * @param {Address | null} to - The recipient address to set, or null to unset.
-   * @returns {OutputsCoinSubject} A new instance of OutputsCoinSubject with the updated recipient address.
+   * @returns A new instance of OutputsCoinSubject with the updated recipient address.
    */
   withTo(to: Address | null) {
     return this.with('to', to);
@@ -188,7 +188,7 @@ export class OutputsCoinSubject extends SubjectBase<OutputsCoinFields> {
   /**
    * Sets the asset ID for the subject.
    * @param {AssetId | null} assetId - The asset ID to set, or null to unset.
-   * @returns {OutputsCoinSubject} A new instance of OutputsCoinSubject with the updated asset ID.
+   * @returns A new instance of OutputsCoinSubject with the updated asset ID.
    */
   withAssetId(assetId: AssetId | null) {
     return this.with('assetId', assetId);
@@ -219,7 +219,7 @@ interface OutputsContractFields extends OutputsFields {
 export class OutputsContractSubject extends SubjectBase<OutputsContractFields> {
   /**
    * Parses the fields into a string representation.
-   * @returns {string} A string representation of the contract outputs.
+   * @returns A string representation of the contract outputs.
    */
   parse() {
     const { txId, index, contractId } = this.fields;
@@ -231,7 +231,7 @@ export class OutputsContractSubject extends SubjectBase<OutputsContractFields> {
   /**
    * Sets the transaction ID for the subject.
    * @param {Bytes32 | null} txId - The transaction ID to set, or null to unset.
-   * @returns {OutputsContractSubject} A new instance of OutputsContractSubject with the updated transaction ID.
+   * @returns A new instance of OutputsContractSubject with the updated transaction ID.
    */
   withTxId(txId: Bytes32 | null) {
     return this.with('txId', txId);
@@ -240,7 +240,7 @@ export class OutputsContractSubject extends SubjectBase<OutputsContractFields> {
   /**
    * Sets the index for the subject.
    * @param {number | null} index - The index to set, or null to unset.
-   * @returns {OutputsContractSubject} A new instance of OutputsContractSubject with the updated index.
+   * @returns A new instance of OutputsContractSubject with the updated index.
    */
   withIndex(index: number | null) {
     return this.with('index', index);
@@ -249,7 +249,7 @@ export class OutputsContractSubject extends SubjectBase<OutputsContractFields> {
   /**
    * Sets the contract ID for the subject.
    * @param {ContractId | null} contractId - The contract ID to set, or null to unset.
-   * @returns {OutputsContractSubject} A new instance of OutputsContractSubject with the updated contract ID.
+   * @returns A new instance of OutputsContractSubject with the updated contract ID.
    */
   withContractId(contractId: ContractId | null) {
     return this.with('contractId', contractId);
@@ -283,7 +283,7 @@ interface OutputsChangeFields extends OutputsFields {
 export class OutputsChangeSubject extends SubjectBase<OutputsChangeFields> {
   /**
    * Parses the fields into a string representation.
-   * @returns {string} A string representation of the change outputs.
+   * @returns A string representation of the change outputs.
    */
   parse() {
     const { txId, index, to, assetId } = this.fields;
@@ -295,7 +295,7 @@ export class OutputsChangeSubject extends SubjectBase<OutputsChangeFields> {
   /**
    * Sets the transaction ID for the subject.
    * @param {Bytes32 | null} txId - The transaction ID to set, or null to unset.
-   * @returns {OutputsChangeSubject} A new instance of OutputsChangeSubject with the updated transaction ID.
+   * @returns A new instance of OutputsChangeSubject with the updated transaction ID.
    */
   withTxId(txId: Bytes32 | null) {
     return this.with('txId', txId);
@@ -304,7 +304,7 @@ export class OutputsChangeSubject extends SubjectBase<OutputsChangeFields> {
   /**
    * Sets the index for the subject.
    * @param {number | null} index - The index to set, or null to unset.
-   * @returns {OutputsChangeSubject} A new instance of OutputsChangeSubject with the updated index.
+   * @returns A new instance of OutputsChangeSubject with the updated index.
    */
   withIndex(index: number | null) {
     return this.with('index', index);
@@ -313,7 +313,7 @@ export class OutputsChangeSubject extends SubjectBase<OutputsChangeFields> {
   /**
    * Sets the recipient address for the subject.
    * @param {Address | null} to - The recipient address to set, or null to unset.
-   * @returns {OutputsChangeSubject} A new instance of OutputsChangeSubject with the updated recipient address.
+   * @returns A new instance of OutputsChangeSubject with the updated recipient address.
    */
   withTo(to: Address | null) {
     return this.with('to', to);
@@ -322,7 +322,7 @@ export class OutputsChangeSubject extends SubjectBase<OutputsChangeFields> {
   /**
    * Sets the asset ID for the subject.
    * @param {AssetId | null} assetId - The asset ID to set, or null to unset.
-   * @returns {OutputsChangeSubject} A new instance of OutputsChangeSubject with the updated asset ID.
+   * @returns A new instance of OutputsChangeSubject with the updated asset ID.
    */
   withAssetId(assetId: AssetId | null) {
     return this.with('assetId', assetId);
@@ -356,7 +356,7 @@ interface OutputsVariableFields extends OutputsFields {
 export class OutputsVariableSubject extends SubjectBase<OutputsVariableFields> {
   /**
    * Parses the fields into a string representation.
-   * @returns {string} A string representation of the variable outputs.
+   * @returns A string representation of the variable outputs.
    */
   parse() {
     const { txId, index, to, assetId } = this.fields;
@@ -368,7 +368,7 @@ export class OutputsVariableSubject extends SubjectBase<OutputsVariableFields> {
   /**
    * Sets the transaction ID for the subject.
    * @param {Bytes32 | null} txId - The transaction ID to set, or null to unset.
-   * @returns {OutputsVariableSubject} A new instance of OutputsVariableSubject with the updated transaction ID.
+   * @returns A new instance of OutputsVariableSubject with the updated transaction ID.
    */
   withTxId(txId: Bytes32 | null) {
     return this.with('txId', txId);
@@ -377,7 +377,7 @@ export class OutputsVariableSubject extends SubjectBase<OutputsVariableFields> {
   /**
    * Sets the index for the subject.
    * @param {number | null} index - The index to set, or null to unset.
-   * @returns {OutputsVariableSubject} A new instance of OutputsVariableSubject with the updated index.
+   * @returns A new instance of OutputsVariableSubject with the updated index.
    */
   withIndex(index: number | null) {
     return this.with('index', index);
@@ -386,7 +386,7 @@ export class OutputsVariableSubject extends SubjectBase<OutputsVariableFields> {
   /**
    * Sets the recipient address for the subject.
    * @param {Address | null} to - The recipient address to set, or null to unset.
-   * @returns {OutputsVariableSubject} A new instance of OutputsVariableSubject with the updated recipient address.
+   * @returns A new instance of OutputsVariableSubject with the updated recipient address.
    */
   withTo(to: Address | null) {
     return this.with('to', to);
@@ -395,7 +395,7 @@ export class OutputsVariableSubject extends SubjectBase<OutputsVariableFields> {
   /**
    * Sets the asset ID for the subject.
    * @param {AssetId | null} assetId - The asset ID to set, or null to unset.
-   * @returns {OutputsVariableSubject} A new instance of OutputsVariableSubject with the updated asset ID.
+   * @returns A new instance of OutputsVariableSubject with the updated asset ID.
    */
   withAssetId(assetId: AssetId | null) {
     return this.with('assetId', assetId);

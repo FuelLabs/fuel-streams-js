@@ -41,7 +41,7 @@ export class OutputStream {
   /**
    * Initializes a new output stream.
    * @param {Client} client - The NATS client used for streaming.
-   * @returns {Promise<Stream<StreamedOutput>>} A promise that resolves to the initialized output stream.
+   * @returns A promise that resolves to the initialized output stream.
    *
    * @example
    * ```typescript

@@ -29,7 +29,7 @@ export class StreamData<T> implements IStreamData<T> {
 
   /**
    * Converts the timestamp to milliseconds.
-   * @returns {number} The timestamp in milliseconds.
+   * @returns The timestamp in milliseconds.
    */
   public tsAsMillis(): number {
     const parsedDate = Date.parse(this.timestamp);
@@ -38,7 +38,7 @@ export class StreamData<T> implements IStreamData<T> {
 
   /**
    * Decodes the payload into the specified type.
-   * @returns {T} The decoded payload.
+   * @returns The decoded payload.
    * @throws {SyntaxError} If the JSON parsing fails.
    */
   // TODO: finish this when have postcard decoding

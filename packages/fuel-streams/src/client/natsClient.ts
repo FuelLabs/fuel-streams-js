@@ -23,16 +23,16 @@ import type { ClientOpts } from './clientOpts';
  * Callback function type for status stream updates
  * @callback StatusStreamCallback
  * @param {ClientStatus} status - The current client status
- * @returns {void}
+ * @returns
  */
 export type StatusStreamCallback = (status: ClientStatus) => void;
 
 /**
  * Maps NATS events to ClientStatus
  * @param {Events | DebugEvents} status - The NATS event
- * @returns {ClientStatus} The corresponding ClientStatus
+ * @returns The corresponding ClientStatus
  */
-const mapEventStatus = (status: Events | DebugEvents): ClientStatus => {
+const mapEventStatus = (status: Events | DebugEvents) => {
   switch (status) {
     case Events.Disconnect:
       return ClientStatus.Disconnected;
@@ -59,20 +59,20 @@ interface NatsClient {
   /**
    * Starts the NATS client connection
    * @param {ClientOpts} opts - The client options
-   * @returns {Promise<void>}
+   * @returns
    */
   start(opts: ClientOpts): Promise<void>;
 
   /**
    * Gets the client options
-   * @returns {ClientOpts} The client options
+   * @returns The client options
    * @throws {Error} If client options are not set
    */
   getClientOpts(): ClientOpts;
 
   /**
    * Safely closes the NATS connection
-   * @returns {Promise<boolean>} A promise that resolves to true if the connection is closed
+   * @returns A promise that resolves to true if the connection is closed
    * @throws {Error} If NATS client is not set
    */
   closeSafely(): Promise<boolean>;
@@ -88,7 +88,7 @@ interface NatsClient {
    * Gets or creates a key-value store
    * @param {string} storeName - The name of the key-value store
    * @param {Partial<KvOptions>} opts - The options for the key-value store
-   * @returns {Promise<KV>} A promise that resolves to the key-value store
+   * @returns A promise that resolves to the key-value store
    * @throws {Error} If Kvm client is not set
    */
   getOrCreateKvStore(storeName: string, opts: Partial<KvOptions>): Promise<KV>;
@@ -120,7 +120,7 @@ export class Client implements NatsClient {
   /**
    * Creates and connects a new Client instance
    * @param {ClientOpts} opts - The client options
-   * @returns {Promise<Client>} A promise that resolves to the connected Client instance
+   * @returns A promise that resolves to the connected Client instance
    */
   static async connect(opts: ClientOpts) {
     const client = new Client();
@@ -145,7 +145,7 @@ export class Client implements NatsClient {
 
   /**
    * Gets the NATS connection
-   * @returns {NatsConnection} The NATS connection
+   * @returns The NATS connection
    */
   getNatsConnection() {
     return this.natsConnection as NatsConnection;
@@ -153,7 +153,7 @@ export class Client implements NatsClient {
 
   /**
    * Gets the JetStream client
-   * @returns {JetStreamClient} The JetStream client
+   * @returns The JetStream client
    */
   getJetstream() {
     return this.jetstream as JetStreamClient;
@@ -161,7 +161,7 @@ export class Client implements NatsClient {
 
   /**
    * Gets the JetStream manager
-   * @returns {JetStreamManager} The JetStream manager
+   * @returns The JetStream manager
    */
   getJetstreamManager() {
     return this.jetstreamManager as JetStreamManager;
@@ -193,7 +193,7 @@ export class Client implements NatsClient {
 
   /**
    * Checks if the connection is closing
-   * @returns {boolean} True if the connection is closing, false otherwise
+   * @returns True if the connection is closing, false otherwise
    */
   isConnectionClosing() {
     return (

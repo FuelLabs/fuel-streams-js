@@ -63,7 +63,7 @@ interface TransactionsFields {
 export class TransactionsSubject extends SubjectBase<TransactionsFields> {
   /**
    * Parses the transaction fields into a string representation.
-   * @returns {string} A string representation of the transaction.
+   * @returns A string representation of the transaction.
    */
   parse() {
     const { blockHeight, txIndex, txId, status, kind } = this.fields;
@@ -75,7 +75,7 @@ export class TransactionsSubject extends SubjectBase<TransactionsFields> {
   /**
    * Sets the block height for the transaction subject.
    * @param {BlockHeight | null} blockHeight - The block height to set.
-   * @returns {TransactionsSubject} A new TransactionsSubject with the updated block height.
+   * @returns A new TransactionsSubject with the updated block height.
    */
   withBlockHeight(blockHeight: BlockHeight | null) {
     return this.with('blockHeight', blockHeight);
@@ -84,7 +84,7 @@ export class TransactionsSubject extends SubjectBase<TransactionsFields> {
   /**
    * Sets the transaction index for the transaction subject.
    * @param {number | null} txIndex - The transaction index to set.
-   * @returns {TransactionsSubject} A new TransactionsSubject with the updated transaction index.
+   * @returns A new TransactionsSubject with the updated transaction index.
    */
   withTxIndex(txIndex: number | null) {
     return this.with('txIndex', txIndex);
@@ -93,7 +93,7 @@ export class TransactionsSubject extends SubjectBase<TransactionsFields> {
   /**
    * Sets the transaction ID for the transaction subject.
    * @param {Bytes32 | null} txId - The transaction ID to set.
-   * @returns {TransactionsSubject} A new TransactionsSubject with the updated transaction ID.
+   * @returns A new TransactionsSubject with the updated transaction ID.
    */
   withTxId(txId: Bytes32 | null) {
     return this.with('txId', txId);
@@ -102,7 +102,7 @@ export class TransactionsSubject extends SubjectBase<TransactionsFields> {
   /**
    * Sets the status for the transaction subject.
    * @param {TransactionStatus | null} status - The status to set.
-   * @returns {TransactionsSubject} A new TransactionsSubject with the updated status.
+   * @returns A new TransactionsSubject with the updated status.
    */
   withStatus(status: TransactionStatus | null) {
     return this.with('status', status);
@@ -111,7 +111,7 @@ export class TransactionsSubject extends SubjectBase<TransactionsFields> {
   /**
    * Sets the kind for the transaction subject.
    * @param {TransactionKind | null} kind - The kind to set.
-   * @returns {TransactionsSubject} A new TransactionsSubject with the updated kind.
+   * @returns A new TransactionsSubject with the updated kind.
    */
   withKind(kind: TransactionKind | null) {
     return this.with('kind', kind);
@@ -145,7 +145,7 @@ interface TransactionsByIdFields {
 export class TransactionsByIdSubject extends SubjectBase<TransactionsByIdFields> {
   /**
    * Parses the transaction by ID fields into a string representation.
-   * @returns {string} A string representation of the transaction by ID.
+   * @returns A string representation of the transaction by ID.
    */
   parse() {
     const { idKind, idValue } = this.fields;
@@ -155,7 +155,7 @@ export class TransactionsByIdSubject extends SubjectBase<TransactionsByIdFields>
   /**
    * Sets the identifier kind for the transaction by ID subject.
    * @param {IdentifierKind | null} idKind - The identifier kind to set.
-   * @returns {TransactionsByIdSubject} A new TransactionsByIdSubject with the updated identifier kind.
+   * @returns A new TransactionsByIdSubject with the updated identifier kind.
    */
   withIdKind(idKind: IdentifierKind | null) {
     return this.with('idKind', idKind);
@@ -164,7 +164,7 @@ export class TransactionsByIdSubject extends SubjectBase<TransactionsByIdFields>
   /**
    * Sets the identifier value for the transaction by ID subject.
    * @param {Address | null} idValue - The identifier value to set.
-   * @returns {TransactionsByIdSubject} A new TransactionsByIdSubject with the updated identifier value.
+   * @returns A new TransactionsByIdSubject with the updated identifier value.
    */
   withIdValue(idValue: Address | null) {
     return this.with('idValue', idValue);

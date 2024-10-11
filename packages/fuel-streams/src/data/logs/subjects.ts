@@ -45,7 +45,7 @@ interface LogsFields {
 export class LogsSubject extends SubjectBase<LogsFields> {
   /**
    * Parses the fields into a subject string.
-   * @returns {string} The parsed subject string.
+   * @returns The parsed subject string.
    */
   parse() {
     const { blockHeight, txId, receiptIndex, logId } = this.fields;
@@ -57,7 +57,7 @@ export class LogsSubject extends SubjectBase<LogsFields> {
   /**
    * Sets the block height for the subject.
    * @param {BlockHeight | null} blockHeight - The block height to set.
-   * @returns {LogsSubject} The updated {@link LogsSubject} instance.
+   * @returns instance.
    */
   withBlockHeight(blockHeight: BlockHeight | null) {
     return this.with('blockHeight', blockHeight);
@@ -66,7 +66,7 @@ export class LogsSubject extends SubjectBase<LogsFields> {
   /**
    * Sets the transaction ID for the subject.
    * @param {Bytes32 | null} txId - The transaction ID to set.
-   * @returns {LogsSubject} The updated {@link LogsSubject} instance.
+   * @returns instance.
    */
   withTxId(txId: Bytes32 | null) {
     return this.with('txId', txId);
@@ -75,7 +75,7 @@ export class LogsSubject extends SubjectBase<LogsFields> {
   /**
    * Sets the receipt index for the subject.
    * @param {number | null} receiptIndex - The receipt index to set.
-   * @returns {LogsSubject} The updated {@link LogsSubject} instance.
+   * @returns instance.
    */
   withReceiptIndex(receiptIndex: number | null) {
     return this.with('receiptIndex', receiptIndex);
@@ -84,7 +84,7 @@ export class LogsSubject extends SubjectBase<LogsFields> {
   /**
    * Sets the log ID for the subject.
    * @param {Bytes32 | null} logId - The log ID to set.
-   * @returns {LogsSubject} The updated {@link LogsSubject} instance.
+   * @returns instance.
    */
   withLogId(logId: Bytes32 | null) {
     return this.with('logId', logId);

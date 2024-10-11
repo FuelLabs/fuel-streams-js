@@ -44,7 +44,7 @@ export class TransactionStream {
   /**
    * Initializes a new transaction stream.
    * @param {Client} client - The NATS client used for streaming.
-   * @returns {Promise<Stream<StreamedTransaction>>} A promise that resolves to the initialized transaction stream.
+   * @returns A promise that resolves to the initialized transaction stream.
    *
    * @example
    * ```typescript

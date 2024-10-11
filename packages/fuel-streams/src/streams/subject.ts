@@ -18,7 +18,7 @@ export abstract class SubjectBase<T extends Record<string, any>>
   /**
    * Parses the subject into a string representation.
    * @abstract
-   * @returns {string} The parsed subject string
+   * @returns The parsed subject string
    */
   abstract parse(): string;
 
@@ -27,7 +27,7 @@ export abstract class SubjectBase<T extends Record<string, any>>
    * @template K - Key of T
    * @param {K} key - The key to update
    * @param {T[K] | null} value - The value to set
-   * @returns {this} The updated subject instance
+   * @returns The updated subject instance
    */
   with<K extends keyof T>(key: K, value: T[K] | null): this {
     (this.fields as Record<K, T[K] | null>)[key] = value;
@@ -37,7 +37,7 @@ export abstract class SubjectBase<T extends Record<string, any>>
   /**
    * Creates a wildcard representation of the subject.
    * @template U - Type extending SubjectBase<Record<string, unknown>>
-   * @returns {string} The wildcard string representation
+   * @returns The wildcard string representation
    */
   static wildcard<U extends SubjectBase<Record<string, unknown>>>(
     this: new () => U,
@@ -49,7 +49,7 @@ export abstract class SubjectBase<T extends Record<string, any>>
   /**
    * Creates an instance of the subject with all fields unset.
    * @template U - Type extending SubjectBase<Record<string, unknown>>
-   * @returns {U} A new instance of the subject
+   * @returns A new instance of the subject
    */
   static all<U extends SubjectBase<Record<string, unknown>>>(
     this: new () => U,

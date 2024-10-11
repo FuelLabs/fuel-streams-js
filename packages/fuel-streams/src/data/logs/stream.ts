@@ -41,7 +41,7 @@ export class LogStream {
   /**
    * Initializes a new log stream.
    * @param {Client} client - The NATS client used for streaming.
-   * @returns {Promise<Stream<StreamedLog>>} A promise that resolves to the initialized log stream.
+   * @returns A promise that resolves to the initialized log stream.
    *
    * @example
    * ```typescript
