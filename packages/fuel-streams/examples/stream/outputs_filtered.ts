@@ -18,7 +18,7 @@ async function main() {
 
   // Create a filtered subject
   const filteredSubject = new OutputsCoinSubject().withTo(
-    Address.fromString('0x000'), // Replace with an actual recipient address if known
+    '0x0000000000000000000000000000000000000000', // Replace with an actual recipient address if known
   );
 
   const consumer = await stream.subscribeConsumer({

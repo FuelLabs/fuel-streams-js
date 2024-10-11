@@ -1,4 +1,4 @@
-import type { Address, AssetId, Bytes32, ContractId, IdentifierKind } from '..';
+import type { Bytes32, IdentifierKind } from '..';
 import { SubjectBase } from '../../streams/subject';
 
 /**
@@ -125,9 +125,9 @@ export class InputsSubject<T extends InputsFields> extends SubjectBase<T> {
  */
 interface InputsCoinFields extends InputsFields {
   /** The owner of the coin */
-  owner: Address;
+  owner: Bytes32;
   /** The asset ID of the coin */
-  assetId: AssetId;
+  assetId: Bytes32;
 }
 
 /**
@@ -174,19 +174,19 @@ export class InputsCoinSubject extends SubjectBase<InputsCoinFields> {
 
   /**
    * Sets the owner for the subject.
-   * @param {Address | null} owner - The owner to set.
+   * @param {Bytes32 | null} owner - The owner to set.
    * @returns instance.
    */
-  withOwner(owner: Address | null) {
+  withOwner(owner: Bytes32 | null) {
     return this.with('owner', owner);
   }
 
   /**
    * Sets the asset ID for the subject.
-   * @param {AssetId | null} assetId - The asset ID to set.
+   * @param {Bytes32 | null} assetId - The asset ID to set.
    * @returns instance.
    */
-  withAssetId(assetId: AssetId | null) {
+  withAssetId(assetId: Bytes32 | null) {
     return this.with('assetId', assetId);
   }
 }
@@ -198,7 +198,7 @@ export class InputsCoinSubject extends SubjectBase<InputsCoinFields> {
  */
 interface InputsContractFields extends InputsFields {
   /** The contract ID */
-  contractId: ContractId;
+  contractId: Bytes32;
 }
 
 /**
@@ -244,10 +244,10 @@ export class InputsContractSubject extends SubjectBase<InputsContractFields> {
 
   /**
    * Sets the contract ID for the subject.
-   * @param {ContractId | null} contractId - The contract ID to set.
+   * @param {Bytes32 | null} contractId - The contract ID to set.
    * @returns instance.
    */
-  withContractId(contractId: ContractId | null) {
+  withContractId(contractId: Bytes32 | null) {
     return this.with('contractId', contractId);
   }
 }
@@ -259,9 +259,9 @@ export class InputsContractSubject extends SubjectBase<InputsContractFields> {
  */
 interface InputsMessageFields extends InputsFields {
   /** The sender of the message */
-  sender: Address;
+  sender: Bytes32;
   /** The recipient of the message */
-  recipient: Address;
+  recipient: Bytes32;
 }
 
 /**
@@ -308,19 +308,19 @@ export class InputsMessageSubject extends SubjectBase<InputsMessageFields> {
 
   /**
    * Sets the sender for the subject.
-   * @param {Address | null} sender - The sender to set.
+   * @param {Bytes32 | null} sender - The sender to set.
    * @returns instance.
    */
-  withSender(sender: Address | null) {
+  withSender(sender: Bytes32 | null) {
     return this.with('sender', sender);
   }
 
   /**
    * Sets the recipient for the subject.
-   * @param {Address | null} recipient - The recipient to set.
+   * @param {Bytes32 | null} recipient - The recipient to set.
    * @returns instance.
    */
-  withRecipient(recipient: Address | null) {
+  withRecipient(recipient: Bytes32 | null) {
     return this.with('recipient', recipient);
   }
 }

@@ -18,7 +18,7 @@ async function main() {
 
   // Create a filtered subject
   const filteredSubject = new InputsCoinSubject().withOwner(
-    Address.fromString('0x000'), // Replace with an actual owner address if known
+    '0x0000000000000000000000000000000000000000', // Replace with an actual owner address if known
   );
 
   const consumer = await stream.subscribeConsumer({

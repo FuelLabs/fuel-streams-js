@@ -1,4 +1,4 @@
-import type { Address, AssetId, Bytes32, ContractId, IdentifierKind } from '..';
+import type { Bytes32, IdentifierKind } from '..';
 import { SubjectBase } from '../../streams/subject';
 
 /**
@@ -129,9 +129,9 @@ export class OutputsSubject<T extends OutputsFields> extends SubjectBase<T> {
  */
 interface OutputsCoinFields extends OutputsFields {
   /** The recipient address */
-  to: Address;
+  to: Bytes32;
   /** The asset ID */
-  assetId: AssetId;
+  assetId: Bytes32;
 }
 
 /**
@@ -142,9 +142,9 @@ interface OutputsCoinFields extends OutputsFields {
  * const subject = new OutputsCoinSubject()
  *   .withTxId('0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef')
  *   .withIndex(0)
- *   .withTo('fuel1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqsx2tme')
+ *   .withTo('0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef')
  *   .withAssetId('0x0000000000000000000000000000000000000000000000000000000000000000');
- * console.log(subject.parse()); // 'outputs.coin.0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef.0.fuel1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqsx2tme.0x0000000000000000000000000000000000000000000000000000000000000000'
+ * console.log(subject.parse()); // 'outputs.coin.0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef.0.0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef.0x0000000000000000000000000000000000000000000000000000000000000000'
  */
 export class OutputsCoinSubject extends SubjectBase<OutputsCoinFields> {
   /**
@@ -178,19 +178,19 @@ export class OutputsCoinSubject extends SubjectBase<OutputsCoinFields> {
 
   /**
    * Sets the recipient address for the subject.
-   * @param {Address | null} to - The recipient address to set, or null to unset.
+   * @param {Bytes32 | null} to - The recipient address to set, or null to unset.
    * @returns A new instance of OutputsCoinSubject with the updated recipient address.
    */
-  withTo(to: Address | null) {
+  withTo(to: Bytes32 | null) {
     return this.with('to', to);
   }
 
   /**
    * Sets the asset ID for the subject.
-   * @param {AssetId | null} assetId - The asset ID to set, or null to unset.
+   * @param {Bytes32 | null} assetId - The asset ID to set, or null to unset.
    * @returns A new instance of OutputsCoinSubject with the updated asset ID.
    */
-  withAssetId(assetId: AssetId | null) {
+  withAssetId(assetId: Bytes32 | null) {
     return this.with('assetId', assetId);
   }
 }
@@ -202,7 +202,7 @@ export class OutputsCoinSubject extends SubjectBase<OutputsCoinFields> {
  */
 interface OutputsContractFields extends OutputsFields {
   /** The contract ID */
-  contractId: ContractId;
+  contractId: Bytes32;
 }
 
 /**
@@ -248,10 +248,10 @@ export class OutputsContractSubject extends SubjectBase<OutputsContractFields> {
 
   /**
    * Sets the contract ID for the subject.
-   * @param {ContractId | null} contractId - The contract ID to set, or null to unset.
+   * @param {Bytes32 | null} contractId - The contract ID to set, or null to unset.
    * @returns A new instance of OutputsContractSubject with the updated contract ID.
    */
-  withContractId(contractId: ContractId | null) {
+  withContractId(contractId: Bytes32 | null) {
     return this.with('contractId', contractId);
   }
 }
@@ -263,9 +263,9 @@ export class OutputsContractSubject extends SubjectBase<OutputsContractFields> {
  */
 interface OutputsChangeFields extends OutputsFields {
   /** The recipient address */
-  to: Address;
+  to: Bytes32;
   /** The asset ID */
-  assetId: AssetId;
+  assetId: Bytes32;
 }
 
 /**
@@ -276,9 +276,9 @@ interface OutputsChangeFields extends OutputsFields {
  * const subject = new OutputsChangeSubject()
  *   .withTxId('0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef')
  *   .withIndex(0)
- *   .withTo('fuel1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqsx2tme')
+ *   .withTo('0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef')
  *   .withAssetId('0x0000000000000000000000000000000000000000000000000000000000000000');
- * console.log(subject.parse()); // 'outputs.change.0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef.0.fuel1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqsx2tme.0x0000000000000000000000000000000000000000000000000000000000000000'
+ * console.log(subject.parse()); // 'outputs.change.0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef.0.0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef.0x0000000000000000000000000000000000000000000000000000000000000000'
  */
 export class OutputsChangeSubject extends SubjectBase<OutputsChangeFields> {
   /**
@@ -312,19 +312,19 @@ export class OutputsChangeSubject extends SubjectBase<OutputsChangeFields> {
 
   /**
    * Sets the recipient address for the subject.
-   * @param {Address | null} to - The recipient address to set, or null to unset.
+   * @param {Bytes32 | null} to - The recipient address to set, or null to unset.
    * @returns A new instance of OutputsChangeSubject with the updated recipient address.
    */
-  withTo(to: Address | null) {
+  withTo(to: Bytes32 | null) {
     return this.with('to', to);
   }
 
   /**
    * Sets the asset ID for the subject.
-   * @param {AssetId | null} assetId - The asset ID to set, or null to unset.
+   * @param {Bytes32 | null} assetId - The asset ID to set, or null to unset.
    * @returns A new instance of OutputsChangeSubject with the updated asset ID.
    */
-  withAssetId(assetId: AssetId | null) {
+  withAssetId(assetId: Bytes32 | null) {
     return this.with('assetId', assetId);
   }
 }
@@ -336,9 +336,9 @@ export class OutputsChangeSubject extends SubjectBase<OutputsChangeFields> {
  */
 interface OutputsVariableFields extends OutputsFields {
   /** The recipient address */
-  to: Address;
+  to: Bytes32;
   /** The asset ID */
-  assetId: AssetId;
+  assetId: Bytes32;
 }
 
 /**
@@ -349,9 +349,9 @@ interface OutputsVariableFields extends OutputsFields {
  * const subject = new OutputsVariableSubject()
  *   .withTxId('0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef')
  *   .withIndex(0)
- *   .withTo('fuel1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqsx2tme')
+ *   .withTo('0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef')
  *   .withAssetId('0x0000000000000000000000000000000000000000000000000000000000000000');
- * console.log(subject.parse()); // 'outputs.variable.0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef.0.fuel1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqsx2tme.0x0000000000000000000000000000000000000000000000000000000000000000'
+ * console.log(subject.parse()); // 'outputs.variable.0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef.0.0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef.0x0000000000000000000000000000000000000000000000000000000000000000'
  */
 export class OutputsVariableSubject extends SubjectBase<OutputsVariableFields> {
   /**
@@ -385,19 +385,19 @@ export class OutputsVariableSubject extends SubjectBase<OutputsVariableFields> {
 
   /**
    * Sets the recipient address for the subject.
-   * @param {Address | null} to - The recipient address to set, or null to unset.
+   * @param {Bytes32 | null} to - The recipient address to set, or null to unset.
    * @returns A new instance of OutputsVariableSubject with the updated recipient address.
    */
-  withTo(to: Address | null) {
+  withTo(to: Bytes32 | null) {
     return this.with('to', to);
   }
 
   /**
    * Sets the asset ID for the subject.
-   * @param {AssetId | null} assetId - The asset ID to set, or null to unset.
+   * @param {Bytes32 | null} assetId - The asset ID to set, or null to unset.
    * @returns A new instance of OutputsVariableSubject with the updated asset ID.
    */
-  withAssetId(assetId: AssetId | null) {
+  withAssetId(assetId: Bytes32 | null) {
     return this.with('assetId', assetId);
   }
 }

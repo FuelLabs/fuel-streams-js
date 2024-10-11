@@ -18,7 +18,7 @@ async function main() {
   // Create a filtered subject
   const filteredSubject = new LogsSubject()
     .withBlockHeight(1000) // Filter for logs from block height 1000 and above
-    .withTxId('0x123'); // Replace with an actual transaction ID if known
+    .withTxId('0x1234567890abcdef1234567890abcdef1234567890abcdef'); // Replace with an actual transaction ID if known
 
   const consumer = await stream.subscribeConsumer({
     filterSubjects: [filteredSubject],

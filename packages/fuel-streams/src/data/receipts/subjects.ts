@@ -1,4 +1,4 @@
-import type { Address, AssetId, Bytes32, ContractId, IdentifierKind } from '..';
+import type { Bytes32, IdentifierKind } from '..';
 import { SubjectBase } from '../../streams/subject';
 
 /**
@@ -111,11 +111,11 @@ interface ReceiptsCallFields {
   /** The index of the receipt */
   index: number;
   /** The contract ID of the caller */
-  from: ContractId;
+  from: Bytes32;
   /** The contract ID of the callee */
-  to: ContractId;
+  to: Bytes32;
   /** The asset ID */
-  assetId: AssetId;
+  assetId: Bytes32;
 }
 
 /**
@@ -154,28 +154,28 @@ export class ReceiptsCallSubject extends SubjectBase<ReceiptsCallFields> {
 
   /**
    * Sets the 'from' contract ID for the subject.
-   * @param {ContractId | null} from - The 'from' contract ID to set.
+   * @param {Bytes32 | null} from - The 'from' contract ID to set.
    * @returns A new instance of ReceiptsCallSubject with the updated 'from' contract ID.
    */
-  withFrom(from: ContractId | null) {
+  withFrom(from: Bytes32 | null) {
     return this.with('from', from);
   }
 
   /**
    * Sets the 'to' contract ID for the subject.
-   * @param {ContractId | null} to - The 'to' contract ID to set.
+   * @param {Bytes32 | null} to - The 'to' contract ID to set.
    * @returns A new instance of ReceiptsCallSubject with the updated 'to' contract ID.
    */
-  withTo(to: ContractId | null) {
+  withTo(to: Bytes32 | null) {
     return this.with('to', to);
   }
 
   /**
    * Sets the asset ID for the subject.
-   * @param {AssetId | null} assetId - The asset ID to set.
+   * @param {Bytes32 | null} assetId - The asset ID to set.
    * @returns A new instance of ReceiptsCallSubject with the updated asset ID.
    */
-  withAssetId(assetId: AssetId | null) {
+  withAssetId(assetId: Bytes32 | null) {
     return this.with('assetId', assetId);
   }
 }
@@ -190,7 +190,7 @@ interface ReceiptsReturnFields {
   /** The index of the receipt */
   index: number;
   /** The contract ID */
-  id: ContractId;
+  id: Bytes32;
 }
 
 /**
@@ -229,10 +229,10 @@ export class ReceiptsReturnSubject extends SubjectBase<ReceiptsReturnFields> {
 
   /**
    * Sets the contract ID for the subject.
-   * @param {ContractId | null} id - The contract ID to set.
+   * @param {Bytes32 | null} id - The contract ID to set.
    * @returns A new instance of ReceiptsReturnSubject with the updated contract ID.
    */
-  withId(id: ContractId | null) {
+  withId(id: Bytes32 | null) {
     return this.with('id', id);
   }
 }
@@ -247,11 +247,11 @@ interface ReceiptsTransferFields {
   /** The index of the receipt */
   index: number;
   /** The contract ID of the sender */
-  from: ContractId;
+  from: Bytes32;
   /** The contract ID of the recipient */
-  to: ContractId;
+  to: Bytes32;
   /** The asset ID */
-  assetId: AssetId;
+  assetId: Bytes32;
 }
 
 /**
@@ -290,28 +290,28 @@ export class ReceiptsTransferSubject extends SubjectBase<ReceiptsTransferFields>
 
   /**
    * Sets the 'from' contract ID for the subject.
-   * @param {ContractId | null} from - The 'from' contract ID to set.
+   * @param {Bytes32 | null} from - The 'from' contract ID to set.
    * @returns A new instance of ReceiptsTransferSubject with the updated 'from' contract ID.
    */
-  withFrom(from: ContractId | null) {
+  withFrom(from: Bytes32 | null) {
     return this.with('from', from);
   }
 
   /**
    * Sets the 'to' contract ID for the subject.
-   * @param {ContractId | null} to - The 'to' contract ID to set.
+   * @param {Bytes32 | null} to - The 'to' contract ID to set.
    * @returns A new instance of ReceiptsTransferSubject with the updated 'to' contract ID.
    */
-  withTo(to: ContractId | null) {
+  withTo(to: Bytes32 | null) {
     return this.with('to', to);
   }
 
   /**
    * Sets the asset ID for the subject.
-   * @param {AssetId | null} assetId - The asset ID to set.
+   * @param {Bytes32 | null} assetId - The asset ID to set.
    * @returns A new instance of ReceiptsTransferSubject with the updated asset ID.
    */
-  withAssetId(assetId: AssetId | null) {
+  withAssetId(assetId: Bytes32 | null) {
     return this.with('assetId', assetId);
   }
 }
@@ -326,7 +326,7 @@ interface ReceiptsReturnDataFields {
   /** The index of the receipt */
   index: number;
   /** The contract ID */
-  id: ContractId;
+  id: Bytes32;
 }
 
 /**
@@ -365,10 +365,10 @@ export class ReceiptsReturnDataSubject extends SubjectBase<ReceiptsReturnDataFie
 
   /**
    * Sets the contract ID for the subject.
-   * @param {ContractId | null} id - The contract ID to set.
+   * @param {Bytes32 | null} id - The contract ID to set.
    * @returns A new instance of ReceiptsReturnDataSubject with the updated contract ID.
    */
-  withId(id: ContractId | null) {
+  withId(id: Bytes32 | null) {
     return this.with('id', id);
   }
 }
@@ -383,7 +383,7 @@ interface ReceiptsPanicFields {
   /** The index of the receipt */
   index: number;
   /** The contract ID */
-  id: ContractId;
+  id: Bytes32;
 }
 
 /**
@@ -422,10 +422,10 @@ export class ReceiptsPanicSubject extends SubjectBase<ReceiptsPanicFields> {
 
   /**
    * Sets the contract ID for the subject.
-   * @param {ContractId | null} id - The contract ID to set.
+   * @param {Bytes32 | null} id - The contract ID to set.
    * @returns A new instance of ReceiptsPanicSubject with the updated contract ID.
    */
-  withId(id: ContractId | null) {
+  withId(id: Bytes32 | null) {
     return this.with('id', id);
   }
 }
@@ -440,7 +440,7 @@ interface ReceiptsRevertFields {
   /** The index of the receipt */
   index: number;
   /** The contract ID */
-  id: ContractId;
+  id: Bytes32;
 }
 
 /**
@@ -479,10 +479,10 @@ export class ReceiptsRevertSubject extends SubjectBase<ReceiptsRevertFields> {
 
   /**
    * Sets the contract ID for the subject.
-   * @param {ContractId | null} id - The contract ID to set.
+   * @param {Bytes32 | null} id - The contract ID to set.
    * @returns A new instance of ReceiptsRevertSubject with the updated contract ID.
    */
-  withId(id: ContractId | null) {
+  withId(id: Bytes32 | null) {
     return this.with('id', id);
   }
 }
@@ -497,7 +497,7 @@ interface ReceiptsLogFields {
   /** The index of the receipt */
   index: number;
   /** The contract ID */
-  id: ContractId;
+  id: Bytes32;
 }
 
 /**
@@ -534,10 +534,10 @@ export class ReceiptsLogSubject extends SubjectBase<ReceiptsLogFields> {
 
   /**
    * Sets the contract ID for the subject.
-   * @param {ContractId | null} id - The contract ID to set.
+   * @param {Bytes32 | null} id - The contract ID to set.
    * @returns A new instance of ReceiptsLogSubject with the updated contract ID.
    */
-  withId(id: ContractId | null) {
+  withId(id: Bytes32 | null) {
     return this.with('id', id);
   }
 }
@@ -552,7 +552,7 @@ interface ReceiptsLogDataFields {
   /** The index of the receipt */
   index: number;
   /** The contract ID */
-  id: ContractId;
+  id: Bytes32;
 }
 
 /**
@@ -591,10 +591,10 @@ export class ReceiptsLogDataSubject extends SubjectBase<ReceiptsLogDataFields> {
 
   /**
    * Sets the contract ID for the subject.
-   * @param {ContractId | null} id - The contract ID to set.
+   * @param {Bytes32 | null} id - The contract ID to set.
    * @returns A new instance of ReceiptsLogDataSubject with the updated contract ID.
    */
-  withId(id: ContractId | null) {
+  withId(id: Bytes32 | null) {
     return this.with('id', id);
   }
 }
@@ -653,9 +653,9 @@ interface ReceiptsMessageOutFields {
   /** The index of the receipt */
   index: number;
   /** The sender's address */
-  sender: Address;
+  sender: Bytes32;
   /** The recipient's address */
-  recipient: Address;
+  recipient: Bytes32;
 }
 
 /**
@@ -694,19 +694,19 @@ export class ReceiptsMessageOutSubject extends SubjectBase<ReceiptsMessageOutFie
 
   /**
    * Sets the sender's address for the subject.
-   * @param {Address | null} sender - The sender's address to set.
+   * @param {Bytes32 | null} sender - The sender's address to set.
    * @returns A new instance of ReceiptsMessageOutSubject with the updated sender's address.
    */
-  withSender(sender: Address | null) {
+  withSender(sender: Bytes32 | null) {
     return this.with('sender', sender);
   }
 
   /**
    * Sets the recipient's address for the subject.
-   * @param {Address | null} recipient - The recipient's address to set.
+   * @param {Bytes32 | null} recipient - The recipient's address to set.
    * @returns A new instance of ReceiptsMessageOutSubject with the updated recipient's address.
    */
-  withRecipient(recipient: Address | null) {
+  withRecipient(recipient: Bytes32 | null) {
     return this.with('recipient', recipient);
   }
 }
@@ -721,7 +721,7 @@ interface ReceiptsMintFields {
   /** The index of the receipt */
   index: number;
   /** The contract ID */
-  contractId: ContractId;
+  contractId: Bytes32;
   /** The sub-identifier */
   subId: Bytes32;
 }
@@ -762,10 +762,10 @@ export class ReceiptsMintSubject extends SubjectBase<ReceiptsMintFields> {
 
   /**
    * Sets the contract ID for the subject.
-   * @param {ContractId | null} contractId - The contract ID to set.
+   * @param {Bytes32 | null} contractId - The contract ID to set.
    * @returns A new instance of ReceiptsMintSubject with the updated contract ID.
    */
-  withContractId(contractId: ContractId | null) {
+  withContractId(contractId: Bytes32 | null) {
     return this.with('contractId', contractId);
   }
 
@@ -789,7 +789,7 @@ interface ReceiptsBurnFields {
   /** The index of the receipt */
   index: number;
   /** The contract ID */
-  contractId: ContractId;
+  contractId: Bytes32;
   /** The sub-identifier */
   subId: Bytes32;
 }
@@ -830,10 +830,10 @@ export class ReceiptsBurnSubject extends SubjectBase<ReceiptsBurnFields> {
 
   /**
    * Sets the contract ID for the subject.
-   * @param {ContractId | null} contractId - The contract ID to set.
+   * @param {Bytes32 | null} contractId - The contract ID to set.
    * @returns A new instance of ReceiptsBurnSubject with the updated contract ID.
    */
-  withContractId(contractId: ContractId | null) {
+  withContractId(contractId: Bytes32 | null) {
     return this.with('contractId', contractId);
   }
 

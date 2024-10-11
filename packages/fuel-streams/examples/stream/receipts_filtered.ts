@@ -18,8 +18,8 @@ async function main() {
 
   // Create a filtered subject
   const filteredSubject = new ReceiptsCallSubject()
-    .withFrom(Address.fromString('0x000'))
-    .withTo(Address.fromString('0x000'));
+    .withFrom('0x0000000000000000000000000000000000000000')
+    .withTo('0x0000000000000000000000000000000000000000');
 
   const consumer = await stream.subscribeConsumer({
     filterSubjects: [filteredSubject],

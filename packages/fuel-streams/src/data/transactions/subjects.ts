@@ -1,5 +1,4 @@
 import type {
-  Address,
   BlockHeight,
   Bytes32,
   IdentifierKind,
@@ -126,7 +125,7 @@ interface TransactionsByIdFields {
   /** The kind of identifier */
   idKind: IdentifierKind;
   /** The value of the identifier */
-  idValue: Address;
+  idValue: Bytes32;
 }
 
 /**
@@ -137,9 +136,9 @@ interface TransactionsByIdFields {
  * ```typescript
  * const subject = new TransactionsByIdSubject()
  *   .withIdKind('B256')
- *   .withIdValue('fuel1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqsx2tme');
+ *   .withIdValue('0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef');
  * console.log(subject.parse());
- * // Output: by_id.transactions.B256.fuel1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqsx2tme
+ * // Output: by_id.transactions.B256.0x1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef
  * ```
  */
 export class TransactionsByIdSubject extends SubjectBase<TransactionsByIdFields> {
@@ -163,10 +162,10 @@ export class TransactionsByIdSubject extends SubjectBase<TransactionsByIdFields>
 
   /**
    * Sets the identifier value for the transaction by ID subject.
-   * @param {Address | null} idValue - The identifier value to set.
+   * @param {Bytes32 | null} idValue - The identifier value to set.
    * @returns A new TransactionsByIdSubject with the updated identifier value.
    */
-  withIdValue(idValue: Address | null) {
+  withIdValue(idValue: Bytes32 | null) {
     return this.with('idValue', idValue);
   }
 }
