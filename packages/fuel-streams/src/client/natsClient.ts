@@ -1,3 +1,10 @@
+/**
+ * @file natsClient.ts
+ * @description This file contains the implementation of the NATS client for the Fuel Streams package.
+ * It provides functionality for connecting to NATS servers, managing JetStream, and handling key-value stores.
+ * @module fuel-streams/client
+ */
+
 import 'dotenv/config';
 import {
   type JetStreamClient,
@@ -12,8 +19,19 @@ import { connect } from '@nats-io/transport-node';
 import { ClientStatus } from '../constants';
 import type { ClientOpts } from './clientOpts';
 
+/**
+ * Callback function type for status stream updates
+ * @callback StatusStreamCallback
+ * @param {ClientStatus} status - The current client status
+ * @returns {void}
+ */
 export type StatusStreamCallback = (status: ClientStatus) => void;
 
+/**
+ * Maps NATS events to ClientStatus
+ * @param {Events | DebugEvents} status - The NATS event
+ * @returns {ClientStatus} The corresponding ClientStatus
+ */
 const mapEventStatus = (status: Events | DebugEvents): ClientStatus => {
   switch (status) {
     case Events.Disconnect:
@@ -33,29 +51,86 @@ const mapEventStatus = (status: Events | DebugEvents): ClientStatus => {
   }
 };
 
+/**
+ * Interface defining the methods for the NATS client
+ * @interface
+ */
 interface NatsClient {
+  /**
+   * Starts the NATS client connection
+   * @param {ClientOpts} opts - The client options
+   * @returns {Promise<void>}
+   */
   start(opts: ClientOpts): Promise<void>;
+
+  /**
+   * Gets the client options
+   * @returns {ClientOpts} The client options
+   * @throws {Error} If client options are not set
+   */
   getClientOpts(): ClientOpts;
+
+  /**
+   * Safely closes the NATS connection
+   * @returns {Promise<boolean>} A promise that resolves to true if the connection is closed
+   * @throws {Error} If NATS client is not set
+   */
   closeSafely(): Promise<boolean>;
+
+  /**
+   * Sets up a status stream and calls the callback for each status update
+   * @param {StatusStreamCallback} callback - The callback function to handle status updates
+   * @throws {Error} If client options are not set
+   */
   getStatusSteam(callback: StatusStreamCallback): void;
+
+  /**
+   * Gets or creates a key-value store
+   * @param {string} storeName - The name of the key-value store
+   * @param {Partial<KvOptions>} opts - The options for the key-value store
+   * @returns {Promise<KV>} A promise that resolves to the key-value store
+   * @throws {Error} If Kvm client is not set
+   */
   getOrCreateKvStore(storeName: string, opts: Partial<KvOptions>): Promise<KV>;
 }
 
+/**
+ * Implementation of the NATS client
+ * @class
+ * @implements {NatsClient}
+ */
 export class Client implements NatsClient {
+  /** @property {ClientOpts | undefined} opts - The client options */
   opts?: ClientOpts;
+
+  /** @property {NatsConnection | undefined} natsConnection - The NATS connection */
   private natsConnection?: NatsConnection;
+
+  /** @property {JetStreamManager | undefined} jetstreamManager - The JetStream manager */
   private jetstreamManager?: JetStreamManager;
+
+  /** @property {JetStreamClient | undefined} jetstream - The JetStream client */
   private jetstream?: JetStreamClient;
+
+  /** @property {Kvm | undefined} kvm - The Key-Value manager */
   private kvm?: Kvm;
 
   private constructor() {}
 
+  /**
+   * Creates and connects a new Client instance
+   * @param {ClientOpts} opts - The client options
+   * @returns {Promise<Client>} A promise that resolves to the connected Client instance
+   */
   static async connect(opts: ClientOpts) {
     const client = new Client();
     await client.start(opts);
     return client;
   }
 
+  /**
+   * @inheritdoc
+   */
   async start(opts: ClientOpts) {
     const nc = await connect(opts.connectOpts());
     console.info(`Successfully connected to ${nc.getServer()} !`);
@@ -68,18 +143,33 @@ export class Client implements NatsClient {
     this.opts = opts;
   }
 
+  /**
+   * Gets the NATS connection
+   * @returns {NatsConnection} The NATS connection
+   */
   getNatsConnection() {
     return this.natsConnection as NatsConnection;
   }
 
+  /**
+   * Gets the JetStream client
+   * @returns {JetStreamClient} The JetStream client
+   */
   getJetstream() {
     return this.jetstream as JetStreamClient;
   }
 
+  /**
+   * Gets the JetStream manager
+   * @returns {JetStreamManager} The JetStream manager
+   */
   getJetstreamManager() {
     return this.jetstreamManager as JetStreamManager;
   }
 
+  /**
+   * @inheritdoc
+   */
   getClientOpts() {
     if (!this.opts) {
       throw new Error('Client options are not set.');
@@ -87,6 +177,9 @@ export class Client implements NatsClient {
     return this.opts;
   }
 
+  /**
+   * @inheritdoc
+   */
   async closeSafely() {
     if (!this.natsConnection) {
       throw new Error('Nats client is not set.');
@@ -98,6 +191,10 @@ export class Client implements NatsClient {
     return this.natsConnection.isClosed();
   }
 
+  /**
+   * Checks if the connection is closing
+   * @returns {boolean} True if the connection is closing, false otherwise
+   */
   isConnectionClosing() {
     return (
       this.natsConnection?.isClosed() ||
@@ -106,6 +203,9 @@ export class Client implements NatsClient {
     );
   }
 
+  /**
+   * @inheritdoc
+   */
   getStatusSteam(callback: StatusStreamCallback) {
     if (!this.natsConnection) {
       throw new Error('Client options are not set.');
@@ -122,6 +222,9 @@ export class Client implements NatsClient {
     }
   }
 
+  /**
+   * @inheritdoc
+   */
   async getOrCreateKvStore(storeName: string, opts: Partial<KvOptions>) {
     if (!this.kvm) {
       throw new Error('Kvm client is not set.');

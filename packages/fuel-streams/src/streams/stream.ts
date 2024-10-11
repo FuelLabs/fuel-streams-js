@@ -1,3 +1,7 @@
+/**
+ * @module Stream
+ */
+
 import {
   AckPolicy,
   type ConsumerConfig,
@@ -13,19 +17,49 @@ import { StreamData } from './streamData';
 type GenericRecord = Record<string, any>;
 export { DeliverPolicy };
 
+/**
+ * Abstract base class for streamable objects.
+ * @template T - Type extending GenericRecord
+ */
 export abstract class Streameable<T extends GenericRecord> {
+  /**
+   * Get the name of the stream.
+   * @returns {string} The name of the stream
+   */
   abstract name(): string;
+
+  /**
+   * Get the wildcards for the stream.
+   * @returns {string[]} Array of wildcards
+   */
   abstract wildcards(): string[];
+
+  /**
+   * Decode the encoded data.
+   * @param {Uint8Array} encoded - The encoded data
+   * @returns {T} The decoded data
+   */
   decode(encoded: Uint8Array): T {
     const data = new StreamData(encoded);
     return data.decode() as T;
   }
 }
 
+/**
+ * Abstract base class extending {@link Streameable} with additional functionality.
+ * @template T - Type extending GenericRecord
+ * @template W - Type extending Record<string, string>
+ * @extends {Streameable<T>}
+ */
 export abstract class BaseStreameable<
   T extends GenericRecord,
   W extends Record<string, string>,
 > extends Streameable<T> {
+  /**
+   * @param {T} payload - The payload data
+   * @param {string} streamName - The name of the stream
+   * @param {W} wildcardEnum - The wildcard enum
+   */
   constructor(
     public payload: T,
     private streamName: string,
@@ -34,21 +68,37 @@ export abstract class BaseStreameable<
     super();
   }
 
+  /**
+   * @inheritdoc
+   */
   name(): string {
     return this.streamName;
   }
 
+  /**
+   * @inheritdoc
+   */
   wildcards(): string[] {
     return Object.values(this.wildcardEnum);
   }
 }
 
+/**
+ * Factory class for creating {@link Stream} instances.
+ * @template S - Type extending {@link Streameable}<GenericRecord>
+ */
 export class StreamFactory<S extends Streameable<GenericRecord>> {
   #stream: Stream<S>;
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   private static instance: StreamFactory<any>;
   private constructor(readonly bucketName: string) {}
 
+  /**
+   * Get or create a StreamFactory instance.
+   * @template S - Type extending {@link Streameable}<GenericRecord>
+   * @param {string} name - The name of the bucket
+   * @returns {StreamFactory<S>} The StreamFactory instance
+   */
   public static get<S extends Streameable<GenericRecord>>(
     name: string,
   ): StreamFactory<S> {
@@ -58,28 +108,54 @@ export class StreamFactory<S extends Streameable<GenericRecord>> {
     return StreamFactory.instance as StreamFactory<S>;
   }
 
+  /**
+   * Initialize the stream.
+   * @param {Client} client - The client instance
+   * @returns {Promise<Stream<S>>} The initialized stream
+   */
   async init(client: Client) {
     this.#stream = await Stream.create<S>(client, this.bucketName);
     return this.#stream;
   }
 }
 
+/**
+ * Interface for subscribe consumer configuration.
+ */
 export interface SubscribeConsumerConfig {
+  /** Array of filter subjects */
   filterSubjects: Array<Subject>;
+  /** Delivery policy */
   deliverPolicy: DeliverPolicy;
 }
 
+/**
+ * Class representing a stream.
+ * @template _T - Type extending {@link Streameable}<GenericRecord>
+ */
 export class Stream<_T extends Streameable<GenericRecord>> {
   #store: KV;
   #client: Client;
   #name: string;
 
+  /**
+   * @param {string} name - The name of the stream
+   * @param {KV} store - The KV store
+   * @param {Client} client - The client instance
+   */
   constructor(name: string, store: KV, client: Client) {
     this.#name = name;
     this.#store = store;
     this.#client = client;
   }
 
+  /**
+   * Create a new Stream instance.
+   * @template _T - Type extending {@link Streameable}<GenericRecord>
+   * @param {Client} client - The client instance
+   * @param {string} bucketName - The name of the bucket
+   * @returns {Promise<Stream<_T>>} The created Stream instance
+   */
   static async create<_T extends Streameable<GenericRecord>>(
     client: Client,
     bucketName: string,
@@ -90,6 +166,10 @@ export class Stream<_T extends Streameable<GenericRecord>> {
     return new Stream(storeName, store, client);
   }
 
+  /**
+   * Get the KV store.
+   * @returns {KV} The KV store
+   */
   getStore(): KV {
     return this.#store;
   }
@@ -105,6 +185,10 @@ export class Stream<_T extends Streameable<GenericRecord>> {
     return config;
   }
 
+  /**
+   * Get consumers and state information.
+   * @returns {Promise<{streamName: string, consumers: Array<ConsumerInfo>, state: any}>} The consumers and state information
+   */
   async getConsumersAndState() {
     const status = await this.#store.status();
     const state = status.streamInfo.state;
@@ -119,15 +203,30 @@ export class Stream<_T extends Streameable<GenericRecord>> {
     return { streamName, consumers, state };
   }
 
+  /**
+   * Get the stream name.
+   * @returns {Promise<string>} The stream name
+   */
   async getStreamName() {
     return this.#name;
   }
 
+  /**
+   * Subscribe to a subject.
+   * @template S - Type extending Subject
+   * @param {S} subject - The subject to subscribe to
+   * @returns {Promise<AsyncIterable<KV>>} An async iterable of KV entries
+   */
   async subscribe<S extends Subject>(subject: S) {
     const kvOpts = { key: subject.parse() } as KvWatchOptions;
     return this.#store.watch(kvOpts);
   }
 
+  /**
+   * Subscribe to a consumer.
+   * @param {Partial<SubscribeConsumerConfig>} userConfig - The user configuration
+   * @returns {Promise<JetStreamPullSubscription>} The JetStream pull subscription
+   */
   async subscribeConsumer(userConfig: Partial<SubscribeConsumerConfig>) {
     const config = this.extendConsumerConfig(userConfig);
     const consumer = await this.createConsumer(config);
@@ -142,6 +241,11 @@ export class Stream<_T extends Streameable<GenericRecord>> {
     } as ConsumerConfig;
   }
 
+  /**
+   * Create a consumer.
+   * @param {Partial<ConsumerConfig>} config - The consumer configuration
+   * @returns {Promise<ConsumerInfo>} The created consumer info
+   */
   async createConsumer(config: Partial<ConsumerConfig>) {
     const extendedConfig = this.prefixFilterSubjects(config);
     const streamName = `KV_${this.#name}`;
@@ -150,6 +254,10 @@ export class Stream<_T extends Streameable<GenericRecord>> {
       .consumers.add(streamName, extendedConfig);
   }
 
+  /**
+   * Flush and await completion.
+   * @returns {Promise<void>}
+   */
   async flushAwait() {
     return this.#client.closeSafely();
   }
