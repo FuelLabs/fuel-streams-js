@@ -5,7 +5,7 @@ import { handleUnhandledError, printHeader } from '../helpers';
 async function main() {
   printHeader('Receipt Streams Example');
 
-  const opts = new ClientOpts('testnet');
+  const opts = new ClientOpts();
   const client = await Client.connect(opts);
   const stream = await ReceiptStream.init(client);
   const subscription = await stream.subscribe(ReceiptsSubject.all());

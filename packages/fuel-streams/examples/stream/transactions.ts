@@ -10,7 +10,7 @@ import { handleUnhandledError, printHeader } from '../helpers';
 async function main() {
   printHeader('Transaction Streams Example');
 
-  const opts = new ClientOpts('testnet');
+  const opts = new ClientOpts();
   const client = await Client.connect(opts);
   const stream = await TransactionStream.init(client);
   const subscription = await stream.subscribe(TransactionsSubject.all());

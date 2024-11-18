@@ -15,8 +15,3 @@ export enum ClientStatus {
   Errored = 'errored',
   Stale = 'stale',
 }
-
-export enum DefaultProviderUrls {
-  testnet = 'nats://k8s-testnet-natstcp-83dfa2a526-321053ef001044cc.elb.us-east-1.amazonaws.com',
-  localnet = 'nats://127.0.0.1:4222',
-}

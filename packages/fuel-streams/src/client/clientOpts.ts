@@ -2,7 +2,6 @@ import {
   type ConnectionOptions,
   usernamePasswordAuthenticator as connector,
 } from '@nats-io/nats-core';
-import { DefaultProviderUrls } from '../constants';
 
 /**
  * Represents a namespace for NATS subjects and streams.
@@ -67,18 +66,8 @@ export class NatsNamespace {
  * for a NATS client, including URL, timeout, and namespace settings.
  */
 export class ClientOpts {
-  private url = DefaultProviderUrls.testnet;
   private timeoutSecs = 5;
   private namespace = NatsNamespace.default();
-
-  /**
-   * Creates a new ClientOpts instance.
-   *
-   * @param url - The key of the default provider URL to use.
-   */
-  constructor(url: keyof typeof DefaultProviderUrls) {
-    this.url = DefaultProviderUrls[url];
-  }
 
   /**
    * Gets the provider URL.
@@ -152,8 +141,8 @@ export class ClientOpts {
    * @returns The connection options for the NATS client.
    */
   connectOpts() {
-    const username = 'public';
-    const password = 'temp-public-pass';
+    const username = 'default_user';
+    const password = '';
     const authenticator = connector(username, password);
     return {
       servers: this.url,
@@ -161,5 +150,10 @@ export class ClientOpts {
       authenticator,
       maxReconnectAttempts: 3,
     } as ConnectionOptions;
+  }
+
+  get url() {
+    // TODO: this should be dynamic in the future
+    return 'nats://stream-testnet.fuel.network:4222';
   }
 }

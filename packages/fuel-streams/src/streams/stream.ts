@@ -227,7 +227,9 @@ export class Stream<_T extends Streameable<GenericRecord>> {
    * @param {Partial<SubscribeConsumerConfig>} userConfig - The user configuration
    * @returns The JetStream pull subscription
    */
-  async subscribeConsumer(userConfig: Partial<SubscribeConsumerConfig>) {
+  async subscribeConsumer(
+    userConfig: Pick<SubscribeConsumerConfig, 'filterSubjects'>,
+  ) {
     const config = this.extendConsumerConfig(userConfig);
     const consumer = await this.createConsumer(config);
     return this.#client.getJetstream().consumers.get(consumer.name);
@@ -235,8 +237,9 @@ export class Stream<_T extends Streameable<GenericRecord>> {
 
   private extendConsumerConfig(userConfig: Partial<SubscribeConsumerConfig>) {
     return {
+      name: `KV_${this.#name}`,
       filter_subjects: userConfig.filterSubjects?.map((i) => i.parse()),
-      deliver_policy: userConfig.deliverPolicy ?? DeliverPolicy.All,
+      deliver_policy: DeliverPolicy.New,
       ack_policy: AckPolicy.None,
     } as ConsumerConfig;
   }
@@ -248,6 +251,7 @@ export class Stream<_T extends Streameable<GenericRecord>> {
    */
   async createConsumer(config: Partial<ConsumerConfig>) {
     const extendedConfig = this.prefixFilterSubjects(config);
+    console.log(extendedConfig);
     const streamName = `KV_${this.#name}`;
     return this.#client
       .getJetstreamManager()

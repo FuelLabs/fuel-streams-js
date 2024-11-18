@@ -1,18 +1,11 @@
 import chalk from 'chalk';
-import { Address } from 'fuels';
-import {
-  Client,
-  ClientOpts,
-  DeliverPolicy,
-  InputStream,
-  InputsCoinSubject,
-} from '../../src';
+import { Client, ClientOpts, InputStream, InputsCoinSubject } from '../../src';
 import { handleUnhandledError, printHeader } from '../helpers';
 
 async function main() {
   printHeader('Filtered Input Streams Example');
 
-  const opts = new ClientOpts('testnet');
+  const opts = new ClientOpts();
   const client = await Client.connect(opts);
   const stream = await InputStream.init(client);
 
@@ -23,7 +16,6 @@ async function main() {
 
   const consumer = await stream.subscribeConsumer({
     filterSubjects: [filteredSubject],
-    deliverPolicy: DeliverPolicy.New,
   });
 
   const iter = await consumer.consume({ max_messages: 10 });
