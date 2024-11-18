@@ -5,7 +5,7 @@ import { handleUnhandledError, printHeader } from '../helpers';
 async function main() {
   printHeader('Log Streams Example');
 
-  const opts = new ClientOpts('testnet');
+  const opts = new ClientOpts();
   const client = await Client.connect(opts);
   const stream = await LogStream.init(client);
   const subscription = await stream.subscribe(LogsSubject.all());

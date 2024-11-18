@@ -1,5 +1,7 @@
 import chalk from 'chalk';
 
+export const NATS_URL_TESTNET = 'nats://stream-testnet.fuel.network:4222';
+
 export function printHeader(title: string) {
   const header = '='.repeat(process.stdout.columns - 1);
   console.log(header);

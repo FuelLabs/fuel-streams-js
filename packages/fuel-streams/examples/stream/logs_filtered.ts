@@ -1,17 +1,11 @@
 import chalk from 'chalk';
-import {
-  Client,
-  ClientOpts,
-  DeliverPolicy,
-  LogStream,
-  LogsSubject,
-} from '../../src';
+import { Client, ClientOpts, LogStream, LogsSubject } from '../../src';
 import { handleUnhandledError, printHeader } from '../helpers';
 
 async function main() {
   printHeader('Filtered Log Streams Example');
 
-  const opts = new ClientOpts('testnet');
+  const opts = new ClientOpts();
   const client = await Client.connect(opts);
   const stream = await LogStream.init(client);
 
@@ -22,7 +16,6 @@ async function main() {
 
   const consumer = await stream.subscribeConsumer({
     filterSubjects: [filteredSubject],
-    deliverPolicy: DeliverPolicy.New,
   });
 
   const iter = await consumer.consume({ max_messages: 10 });
