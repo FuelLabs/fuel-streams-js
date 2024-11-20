@@ -8,7 +8,7 @@ async function main() {
   const opts = new ClientOpts();
   const client = await Client.connect(opts);
   const stream = await BlockStream.init(client);
-  const subscription = await stream.subscribe(BlocksSubject.all());
+  const subscription = await stream.subscribeWithSubject(BlocksSubject.all());
 
   for await (const msg of subscription) {
     console.log(chalk.blue(`Received block message: ${msg.key}`));

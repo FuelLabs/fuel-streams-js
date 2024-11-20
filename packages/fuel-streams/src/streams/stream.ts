@@ -8,7 +8,8 @@ import {
   type ConsumerInfo,
   DeliverPolicy,
 } from '@nats-io/jetstream';
-import type { KV, KvWatchOptions } from '@nats-io/kv';
+import type { KV, KvEntry, KvWatchOptions } from '@nats-io/kv';
+import type { QueuedIterator } from '@nats-io/nats-core';
 import type { Client } from '../client/natsClient';
 import type { Subject } from '../data';
 import { StreamData } from './streamData';
@@ -88,9 +89,9 @@ export abstract class BaseStreameable<
  * @template S - Type extending {@link Streameable}<GenericRecord>
  */
 export class StreamFactory<S extends Streameable<GenericRecord>> {
-  stream: Stream<S>;
+  stream!: Stream;
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  private static instance: StreamFactory<any>;
+  private static streams = new Map<string, StreamFactory<any>>();
   private constructor(readonly bucketName: string) {}
 
   /**
@@ -102,10 +103,10 @@ export class StreamFactory<S extends Streameable<GenericRecord>> {
   public static get<S extends Streameable<GenericRecord>>(
     name: string,
   ): StreamFactory<S> {
-    if (!StreamFactory.instance) {
-      StreamFactory.instance = new StreamFactory<S>(name);
+    if (!StreamFactory.streams.has(name)) {
+      StreamFactory.streams.set(name, new StreamFactory<S>(name));
     }
-    return StreamFactory.instance as StreamFactory<S>;
+    return StreamFactory.streams.get(name) as StreamFactory<S>;
   }
 
   /**
@@ -114,7 +115,10 @@ export class StreamFactory<S extends Streameable<GenericRecord>> {
    * @returns The initialized stream
    */
   async init(client: Client) {
-    this.stream = await Stream.create<S>(client, this.bucketName);
+    if (!this.stream) {
+      console.log(`Creating stream for ${this.bucketName}`);
+      this.stream = await Stream.create<S>(client, this.bucketName);
+    }
     return this.stream;
   }
 }
@@ -133,7 +137,7 @@ export interface SubscribeConsumerConfig {
  * Class representing a stream.
  * @template _T - Type extending {@link Streameable}<GenericRecord>
  */
-export class Stream<_T extends Streameable<GenericRecord>> {
+export class Stream {
   #store: KV;
   #client: Client;
   #name: string;
@@ -217,8 +221,13 @@ export class Stream<_T extends Streameable<GenericRecord>> {
    * @param {S} subject - The subject to subscribe to
    * @returns An async iterable of KV entries
    */
-  async subscribe<S extends Subject>(subject: S) {
+  async subscribeWithSubject<S extends Subject>(subject: S) {
     const kvOpts = { key: subject.parse() } as KvWatchOptions;
+    return this.#store.watch(kvOpts);
+  }
+
+  async subscribe(subject: string) {
+    const kvOpts = { key: subject } as KvWatchOptions;
     return this.#store.watch(kvOpts);
   }
 
@@ -265,3 +274,6 @@ export class Stream<_T extends Streameable<GenericRecord>> {
     return this.#client.closeSafely();
   }
 }
+
+export type Subscription = QueuedIterator<KvEntry>;
+export type SubscriptionIterator = AsyncIterator<KvEntry>;

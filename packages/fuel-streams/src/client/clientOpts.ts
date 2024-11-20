@@ -148,12 +148,13 @@ export class ClientOpts {
       servers: this.url,
       timeout: this.timeoutSecs * 1000,
       authenticator,
-      maxReconnectAttempts: 3,
+      maxReconnectAttempts: 0,
+      reconnect: false,
     } as ConnectionOptions;
   }
 
   get url() {
     // TODO: this should be dynamic in the future
-    return 'nats://stream-testnet.fuel.network:4222';
+    return 'ws://stream-testnet.fuel.network:8080';
   }
 }

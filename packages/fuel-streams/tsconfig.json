@@ -1,9 +1,10 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
+    "tsBuildInfoFile": "./dist/.tsbuildinfo",
     "outDir": "./dist",
     "baseUrl": ".",
-    "lib": ["ES2015"]
+    "incremental": true
   },
   "exclude": ["dist"]
 }

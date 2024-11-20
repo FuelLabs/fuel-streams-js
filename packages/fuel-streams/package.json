@@ -1,14 +1,23 @@
 {
   "name": "@fuels/streams",
   "version": "0.0.1",
-  "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
-  "types": "./dist/index.d.ts",
+  "private": true,
+  "main": "./src/index.ts",
   "exports": {
-    ".": {
-      "require": "./dist/index.js",
-      "import": "./dist/index.mjs",
-      "types": "./dist/index.d.ts"
+    ".": "./src/index.ts"
+  },
+  "publishConfig": {
+    "private": false,
+    "main": "./dist/index.js",
+    "module": "./dist/index.mjs",
+    "types": "./dist/index.d.ts",
+    "exports": {
+      ".": {
+        "import": "./dist/index.mjs",
+        "require": "./dist/index.js",
+        "default": "./dist/index.js",
+        "types": "./dist/index.d.ts"
+      }
     }
   },
   "files": ["dist"],
@@ -28,19 +37,14 @@
     "terser": "5.31.0",
     "tsup": "8.0.2",
     "typescript": "5.4.5",
+    "chalk": "^4.1.0",
     "vitest": "~2.1.1"
   },
   "dependencies": {
-    "@nats-io/jetstream": "3.0.0-10",
-    "@nats-io/kv": "3.0.0-8",
-    "@nats-io/nats-core": "3.0.0-27",
-    "@nats-io/nuid": "2.0.1-2",
-    "@nats-io/obj": "3.0.0-6",
-    "@nats-io/transport-node": "3.0.0-12",
-    "chalk": "^4.1.0",
-    "dotenv": "^16.0.3",
-    "fuels": "^0.94.8",
-    "msgpackr": "1.11.0",
-    "pako": "2.1.0"
+    "@nats-io/jetstream": "3.0.0-29",
+    "@nats-io/kv": "3.0.0-23",
+    "@nats-io/nats-core": "3.0.0-42",
+    "@nats-io/transport-node": "3.0.0-26",
+    "fuels": "^0.94.8"
   }
 }
