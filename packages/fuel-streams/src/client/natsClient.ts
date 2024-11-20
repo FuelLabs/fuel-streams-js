@@ -5,7 +5,6 @@
  * @module fuel-streams/client
  */
 
-import 'dotenv/config';
 import {
   type JetStreamClient,
   type JetStreamManager,
@@ -14,12 +13,10 @@ import {
   jetstreamManager,
 } from '@nats-io/jetstream';
 import { type KV, type KvOptions, Kvm } from '@nats-io/kv';
-import { DebugEvents, Events, type NatsConnection } from '@nats-io/nats-core';
+import type { NatsConnection, Status } from '@nats-io/nats-core';
 import { wsconnect } from '@nats-io/transport-node';
 import { ClientStatus } from '../constants';
 import type { ClientOpts } from './clientOpts';
-
-globalThis.WebSocket = require('websocket').w3cwebsocket;
 
 /**
  * Callback function type for status stream updates
@@ -28,25 +25,26 @@ globalThis.WebSocket = require('websocket').w3cwebsocket;
  * @returns
  */
 export type StatusStreamCallback = (status: ClientStatus) => void;
+export { ClientStatus };
 
 /**
  * Maps NATS events to ClientStatus
  * @param {Events | DebugEvents} status - The NATS event
  * @returns The corresponding ClientStatus
  */
-const mapEventStatus = (status: Events | DebugEvents) => {
+const mapEventStatus = (status: Status['type']) => {
   switch (status) {
-    case Events.Disconnect:
+    case 'disconnect':
       return ClientStatus.Disconnected;
-    case Events.Reconnect:
+    case 'reconnect':
       return ClientStatus.Connected;
-    case Events.Error:
+    case 'error':
       return ClientStatus.Errored;
-    case DebugEvents.Reconnecting:
+    case 'reconnecting':
       return ClientStatus.Reconnecting;
-    case DebugEvents.ClientInitiatedReconnect:
+    case 'forceReconnect':
       return ClientStatus.Reconnecting;
-    case DebugEvents.StaleConnection:
+    case 'staleConnection':
       return ClientStatus.Stale;
     default:
       return ClientStatus.Connected;
@@ -117,17 +115,34 @@ export class Client implements NatsClient {
   /** @property {Kvm | undefined} kvm - The Key-Value manager */
   private kvm?: Kvm;
 
+  /** @property {Client | undefined} instance - The singleton instance */
+  private static instance?: Client;
+
   private constructor() {}
 
   /**
-   * Creates and connects a new Client instance
+   * Creates and connects a new Client instance, or returns existing instance
    * @param {ClientOpts} opts - The client options
    * @returns A promise that resolves to the connected Client instance
    */
   static async connect(opts: ClientOpts) {
-    const client = new Client();
-    await client.start(opts);
-    return client;
+    if (!Client.instance) {
+      Client.instance = new Client();
+      await Client.instance.start(opts);
+    }
+    return Client.instance;
+  }
+
+  /**
+   * Gets the current instance of the Client
+   * @returns The Client instance
+   * @throws {Error} If client is not initialized
+   */
+  static getInstance(): Client {
+    if (!Client.instance) {
+      throw new Error('Client not initialized. Call connect() first.');
+    }
+    return Client.instance;
   }
 
   /**
@@ -186,11 +201,25 @@ export class Client implements NatsClient {
     if (!this.natsConnection) {
       throw new Error('Nats client is not set.');
     }
-    if (this.isConnectionClosing()) {
+
+    try {
+      if (this.isConnectionClosing()) {
+        return true;
+      }
+
+      await this.natsConnection.drain();
+      await this.natsConnection.close();
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
       return true;
+    } catch (error) {
+      console.error('Error while closing NATS connection:', error);
+      // Force close if graceful shutdown fails
+      if (this.natsConnection && !this.natsConnection.isClosed()) {
+        await this.natsConnection.close();
+      }
+      return false;
     }
-    await this.natsConnection.drain();
-    return this.natsConnection.isClosed();
   }
 
   /**
@@ -199,9 +228,9 @@ export class Client implements NatsClient {
    */
   isConnectionClosing() {
     return (
-      this.natsConnection?.isClosed() ||
-      this.natsConnection?.isDraining() ||
-      false
+      !this.natsConnection ||
+      this.natsConnection.isClosed() ||
+      this.natsConnection.isDraining()
     );
   }
 

@@ -8,7 +8,7 @@ async function main() {
   const opts = new ClientOpts();
   const client = await Client.connect(opts);
   const stream = await OutputStream.init(client);
-  const subscription = await stream.subscribe(OutputsSubject.all());
+  const subscription = await stream.subscribeWithSubject(OutputsSubject.all());
 
   for await (const msg of subscription) {
     console.log(chalk.blue(`Received output message: ${msg.key}`));

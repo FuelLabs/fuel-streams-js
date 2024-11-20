@@ -148,7 +148,8 @@ export class ClientOpts {
       servers: this.url,
       timeout: this.timeoutSecs * 1000,
       authenticator,
-      maxReconnectAttempts: 3,
+      maxReconnectAttempts: 0,
+      reconnect: false,
     } as ConnectionOptions;
   }
 

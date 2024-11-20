@@ -22,6 +22,9 @@
       },
       "suspicious": {
         "noAsyncPromiseExecutor": "off"
+      },
+      "style": {
+        "noNonNullAssertion": "off"
       }
     }
   },
