@@ -36,7 +36,7 @@ export function StreamView() {
   return (
     <Card className={cardStyles({ type: 'stream' })}>
       <CardHeader layout="row" className="h-20 border-b">
-        <div>
+        <div className="flex-1">
           <CardTitle className="text-lg">Stream Data</CardTitle>
           <CardDescription className="text-sm text-muted-foreground">
             Real-time data stream output will appear here

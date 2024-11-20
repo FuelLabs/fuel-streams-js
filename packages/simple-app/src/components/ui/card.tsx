@@ -8,7 +8,7 @@ const cardHeaderVariants = cva('p-6', {
   variants: {
     layout: {
       default: 'flex flex-col space-y-1.5',
-      row: 'flex justify-between items-center',
+      row: 'flex gap-6 items-center',
     },
   },
   defaultVariants: {
