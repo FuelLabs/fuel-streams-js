@@ -15,9 +15,11 @@ import {
 } from '@nats-io/jetstream';
 import { type KV, type KvOptions, Kvm } from '@nats-io/kv';
 import { DebugEvents, Events, type NatsConnection } from '@nats-io/nats-core';
-import { connect } from '@nats-io/transport-node';
+import { wsconnect } from '@nats-io/transport-node';
 import { ClientStatus } from '../constants';
 import type { ClientOpts } from './clientOpts';
+
+globalThis.WebSocket = require('websocket').w3cwebsocket;
 
 /**
  * Callback function type for status stream updates
@@ -132,7 +134,7 @@ export class Client implements NatsClient {
    * @inheritdoc
    */
   async start(opts: ClientOpts) {
-    const nc = await connect(opts.connectOpts());
+    const nc = await wsconnect(opts.connectOpts());
     console.info(`Successfully connected to ${nc.getServer()} !`);
     this.jetstreamManager = await jetstreamManager(nc);
     this.jetstream = jetstream(nc, {

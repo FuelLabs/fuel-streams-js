@@ -154,6 +154,6 @@ export class ClientOpts {
 
   get url() {
     // TODO: this should be dynamic in the future
-    return 'nats://stream-testnet.fuel.network:4222';
+    return 'ws://stream-testnet.fuel.network:8080';
   }
 }
