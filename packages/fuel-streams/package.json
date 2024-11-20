@@ -26,6 +26,7 @@
     "example:blocks_filtered": "tsx ./examples/stream/blocks_filtered.ts",
     "example:transactions": "tsx ./examples/stream/transactions.ts",
     "example:transactions_filtered": "tsx ./examples/stream/transactions_filtered.ts",
+    "example:ws": "tsx ./examples/stream/ws.ts",
     "build": "tsup",
     "build:watch": "tsup --watch",
     "ts:check": "tsc --noEmit",

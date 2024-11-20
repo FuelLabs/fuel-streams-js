@@ -134,7 +134,7 @@ function DataVisualization() {
                           }
                           displayDataTypes={false}
                           src={item.payload as object}
-                          style={{ padding: 0 }}
+                          style={{ padding: 0, background: 'transparent' }}
                         />
                       </CardContent>
                     </Card>

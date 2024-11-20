@@ -25,11 +25,11 @@ importers:
         specifier: 2.27.1
         version: 2.27.1
       '@fuels/ts-config':
-        specifier: 0.23.0
-        version: 0.23.0(typescript@5.6.2)
+        specifier: 0.25.1
+        version: 0.25.1(typescript@5.6.2)
       '@fuels/tsup-config':
-        specifier: 0.23.0
-        version: 0.23.0(tsup@8.0.2(@microsoft/api-extractor@7.43.0(@types/node@22.7.4))(postcss@8.4.49)(ts-node@10.9.2(@types/node@22.7.4)(typescript@5.6.2))(typescript@5.6.2))
+        specifier: 0.25.1
+        version: 0.25.1(tsup@8.0.2(@microsoft/api-extractor@7.43.0(@types/node@22.7.4))(postcss@8.4.49)(ts-node@10.9.2(@types/node@22.7.4)(typescript@5.6.2))(typescript@5.6.2))
       '@types/node':
         specifier: ^22.5.5
         version: 22.7.4
@@ -1272,13 +1272,13 @@ packages:
     engines: {node: ^18.20.3 || ^20.0.0 || ^22.0.0}
     hasBin: true
 
-  '@fuels/ts-config@0.23.0':
-    resolution: {integrity: sha512-9wfQTBKZSuF+8mByCLOVK7vpT56+kxcuzVLUl1unYGAtm0vWJhX0OPjkM2G9H6ZeUG2EJXoZzY8GGqZNjRjv8A==}
+  '@fuels/ts-config@0.25.1':
+    resolution: {integrity: sha512-E8q8P/2eaqM6hWP8jUUsXZEFQKAqiUVYBpGRzzZcGouCZSpnr4ljYlpp+9VG0EZnoz5b3IBaY+5JMY1D/gquSw==}
     peerDependencies:
       typescript: 5.2.2
 
-  '@fuels/tsup-config@0.23.0':
-    resolution: {integrity: sha512-E7d3bnBQe0qemxgh6aBmHth6yCXA+KvgRFq2BcADaIIyNPtMg+FHNMii4bGULQ/JAB0y8yY6QFeDnzYj5uOi5g==}
+  '@fuels/tsup-config@0.25.1':
+    resolution: {integrity: sha512-szTCX5TkW37xxsI39fzlXml7t1rgSRvQSW4sZ5/lejAGvlAWYDfaUFGSRD9X+DA+y6HKueHOi8mg9vtR4JWY9A==}
     peerDependencies:
       tsup: ^7.2.0
 
@@ -1288,7 +1288,7 @@ packages:
   '@graphql-typed-document-node/core@3.2.0':
     resolution: {integrity: sha512-mB9oAsNCm9aM3/SOv4YtBMqZbYj10R7dkq8byBqxGY/ncFwhf2oQzMV+LCRlWoDSEBJ3COiR1yeDvMtsoOsuFQ==}
     peerDependencies:
-      graphql: '>=16.8.1'
+      graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
 
   '@humanfs/core@0.19.1':
     resolution: {integrity: sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA==}
@@ -5725,11 +5725,11 @@ snapshots:
       chalk: 4.1.2
       cli-table: 0.3.11
 
-  '@fuels/ts-config@0.23.0(typescript@5.6.2)':
+  '@fuels/ts-config@0.25.1(typescript@5.6.2)':
     dependencies:
       typescript: 5.6.2
 
-  '@fuels/tsup-config@0.23.0(tsup@8.0.2(@microsoft/api-extractor@7.43.0(@types/node@22.7.4))(postcss@8.4.49)(ts-node@10.9.2(@types/node@22.7.4)(typescript@5.6.2))(typescript@5.6.2))':
+  '@fuels/tsup-config@0.25.1(tsup@8.0.2(@microsoft/api-extractor@7.43.0(@types/node@22.7.4))(postcss@8.4.49)(ts-node@10.9.2(@types/node@22.7.4)(typescript@5.6.2))(typescript@5.6.2))':
     dependencies:
       dotenv: 16.4.5
       react: 18.3.1
