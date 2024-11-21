@@ -23,6 +23,9 @@ jobs:
         with:
           # need this to get full git-history/clone in order to build changelogs and check changesets
           fetch-depth: 0
+          # workaround to ensure force pushes to changeset branch use REPO_TOKEN owner's account
+          # see https://github.com/changesets/action/issues/70
+          persist-credentials: false
 
       - uses: FuelLabs/github-actions/setups/node@master
         with:
@@ -47,11 +50,11 @@ jobs:
           git config --global user.email "${{ github.actor }}@users.noreply.github.com"
 
       - name: Build Lib
-        run: pnpm build
+        run: pnpm build:libs
 
       - name: Create Release Pull Request or Publish to NPM
         id: changesets
-        uses: FuelLabs/changesets-action@main
+        uses: FuelLabs/changesets-action@v2.0.0
         with:
           publish: pnpm changeset publish --tag next
           commit: "ci(changesets): versioning packages"
@@ -60,15 +63,5 @@ jobs:
           githubReleaseName: v${{ env.BUILD_VERSION }}
           githubTagName: v${{ env.BUILD_VERSION }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.REPO_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Release to @main tag
-        if: steps.changesets.outputs.published != 'true'
-        run: |
-          git checkout main
-          pnpm changeset version --snapshot main
-          pnpm changeset publish --tag main
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
