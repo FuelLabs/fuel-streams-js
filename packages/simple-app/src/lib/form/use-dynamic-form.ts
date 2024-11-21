@@ -183,8 +183,6 @@ export function useDynamicForm() {
     actor.send({ type: 'CHANGE.FIELD', fieldName, value });
   };
 
-  console.log(actor.getSnapshot().context);
-
   return {
     selectedModule,
     selectedVariant,

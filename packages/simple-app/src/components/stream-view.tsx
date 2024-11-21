@@ -16,12 +16,13 @@ import { cardStyles } from '@/styles/card-styles';
 import ReactJsonView from '@microlink/react-json-view';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Code, Database, Eraser } from 'lucide-react';
+import { AlertTriangle, Code, Database, Eraser, Terminal } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { useDynamicForm } from '../lib/form';
 import { useStreamData } from '../lib/stream/use-stream-data';
 import { CodeExamples } from './code-examples';
 import { useTheme } from './theme-provider';
+import { Alert, AlertDescription, AlertTitle } from './ui/alert';
 
 export function StreamView() {
   const { subject } = useDynamicForm();
@@ -77,14 +78,34 @@ function DataVisualization() {
     <CardContent className="pt-6">
       <ScrollArea className="w-full h-[calc(100vh-200px)]" ref={scrollAreaRef}>
         {data.length === 0 ? (
-          <div
-            className={`flex items-center justify-center text-muted-foreground ${
-              subject ? 'h-[calc(100vh-350px)]' : 'h-[calc(100vh-250px)]'
-            }`}
-          >
-            No stream data available. Click "Start Listening" to begin receiving
-            data.
-          </div>
+          <>
+            {window.location.protocol === 'https:' && (
+              <Alert className="col-span-5" variant="warning">
+                <AlertTriangle className="h-4 w-4" />
+                <AlertDescription className="flex items-center gap-1">
+                  This demo requires accessing an insecure WebSocket endpoint.
+                </AlertDescription>
+                <AlertDescription>
+                  Please use
+                  <a
+                    href={window.location.href.replace('https:', 'http:')}
+                    className="px-1 underline"
+                  >
+                    HTTP version
+                  </a>
+                  temporarily.
+                </AlertDescription>
+              </Alert>
+            )}
+            <div
+              className={`flex items-center justify-center text-muted-foreground ${
+                subject ? 'h-[calc(100vh-350px)]' : 'h-[calc(100vh-250px)]'
+              }`}
+            >
+              No stream data available. Click "Start Listening" to begin
+              receiving data.
+            </div>
+          </>
         ) : (
           <>
             <div className="flex flex-col gap-4">

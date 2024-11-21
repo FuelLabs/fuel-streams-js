@@ -154,7 +154,11 @@ export class ClientOpts {
   }
 
   get url() {
-    // TODO: this should be dynamic in the future
+    if (process.env.NODE_ENV === 'production') {
+      console.warn(
+        'Warning: Using insecure WebSocket connection. This is not recommended for production.',
+      );
+    }
     return 'ws://stream-testnet.fuel.network:8080';
   }
 }

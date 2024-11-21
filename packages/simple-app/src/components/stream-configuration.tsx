@@ -66,7 +66,7 @@ export function StreamConfiguration() {
           </svg>
         </div>
         <div>
-          <CardTitle>Stream Configuration</CardTitle>
+          <CardTitle className="mb-1">Stream Configuration</CardTitle>
           <CardDescription>
             Configure your stream settings and parameters below
           </CardDescription>
