@@ -159,6 +159,6 @@ export class ClientOpts {
         'Warning: Using insecure WebSocket connection. This is not recommended for production.',
       );
     }
-    return 'ws://stream-testnet.fuel.network:8080';
+    return 'wss://stream-testnet.fuel.network:8443';
   }
 }

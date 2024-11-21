@@ -13,7 +13,7 @@ async function main() {
 
   // create a connection
   const nc = await wsconnect({
-    servers: ['ws://stream-testnet.fuel.network:8080'],
+    servers: ['wss://stream-testnet.fuel.network:8080'],
     timeout: 10 * 1000,
     maxReconnectAttempts: 3,
   } as ConnectionOptions);

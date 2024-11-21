@@ -69,7 +69,7 @@ main().catch(console.error);`,
 
 async function main() {
   const nc = await connect({
-    servers: 'ws://stream-testnet.fuel.network:4222'
+    servers: 'wss://stream-testnet.fuel.network:4222'
   });
 
   const sub = nc.subscribe('${subject}');
@@ -95,7 +95,7 @@ nats kv watch "fuel_${selectedModule}" "${subject}" \\
 # cargo install websocat
 
 # Connect and subscribe to the KV store
-websocat ws://stream-testnet.fuel.network:8080 --jsonrpc -n \\
+websocat wss://stream-testnet.fuel.network:8080 --jsonrpc -n \\
   -H="Authorization: Basic $(echo -n 'default_user:' | base64)" \\
   -1 '{"type":"kv_watch","bucket":"fuel_${selectedModule}","key":"${subject}"}' \\
   --ping-interval 30`,
@@ -122,7 +122,7 @@ export function CodeExamples() {
           <TabsTrigger value="nats-cli">NATS CLI</TabsTrigger>
           <TabsTrigger value="websocket">Simple Websocket</TabsTrigger>
         </TabsList>
-        <TabsContent value="fuel">
+        <TabsContent value="fuel" className="text-sm">
           <SyntaxHighlighter
             language="typescript"
             style={codeTheme}
