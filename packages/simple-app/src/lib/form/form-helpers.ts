@@ -38,7 +38,7 @@ export class FormFieldsManager {
     const mod = this.getModule(selectedModule);
 
     if (!this.hasVariants(mod)) {
-      return 'fields' in mod ? fieldsToArray(mod.fields) : [];
+      return 'fields' in mod ? fieldsToArray(mod.fields as Fields) : [];
     }
 
     if (!selectedVariant) return [];
