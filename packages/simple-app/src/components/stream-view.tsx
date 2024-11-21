@@ -16,13 +16,13 @@ import { cardStyles } from '@/styles/card-styles';
 import ReactJsonView from '@microlink/react-json-view';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
 import { AnimatePresence, motion } from 'framer-motion';
-import { AlertTriangle, Code, Database, Eraser, Terminal } from 'lucide-react';
+import { AlertTriangle, Code, Database, Eraser } from 'lucide-react';
 import { useRef, useState } from 'react';
 import { useDynamicForm } from '../lib/form';
 import { useStreamData } from '../lib/stream/use-stream-data';
 import { CodeExamples } from './code-examples';
 import { useTheme } from './theme-provider';
-import { Alert, AlertDescription, AlertTitle } from './ui/alert';
+import { Alert, AlertDescription } from './ui/alert';
 
 export function StreamView() {
   const { subject } = useDynamicForm();
