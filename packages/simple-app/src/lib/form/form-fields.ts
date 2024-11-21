@@ -1,94 +1,127 @@
+const byIdFields = {
+  tx_id: {
+    type: 'B256',
+  },
+  index: {
+    type: 'u8',
+  },
+  id_kind: {
+    type: 'IdentifierKind',
+    options: [
+      { value: 'address', label: 'Address' },
+      { value: 'contract_id', label: 'Contract ID' },
+      { value: 'asset_id', label: 'Asset ID' },
+      { value: 'predicate_id', label: 'Predicate ID' },
+      { value: 'script_id', label: 'Script ID' },
+    ],
+  },
+  id_value: {
+    type: 'B256',
+  },
+} as const;
+
+export const transactionKindOptions = [
+  { value: 'create', label: 'Create' },
+  { value: 'mint', label: 'Mint' },
+  { value: 'script', label: 'Script' },
+  { value: 'upgrade', label: 'Upgrade' },
+  { value: 'upload', label: 'Upload' },
+  { value: 'blob', label: 'Blob' },
+] as const;
+
+export const transactionStatusOptions = [
+  { value: 'failed', label: 'Failed' },
+  { value: 'submitted', label: 'Submitted' },
+  { value: 'squeezed_out', label: 'Squeezed Out' },
+  { value: 'success', label: 'Success' },
+] as const;
+
+export const utxoTypeOptions = [
+  { value: 'contract', label: 'Contract' },
+  { value: 'coin', label: 'Coin' },
+  { value: 'message', label: 'Message' },
+] as const;
+
 export const formStructure = {
   blocks: {
     name: 'Blocks',
     subject: 'BlocksSubject',
+    format: 'blocks.{producer}.{height}',
+    wildcard: 'blocks.>',
     fields: {
       producer: {
         type: 'Address',
-        optional: true,
       },
       height: {
         type: 'BlockHeight',
-        optional: true,
       },
     },
   },
   inputs: {
     name: 'Inputs',
-    byId: {
-      name: 'By ID',
-      subject: 'InputsByIdSubject',
-      fields: {
-        id_kind: {
-          type: 'IdentifierKind',
-          optional: true,
-        },
-        id_value: {
-          type: 'B256',
-          optional: true,
-        },
-      },
-    },
+    wildcard: 'inputs.>',
     variants: {
+      byId: {
+        name: 'By ID',
+        subject: 'InputsByIdSubject',
+        format: 'by_id.inputs.{tx_id}.{index}.{id_kind}.{id_value}',
+        wildcard: 'by_id.inputs.>',
+        fields: byIdFields,
+      },
       coin: {
         name: 'Coin Input',
         subject: 'InputsCoinSubject',
+        format: 'inputs.{tx_id}.{index}.coin.{owner}.{asset_id}',
+        wildcard: 'inputs.*.*.coin.*.*',
         fields: {
           tx_id: {
             type: 'B256',
-            optional: true,
           },
           index: {
             type: 'usize',
-            optional: true,
           },
           owner: {
             type: 'Address',
-            optional: true,
           },
           asset_id: {
             type: 'AssetId',
-            optional: true,
           },
         },
       },
       contract: {
         name: 'Contract Input',
         subject: 'InputsContractSubject',
+        format: 'inputs.{tx_id}.{index}.contract.{contract_id}',
+        wildcard: 'inputs.*.*.contract.*',
         fields: {
           tx_id: {
             type: 'B256',
-            optional: true,
           },
           index: {
             type: 'usize',
-            optional: true,
           },
           contract_id: {
             type: 'ContractId',
-            optional: true,
           },
         },
       },
       message: {
         name: 'Message Input',
         subject: 'InputsMessageSubject',
+        format: 'inputs.{tx_id}.{index}.message.{sender}.{recipient}',
+        wildcard: 'inputs.*.*.message.*.*',
         fields: {
           tx_id: {
             type: 'B256',
-            optional: true,
           },
           index: {
             type: 'usize',
-            optional: true,
           },
           sender: {
             type: 'Address',
-            optional: true,
           },
           recipient: {
             type: 'Address',
-            optional: true,
           },
         },
       },
@@ -96,120 +129,106 @@ export const formStructure = {
   },
   outputs: {
     name: 'Outputs',
-    byId: {
-      name: 'By ID',
-      subject: 'OutputsByIdSubject',
-      fields: {
-        id_kind: {
-          type: 'IdentifierKind',
-          optional: true,
-        },
-        id_value: {
-          type: 'B256',
-          optional: true,
-        },
-      },
-    },
+    wildcard: 'outputs.>',
     variants: {
+      byId: {
+        name: 'By ID',
+        subject: 'OutputsByIdSubject',
+        format: 'by_id.outputs.{tx_id}.{index}.{id_kind}.{id_value}',
+        wildcard: 'by_id.outputs.>',
+        fields: byIdFields,
+      },
       coin: {
         name: 'Coin Output',
         subject: 'OutputsCoinSubject',
+        format: 'outputs.coin.{tx_id}.{index}.{to}.{asset_id}',
+        wildcard: 'outputs.coin.>',
         fields: {
           tx_id: {
             type: 'B256',
-            optional: true,
           },
           index: {
             type: 'u16',
-            optional: true,
           },
           to: {
             type: 'Address',
-            optional: true,
           },
           asset_id: {
             type: 'AssetId',
-            optional: true,
           },
         },
       },
       contract: {
         name: 'Contract Output',
         subject: 'OutputsContractSubject',
+        format: 'outputs.contract.{tx_id}.{index}.{contract_id}',
+        wildcard: 'outputs.contract.>',
         fields: {
           tx_id: {
             type: 'B256',
-            optional: true,
           },
           index: {
             type: 'u16',
-            optional: true,
           },
           contract_id: {
             type: 'ContractId',
-            optional: true,
           },
         },
       },
       change: {
         name: 'Change Output',
         subject: 'OutputsChangeSubject',
+        format: 'outputs.change.{tx_id}.{index}.{to}.{asset_id}',
+        wildcard: 'outputs.change.>',
         fields: {
           tx_id: {
             type: 'B256',
-            optional: true,
           },
           index: {
             type: 'u16',
-            optional: true,
           },
           to: {
             type: 'Address',
-            optional: true,
           },
           asset_id: {
             type: 'AssetId',
-            optional: true,
           },
         },
       },
       variable: {
         name: 'Variable Output',
         subject: 'OutputsVariableSubject',
+        format: 'outputs.variable.{tx_id}.{index}.{to}.{asset_id}',
+        wildcard: 'outputs.variable.>',
         fields: {
           tx_id: {
             type: 'B256',
-            optional: true,
           },
           index: {
             type: 'u16',
-            optional: true,
           },
           to: {
             type: 'Address',
-            optional: true,
           },
           asset_id: {
             type: 'AssetId',
-            optional: true,
           },
         },
       },
       contractCreated: {
         name: 'Contract Created Output',
         subject: 'OutputsContractCreatedSubject',
+        format: 'outputs.contract_created.{tx_id}.{index}.{contract_id}',
+        wildcard: 'outputs.contract_created.>',
         fields: {
           tx_id: {
             type: 'B256',
-            optional: true,
           },
           index: {
             type: 'u16',
-            optional: true,
           },
           contract_id: {
             type: 'ContractId',
-            optional: true,
           },
         },
       },
@@ -217,284 +236,257 @@ export const formStructure = {
   },
   receipts: {
     name: 'Receipts',
-    byId: {
-      name: 'By ID',
-      subject: 'ReceiptsByIdSubject',
-      fields: {
-        id_kind: {
-          type: 'IdentifierKind',
-          optional: true,
-        },
-        id_value: {
-          type: 'B256',
-          optional: true,
-        },
-      },
-    },
+    wildcard: 'receipts.>',
     variants: {
+      byId: {
+        name: 'By ID',
+        subject: 'ReceiptsByIdSubject',
+        format: 'by_id.receipts.{tx_id}.{index}.{id_kind}.{id_value}',
+        wildcard: 'by_id.receipts.>',
+        fields: byIdFields,
+      },
       call: {
         name: 'Call Receipt',
         subject: 'ReceiptsCallSubject',
+        format: 'receipts.{tx_id}.{index}.call.{from}.{to}.{asset_id}',
+        wildcard: 'receipts.*.*.call.*.*.*',
         fields: {
           tx_id: {
             type: 'B256',
-            optional: true,
           },
           index: {
             type: 'usize',
-            optional: true,
           },
           from: {
             type: 'ContractId',
-            optional: true,
           },
           to: {
             type: 'ContractId',
-            optional: true,
           },
           asset_id: {
             type: 'AssetId',
-            optional: true,
           },
         },
       },
       return: {
         name: 'Return Receipt',
         subject: 'ReceiptsReturnSubject',
+        format: 'receipts.{tx_id}.{index}.return.{id}',
+        wildcard: 'receipts.*.*.return.*',
         fields: {
           tx_id: {
             type: 'B256',
-            optional: true,
           },
           index: {
             type: 'usize',
-            optional: true,
           },
           id: {
             type: 'ContractId',
-            optional: true,
           },
         },
       },
       returnData: {
         name: 'Return Data Receipt',
         subject: 'ReceiptsReturnDataSubject',
+        format: 'receipts.{tx_id}.{index}.return_data.{id}',
+        wildcard: 'receipts.*.*.return_data.*',
         fields: {
           tx_id: {
             type: 'B256',
-            optional: true,
           },
           index: {
             type: 'usize',
-            optional: true,
           },
           id: {
             type: 'ContractId',
-            optional: true,
           },
         },
       },
       panic: {
         name: 'Panic Receipt',
         subject: 'ReceiptsPanicSubject',
+        format: 'receipts.{tx_id}.{index}.panic.{id}',
+        wildcard: 'receipts.*.*.panic.*',
         fields: {
           tx_id: {
             type: 'B256',
-            optional: true,
           },
           index: {
             type: 'usize',
-            optional: true,
           },
           id: {
             type: 'ContractId',
-            optional: true,
           },
         },
       },
       revert: {
         name: 'Revert Receipt',
         subject: 'ReceiptsRevertSubject',
+        format: 'receipts.{tx_id}.{index}.revert.{id}',
+        wildcard: 'receipts.*.*.revert.*',
         fields: {
           tx_id: {
             type: 'B256',
-            optional: true,
           },
           index: {
             type: 'usize',
-            optional: true,
           },
           id: {
             type: 'ContractId',
-            optional: true,
           },
         },
       },
       log: {
         name: 'Log Receipt',
         subject: 'ReceiptsLogSubject',
+        format: 'receipts.{tx_id}.{index}.log.{id}',
+        wildcard: 'receipts.*.*.log.*',
         fields: {
           tx_id: {
             type: 'B256',
-            optional: true,
           },
           index: {
             type: 'usize',
-            optional: true,
           },
           id: {
             type: 'ContractId',
-            optional: true,
           },
         },
       },
       logData: {
         name: 'Log Data Receipt',
         subject: 'ReceiptsLogDataSubject',
+        format: 'receipts.{tx_id}.{index}.log_data.{id}',
+        wildcard: 'receipts.*.*.log_data.*',
         fields: {
           tx_id: {
             type: 'B256',
-            optional: true,
           },
           index: {
             type: 'usize',
-            optional: true,
           },
           id: {
             type: 'ContractId',
-            optional: true,
           },
         },
       },
       transfer: {
         name: 'Transfer Receipt',
         subject: 'ReceiptsTransferSubject',
+        format: 'receipts.{tx_id}.{index}.transfer.{from}.{to}.{asset_id}',
+        wildcard: 'receipts.*.*.transfer.*.*.*',
         fields: {
           tx_id: {
             type: 'B256',
-            optional: true,
           },
           index: {
             type: 'usize',
-            optional: true,
           },
           from: {
             type: 'ContractId',
-            optional: true,
           },
           to: {
             type: 'ContractId',
-            optional: true,
           },
           asset_id: {
             type: 'AssetId',
-            optional: true,
           },
         },
       },
       transferOut: {
         name: 'Transfer Out Receipt',
         subject: 'ReceiptsTransferOutSubject',
+        format: 'receipts.{tx_id}.{index}.transfer_out.{from}.{to}.{asset_id}',
+        wildcard: 'receipts.*.*.transfer_out.*.*.*',
         fields: {
           tx_id: {
             type: 'B256',
-            optional: true,
           },
           index: {
             type: 'usize',
-            optional: true,
           },
           from: {
             type: 'ContractId',
-            optional: true,
           },
           to: {
             type: 'Address',
-            optional: true,
           },
           asset_id: {
             type: 'AssetId',
-            optional: true,
           },
         },
       },
       mint: {
         name: 'Mint Receipt',
         subject: 'ReceiptsMintSubject',
+        format: 'receipts.{tx_id}.{index}.mint.{contract_id}.{sub_id}',
+        wildcard: 'receipts.*.*.mint.*.*',
         fields: {
           tx_id: {
             type: 'B256',
-            optional: true,
           },
           index: {
             type: 'usize',
-            optional: true,
           },
           contract_id: {
             type: 'ContractId',
-            optional: true,
           },
           sub_id: {
             type: 'B256',
-            optional: true,
           },
         },
       },
       burn: {
         name: 'Burn Receipt',
         subject: 'ReceiptsBurnSubject',
+        format: 'receipts.{tx_id}.{index}.burn.{contract_id}.{sub_id}',
+        wildcard: 'receipts.*.*.burn.*.*',
         fields: {
           tx_id: {
             type: 'B256',
-            optional: true,
           },
           index: {
             type: 'usize',
-            optional: true,
           },
           contract_id: {
             type: 'ContractId',
-            optional: true,
           },
           sub_id: {
             type: 'B256',
-            optional: true,
           },
         },
       },
       scriptResult: {
         name: 'Script Result Receipt',
         subject: 'ReceiptsScriptResultSubject',
+        format: 'receipts.{tx_id}.{index}.script_result',
+        wildcard: 'receipts.*.*.script_result',
         fields: {
           tx_id: {
             type: 'B256',
-            optional: true,
           },
           index: {
             type: 'usize',
-            optional: true,
           },
         },
       },
       messageOut: {
         name: 'Message Out Receipt',
         subject: 'ReceiptsMessageOutSubject',
+        format: 'receipts.{tx_id}.{index}.message_out.{sender}.{recipient}',
+        wildcard: 'receipts.*.*.message_out.*.*',
         fields: {
           tx_id: {
             type: 'B256',
-            optional: true,
           },
           index: {
             type: 'usize',
-            optional: true,
           },
           sender: {
             type: 'Address',
-            optional: true,
           },
           recipient: {
             type: 'Address',
-            optional: true,
           },
         },
       },
@@ -502,44 +494,37 @@ export const formStructure = {
   },
   transactions: {
     name: 'Transactions',
-    byId: {
-      name: 'By ID',
-      subject: 'TransactionsByIdSubject',
-      fields: {
-        id_kind: {
-          type: 'IdentifierKind',
-          optional: true,
-        },
-        id_value: {
-          type: 'B256',
-          optional: true,
-        },
-      },
-    },
+    wildcard: 'transactions.>',
     variants: {
+      byId: {
+        name: 'By ID',
+        subject: 'TransactionsByIdSubject',
+        format: 'by_id.transactions.{tx_id}.{index}.{id_kind}.{id_value}',
+        wildcard: 'by_id.transactions.>',
+        fields: byIdFields,
+      },
       transaction: {
         name: 'Transaction',
         subject: 'TransactionsSubject',
+        format: 'transactions.{block_height}.{index}.{tx_id}.{status}.{kind}',
+        wildcard: 'transactions.>',
         fields: {
           block_height: {
             type: 'BlockHeight',
-            optional: true,
           },
           index: {
             type: 'usize',
-            optional: true,
           },
           tx_id: {
             type: 'B256',
-            optional: true,
           },
           status: {
             type: 'TransactionStatus',
-            optional: true,
+            options: transactionStatusOptions,
           },
           kind: {
             type: 'TransactionKind',
-            optional: true,
+            options: transactionKindOptions,
           },
         },
       },
@@ -548,36 +533,35 @@ export const formStructure = {
   logs: {
     name: 'Logs',
     subject: 'LogsSubject',
+    format: 'logs.{block_height}.{tx_id}.{receipt_index}.{log_id}',
+    wildcard: 'logs.>',
     fields: {
       block_height: {
         type: 'BlockHeight',
-        optional: true,
       },
       tx_id: {
         type: 'B256',
-        optional: true,
       },
       receipt_index: {
         type: 'usize',
-        optional: true,
       },
       log_id: {
         type: 'B256',
-        optional: true,
       },
     },
   },
   utxos: {
     name: 'UTXOs',
     subject: 'UtxosSubject',
+    format: 'utxos.{utxo_type}.{hash}',
+    wildcard: 'utxos.>',
     fields: {
-      hash: {
-        type: 'MessageId',
-        optional: true,
-      },
       utxo_type: {
         type: 'UtxoType',
-        optional: true,
+        options: utxoTypeOptions,
+      },
+      hash: {
+        type: 'MessageId',
       },
     },
   },

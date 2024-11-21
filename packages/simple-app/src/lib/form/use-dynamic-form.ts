@@ -2,26 +2,33 @@ import { createActorContext } from '@xstate/react';
 import { type StateFrom, assign, setup } from 'xstate';
 import { formStructure } from './form-fields';
 import { FormFieldsManager, SubjectBuilder } from './form-helpers';
-import type { FormModuleType } from './form-types';
+import type {
+  FormField,
+  FormModuleType,
+  FormStructure,
+  SelectOption,
+} from './form-types';
 
 const fieldsManager = new FormFieldsManager(formStructure);
-const subjectBuilder = new SubjectBuilder();
+const subjectBuilder = new SubjectBuilder(formStructure);
 
 const formMachine = setup({
   types: {
     context: {} as {
       selectedModule?: FormModuleType;
-      selectedVariant: string;
-      formData: Record<string, string>;
-      selectedFields: Record<string, string>;
+      selectedVariant: string | null;
       subject: string | null;
-      currentFields: { name: string; type: string; optional: boolean }[];
-      moduleOptions: { value: string; label: string }[];
-      variantOptions: { value: string; label: string }[];
+      formData: Record<string, string> | null;
+      selectedFields: Record<string, string> | null;
+      currentFields: FormField[];
+      moduleOptions: SelectOption[];
+      variantOptions: SelectOption[];
+      subjectClass: string | null;
     },
     events: {} as
-      | { type: 'CHANGE.MODULE'; value: FormModuleType | '' }
-      | { type: 'CHANGE.VARIANT'; value: string }
+      | { type: 'CHANGE.MODULE'; value: keyof FormStructure }
+      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+      | { type: 'CHANGE.VARIANT'; value: any }
       | { type: 'CHANGE.FIELD'; fieldName: string; value: string },
   },
   actions: {
@@ -33,6 +40,14 @@ const formMachine = setup({
       variantOptions: ({ event }) => {
         return fieldsManager.getVariantOptions(event.value as FormModuleType);
       },
+      subjectClass: ({ event }) => {
+        const mod = fieldsManager.getModule(event.value as FormModuleType);
+        if (!('variants' in mod)) return mod.subject ?? null;
+        return (
+          mod.variants[event.value as keyof typeof mod.variants]?.subject ??
+          null
+        );
+      },
     }),
     updateVariantFields: assign({
       currentFields: ({ context, event }) => {
@@ -43,6 +58,15 @@ const formMachine = setup({
         );
       },
       selectedFields: () => ({}),
+      subjectClass: ({ context, event }) => {
+        if (!context.selectedModule) return null;
+        const mod = fieldsManager.getModule(context.selectedModule);
+        if (!('variants' in mod)) return mod.subject ?? null;
+        return (
+          mod.variants[event.value as keyof typeof mod.variants]?.subject ??
+          null
+        );
+      },
     }),
     updateField: assign({
       formData: ({ context, event }) => {
@@ -62,12 +86,11 @@ const formMachine = setup({
     }),
     updateSubject: assign({
       subject: ({ context }) => {
-        if (!context.selectedModule) return '';
         return subjectBuilder.buildSubject({
-          selectedModule: context.selectedModule,
+          selectedModule: context.selectedModule as string,
           selectedVariant: context.selectedVariant,
           currentFields: context.currentFields,
-          selectedFields: context.selectedFields,
+          selectedFields: context.selectedFields ?? {},
         });
       },
     }),
@@ -76,13 +99,14 @@ const formMachine = setup({
   id: 'dynamicForm',
   initial: 'idle',
   context: {
-    selectedVariant: '',
-    formData: {},
-    selectedFields: {},
+    selectedVariant: null,
+    selectedFields: null,
     subject: null,
+    formData: null,
     currentFields: [],
     moduleOptions: fieldsManager.getModuleOptions(),
     variantOptions: [],
+    subjectClass: null,
   },
   states: {
     idle: {
@@ -91,7 +115,7 @@ const formMachine = setup({
           actions: [
             assign({
               selectedModule: ({ event }) => event.value as FormModuleType,
-              selectedVariant: () => '',
+              selectedVariant: () => null,
               formData: () => ({}),
             }),
             'updateModuleFields',
@@ -126,6 +150,7 @@ const selectors = {
   moduleOptions: (state: State) => state.context.moduleOptions,
   variantOptions: (state: State) => state.context.variantOptions,
   subject: (state: State) => state.context.subject,
+  subjectClass: (state: State) => state.context.subjectClass,
 };
 
 export const DynamicFormContext = createActorContext(formMachine);
@@ -145,8 +170,8 @@ export function useDynamicForm() {
     selectors.variantOptions,
   );
   const subject = DynamicFormContext.useSelector(selectors.subject);
-
-  const handleModuleChange = (value: FormModuleType | '') => {
+  const subjectClass = DynamicFormContext.useSelector(selectors.subjectClass);
+  const handleModuleChange = (value: keyof FormStructure) => {
     actor.send({ type: 'CHANGE.MODULE', value });
   };
 
@@ -158,6 +183,8 @@ export function useDynamicForm() {
     actor.send({ type: 'CHANGE.FIELD', fieldName, value });
   };
 
+  console.log(actor.getSnapshot().context);
+
   return {
     selectedModule,
     selectedVariant,
@@ -166,6 +193,7 @@ export function useDynamicForm() {
     moduleOptions,
     variantOptions,
     subject,
+    subjectClass,
     handleModuleChange,
     handleVariantChange,
     handleFieldChange,

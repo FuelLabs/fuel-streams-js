@@ -1,50 +1,48 @@
-import v from 'voca';
-import type { Fields, FormModuleType, FormStructure } from './form-types';
+import type {
+  Fields,
+  FormField,
+  FormModuleType,
+  FormStructure,
+  VariantModule,
+} from './form-types';
 
-export function fieldsToArray(
-  fields: Fields,
-): { name: string; type: string; optional: boolean }[] {
+export function fieldsToArray(fields: Fields): FormField[] {
   return Object.entries(fields).map(([name, field]) => ({
     name,
     type: field.type,
-    optional: field.optional,
+    options: field.options,
   }));
-}
-
-export function getIdentifierKindOptions() {
-  return [
-    { value: 'address', label: 'Address' },
-    { value: 'contract_id', label: 'Contract ID' },
-    { value: 'asset_id', label: 'Asset ID' },
-    { value: 'predicate_id', label: 'Predicate ID' },
-    { value: 'script_id', label: 'Script ID' },
-  ];
 }
 
 export class FormFieldsManager {
   constructor(private formStructure: FormStructure) {}
 
-  getModuleFields(
-    selectedModule: FormModuleType | '',
-    selectedVariant?: string,
-  ): { name: string; type: string; optional: boolean }[] {
+  hasVariants<K extends keyof FormStructure>(
+    mod: FormStructure[K],
+  ): mod is FormStructure[K] & VariantModule {
+    return 'variants' in mod;
+  }
+
+  getModule<K extends keyof FormStructure>(selectedModule: K) {
+    return this.formStructure[selectedModule] as FormStructure[K];
+  }
+
+  getModuleFields<
+    K extends keyof FormStructure,
+    M extends FormStructure[K] = FormStructure[K],
+  >(
+    selectedModule: K,
+    selectedVariant?: M extends VariantModule ? keyof M['variants'] : never,
+  ): FormField[] {
     if (!selectedModule) return [];
-    const mod = this.formStructure[selectedModule as FormModuleType];
+    const mod = this.getModule(selectedModule);
 
     if (!this.hasVariants(mod)) {
       return 'fields' in mod ? fieldsToArray(mod.fields) : [];
     }
 
     if (!selectedVariant) return [];
-    if (selectedVariant === 'byId' && mod.byId) {
-      return fieldsToArray(mod.byId.fields);
-    }
-
-    const variant =
-      selectedVariant in mod.variants
-        ? mod.variants[selectedVariant as keyof typeof mod.variants]
-        : null;
-
+    const variant = mod.variants[selectedVariant as keyof typeof mod.variants];
     return variant ? fieldsToArray(variant.fields) : [];
   }
 
@@ -55,82 +53,54 @@ export class FormFieldsManager {
     }));
   }
 
-  getVariantOptions(selectedModule: FormModuleType) {
-    const mod = this.formStructure[selectedModule];
+  getVariantOptions(
+    selectedModule: FormModuleType,
+  ): { value: string; label: string }[] {
+    const mod = this.getModule(selectedModule);
     if (!this.hasVariants(mod)) return [];
 
-    const options = Object.entries(mod.variants).map(([key, value]) => ({
+    return Object.entries(mod.variants).map(([key, value]) => ({
       value: key,
       label: value.name,
     }));
-
-    if (mod.byId) {
-      options.unshift({
-        value: 'byId',
-        label: mod.byId.name,
-      });
-    }
-
-    return options;
-  }
-
-  private hasVariants(
-    module: FormStructure[FormModuleType],
-  ): module is Extract<
-    FormStructure[FormModuleType],
-    { variants: { [key: string]: { name: string; fields: Fields } } }
-  > & { variants: { [key: string]: { name: string; fields: Fields } } } {
-    return 'variants' in module;
   }
 }
 
 export class SubjectBuilder {
+  constructor(private formStructure: FormStructure) {}
+
   buildSubject(params: {
-    selectedModule: FormModuleType;
-    selectedVariant: string;
-    currentFields: { name: string; type: string; optional: boolean }[];
+    selectedModule: string;
+    selectedVariant: string | null;
     selectedFields: Record<string, string>;
-  }): string {
-    const { selectedModule, selectedVariant, currentFields, selectedFields } =
-      params;
+    currentFields: { name: string; type: string }[];
+  }) {
+    const { selectedModule, selectedVariant, selectedFields } = params;
     if (!selectedModule) return '';
 
-    const parts = this.buildSubjectParts(selectedModule, selectedVariant);
+    const manager = new FormFieldsManager(this.formStructure);
+    const mod = manager.getModule(selectedModule as keyof FormStructure);
+    const hasVariant = manager.hasVariants(mod);
+    const noFieldsSelected = !Object.values(selectedFields ?? {}).some(Boolean);
+    let format = '';
 
-    const fieldsObj = currentFields.reduce((acc, field) => {
-      acc[field.name] = { type: field.type, optional: field.optional };
-      return acc;
-    }, {} as Fields);
-
-    if (!Object.values(selectedFields).some(Boolean)) {
-      return `${parts.join('.')}.>`;
+    // For modules that don't have variants
+    if (!hasVariant && 'wildcard' in mod && 'format' in mod) {
+      if (noFieldsSelected) return mod.wildcard;
+      format = mod.format;
     }
 
-    const fieldValues = this.buildFieldValues(fieldsObj, selectedFields);
-    return [...parts, ...fieldValues].join('.');
-  }
-
-  private buildFieldValues(
-    fields: Fields,
-    selectedFields: Record<string, string>,
-  ): string[] {
-    return Object.keys(fields).map((fieldName) =>
-      selectedFields[fieldName] ? v.snakeCase(selectedFields[fieldName]) : '*',
-    );
-  }
-
-  private buildSubjectParts(
-    selectedModule: FormModuleType,
-    selectedVariant: string,
-  ): string[] {
-    const mod = v.snakeCase(selectedModule);
-    const variant = v.snakeCase(selectedVariant);
-    if (selectedVariant === 'byId') {
-      return ['by_id', mod];
+    // For modules with variants
+    if (hasVariant) {
+      if (!selectedVariant) return mod.wildcard;
+      const variant = mod.variants[selectedVariant];
+      if (noFieldsSelected) return variant.wildcard;
+      format = variant.format;
     }
-    if (selectedModule === 'transactions') {
-      return [mod];
-    }
-    return [mod, variant].filter(Boolean);
+
+    return format.replace(/\{(\w+)\}/g, (_, field) => {
+      const value = selectedFields[field];
+      return value ? value : '*';
+    });
   }
 }

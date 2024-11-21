@@ -1,31 +1,51 @@
 import type { formStructure } from './form-fields';
 
-// Base types for fields
-export type FieldDefinition = {
+export type SelectOption = {
+  value: string;
+  label: string;
+};
+
+export type FieldOptions = {
   type: string;
-  optional: boolean;
+  options?: SelectOption[];
 };
 
-export type Fields = {
-  [key: string]: FieldDefinition;
-};
-
-// Derive main types from formStructure
-export type FormStructure = typeof formStructure;
-export type FormModuleType = keyof FormStructure;
-
-// Helper type for form fields
 export type FormField = {
   name: string;
   type: string;
-  optional: boolean;
+  options?: SelectOption[];
   value?: string;
 };
 
-// Helper type for variants
-export type FormVariant<T extends FormModuleType> =
-  T extends keyof FormStructure
-    ? FormStructure[T] extends { variants: Record<string, unknown> }
-      ? keyof FormStructure[T]['variants'] | 'byId'
-      : never
-    : never;
+export type Fields = {
+  [key: string]: FieldOptions;
+};
+
+export type ModuleBase = {
+  name: string;
+  wildcard: string;
+};
+
+export type SimpleModule = ModuleBase & {
+  subject: string;
+  format: string;
+  fields: Fields;
+};
+
+export type VariantDefinition = {
+  name: string;
+  subject: string;
+  format: string;
+  wildcard: string;
+  fields: Fields;
+};
+
+export type VariantModule = ModuleBase & {
+  variants: {
+    [key: string]: VariantDefinition;
+  };
+};
+
+export type ModuleType = SimpleModule | VariantModule;
+export type FormStructure = typeof formStructure;
+export type FormModuleType = keyof FormStructure;

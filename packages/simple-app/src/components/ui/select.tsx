@@ -1,16 +1,46 @@
 'use client';
 
 import * as SelectPrimitive from '@radix-ui/react-select';
-import { Check, ChevronDown, ChevronUp } from 'lucide-react';
+import { Check, ChevronDown, ChevronUp, X } from 'lucide-react';
 import * as React from 'react';
 
 import { cn } from '@/lib/utils';
 
-const Select = SelectPrimitive.Root;
+const Select = ({
+  children,
+  className,
+  ...props
+}: React.ComponentPropsWithoutRef<typeof SelectPrimitive.Root> & {
+  className?: string;
+}) => {
+  return (
+    <SelectPrimitive.Root {...props}>
+      <div className={cn('relative', className)}>{children}</div>
+    </SelectPrimitive.Root>
+  );
+};
+Select.displayName = SelectPrimitive.Root.displayName;
 
 const SelectGroup = SelectPrimitive.Group;
-
 const SelectValue = SelectPrimitive.Value;
+
+const SelectClear = React.forwardRef<
+  HTMLButtonElement,
+  React.ButtonHTMLAttributes<HTMLButtonElement>
+>(({ className, onClick, ...props }, ref) => (
+  <button
+    ref={ref}
+    onClick={onClick}
+    className={cn(
+      'absolute right-8 top-1/2 -translate-y-1/2 opacity-50 hover:opacity-100 rounded-sm ring-offset-background transition-opacity focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
+      className,
+    )}
+    {...props}
+  >
+    <X className="h-4 w-4" />
+  </button>
+));
+SelectClear.displayName = 'SelectClear';
 
 const SelectTrigger = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Trigger>,
@@ -156,4 +186,5 @@ export {
   SelectSeparator,
   SelectScrollUpButton,
   SelectScrollDownButton,
+  SelectClear,
 };

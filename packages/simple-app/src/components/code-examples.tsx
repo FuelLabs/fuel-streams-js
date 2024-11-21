@@ -7,21 +7,27 @@ import { useTheme } from './theme-provider';
 import { CardContent } from './ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 
-function getExamples(
-  subject: string | null = 'blocks.>',
-  selectedModule: FormModuleType = 'blocks',
+function getFuelExample(
+  stream: string,
+  subject: string,
+  subjectClass: string | null,
 ) {
-  const stream = v.capitalize(`${selectedModule}Stream`);
-  return {
-    fuel: `import { Client, ClientOpts, ${stream} } from '@fuels/streams';
+  const baseClass = stream.replace('Stream', 'Subject');
+  const subjectImport = subjectClass ?? baseClass;
+  const imports = `import { Client, ClientOpts, ${stream}, ${subjectImport} } from '@fuels/streams';`;
+  const subjectInitialization = `// You can use our Subject class
+let subject = ${subjectImport}.all();
+// Or pass the value directly as string
+subject = "${subject}";`;
+  return `${imports}
+
+${subjectInitialization}
 
 async function main() {
-  const subject = '${subject}';
-  
   const opts = new ClientOpts();
   const client = await Client.connect(opts);
   const stream = await ${stream}.init(client);
-  const subscription = await stream.subscribe(subject);
+  const subscription = await stream.subscribeWithSubject(subject);
   
   for await (const msg of subscription) {
     console.log('Received message:', msg.json());
@@ -30,8 +36,18 @@ async function main() {
   await stream.flushAwait();
 }
 
-main().catch(console.error);`,
+main().catch(console.error);`;
+}
 
+function getExamples(
+  subject: string | null = 'blocks.>',
+  selectedModule: FormModuleType = 'blocks',
+  subjectClass: string | null = 'BlocksSubject',
+) {
+  const stream = v.capitalize(`${selectedModule}Stream`);
+
+  return {
+    fuel: getFuelExample(stream, subject ?? '', subjectClass),
     natsNode: `import { connect, StringCodec } from 'nats';
 
 async function main() {
@@ -87,9 +103,13 @@ websocat ws://stream-testnet.fuel.network:8080 --jsonrpc -n \\
 }
 
 export function CodeExamples() {
-  const { subject, selectedModule } = useDynamicForm();
+  const { subject, selectedModule, subjectClass } = useDynamicForm();
   const { isTheme } = useTheme();
-  const examples = getExamples(subject, selectedModule ?? 'blocks');
+  const examples = getExamples(
+    subject,
+    selectedModule ?? 'blocks',
+    subjectClass,
+  );
   const codeTheme = isTheme('dark') ? vs2015 : vs;
 
   return (

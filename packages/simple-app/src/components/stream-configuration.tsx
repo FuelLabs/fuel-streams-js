@@ -9,6 +9,7 @@ import {
 import { Input } from '@/components/ui/input';
 import {
   Select,
+  SelectClear,
   SelectContent,
   SelectItem,
   SelectTrigger,
@@ -18,7 +19,6 @@ import { cardStyles } from '@/styles/card-styles';
 import { Play, Square } from 'lucide-react';
 import v from 'voca';
 import { useDynamicForm } from '../lib/form';
-import { getIdentifierKindOptions } from '../lib/form/form-helpers';
 import { useStreamData } from '../lib/stream/use-stream-data';
 import { ThemeToggle } from './theme-toggle';
 
@@ -105,8 +105,11 @@ export function StreamConfiguration() {
                 </label>
                 <Select
                   onValueChange={handleVariantChange}
-                  value={selectedVariant}
+                  value={selectedVariant ?? ''}
                 >
+                  {selectedVariant && (
+                    <SelectClear onClick={() => handleVariantChange('')} />
+                  )}
                   <SelectTrigger>
                     <SelectValue placeholder="Select a variant" />
                   </SelectTrigger>
@@ -130,18 +133,25 @@ export function StreamConfiguration() {
               >
                 {formatLabel(field.name)} <code>({field.type})</code>
               </label>
-              {field.name === 'id_kind' ? (
+              {field.options ? (
                 <Select
-                  value={formData[field.name] || ''}
+                  value={formData?.[field.name] || ''}
                   onValueChange={(value) =>
                     handleFieldChange(field.name, value)
                   }
                 >
+                  {formData?.[field.name] && (
+                    <SelectClear
+                      onClick={() => handleFieldChange(field.name, '')}
+                    />
+                  )}
                   <SelectTrigger>
-                    <SelectValue placeholder="Select identifier kind" />
+                    <SelectValue
+                      placeholder={`Select ${formatLabel(field.name)}`}
+                    />
                   </SelectTrigger>
                   <SelectContent>
-                    {getIdentifierKindOptions().map(({ value, label }) => (
+                    {field.options.map(({ value, label }) => (
                       <SelectItem key={value} value={value}>
                         {label}
                       </SelectItem>
@@ -156,7 +166,7 @@ export function StreamConfiguration() {
                   onChange={(e) =>
                     handleFieldChange(field.name, e.target.value)
                   }
-                  value={formData[field.name] || ''}
+                  value={formData?.[field.name] || ''}
                 />
               )}
             </div>
