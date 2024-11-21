@@ -1,13 +1,14 @@
 {
   "name": "@fuels/streams",
   "version": "0.0.1",
-  "private": true,
+  "description": "Official data streaming Typescript library for Fuel Network",
+  "author": "Fuel Labs <contact@fuel.sh> (https://fuel.network/)",
+  "homepage": "https://github.com/FuelLabs/fuel-streams-js",
   "main": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts"
   },
   "publishConfig": {
-    "private": false,
     "main": "./dist/index.js",
     "module": "./dist/index.mjs",
     "types": "./dist/index.d.ts",
