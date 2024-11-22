@@ -20,7 +20,7 @@ export function App() {
 
 function AppContent() {
   return (
-    <div className="min-h-screen bg-background text-foreground grid grid-cols-5 h-screen">
+    <div className="min-h-screen bg-background text-foreground grid grid-cols-[500px_1fr] h-screen">
       <StreamConfiguration />
       <StreamView />
     </div>

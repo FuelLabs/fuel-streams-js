@@ -1,4 +1,5 @@
 import { Button } from '@/components/ui/button';
+import { ButtonGroup, ButtonGroupItem } from '@/components/ui/button-group';
 import {
   Card,
   CardContent,
@@ -28,24 +29,42 @@ export function StreamView() {
   const { clear, stop, isSubscribing } = useStreamData();
   const [tab, setTab] = useState<'data' | 'code'>('data');
 
-  function handleShowCode() {
+  function handleTabChange(value: 'data' | 'code') {
     stop();
-    setTab((s) => (s === 'data' ? 'code' : 'data'));
+    setTab(value);
   }
 
   return (
     <Card className={cardStyles({ type: 'stream' })}>
       <CardHeader layout="row" className="h-20 border-b">
         <div className="flex-1">
-          <CardTitle className="text-lg">Stream Data</CardTitle>
+          <CardTitle className="text-lg">
+            {tab === 'data' ? 'Stream Data' : 'Code Examples'}
+          </CardTitle>
           <CardDescription className="text-sm text-muted-foreground">
-            Real-time data stream output will appear here
+            {tab === 'data'
+              ? 'Real-time data stream output will appear here'
+              : 'Example code snippets for implementing the stream'}
           </CardDescription>
         </div>
-        <Button size="sm" onClick={handleShowCode} disabled={isSubscribing}>
-          {tab === 'data' ? <Code size={16} /> : <Database size={16} />}{' '}
-          {tab === 'data' ? 'Code Examples' : 'Data'}
-        </Button>
+        <ButtonGroup defaultValue="data">
+          <ButtonGroupItem
+            onClick={() => handleTabChange('data')}
+            active={tab === 'data'}
+            disabled={isSubscribing}
+            value="data"
+          >
+            <Database size={16} /> View Data
+          </ButtonGroupItem>
+          <ButtonGroupItem
+            onClick={() => handleTabChange('code')}
+            active={tab === 'code'}
+            disabled={isSubscribing}
+            value="code"
+          >
+            <Code size={16} /> Code Examples
+          </ButtonGroupItem>
+        </ButtonGroup>
       </CardHeader>
       {subject && (
         <div className="flex justify-between items-center px-6 py-2 border-b">
