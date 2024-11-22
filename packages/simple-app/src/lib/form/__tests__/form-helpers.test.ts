@@ -1,9 +1,9 @@
+import { subjectsDefinitions } from '@fuels/streams/subjects-def';
 import { describe, expect, it } from 'vitest';
-import { formStructure } from '../form-fields';
 import { SubjectBuilder, fieldsToArray } from '../form-helpers';
 
 describe('SubjectBuilder', () => {
-  const builder = new SubjectBuilder(formStructure);
+  const builder = new SubjectBuilder(subjectsDefinitions);
 
   // Extract test case type for better readability
   type TestCase = {
@@ -28,7 +28,7 @@ describe('SubjectBuilder', () => {
     fields: Record<string, string>;
     expected: string;
   }) {
-    const mod = formStructure[module as keyof typeof formStructure];
+    const mod = subjectsDefinitions[module as keyof typeof subjectsDefinitions];
     const variantData =
       'variants' in mod
         ? mod.variants[variant as keyof typeof mod.variants]
@@ -57,7 +57,7 @@ describe('SubjectBuilder', () => {
     {
       name: 'blocks',
       cases: [
-        { fields: {}, expected: formStructure.blocks.wildcard },
+        { fields: {}, expected: subjectsDefinitions.blocks.wildcard },
         {
           fields: { producer: '0x123', height: '100' },
           expected: 'blocks.0x123.100',
@@ -67,7 +67,7 @@ describe('SubjectBuilder', () => {
     {
       name: 'logs',
       cases: [
-        { fields: {}, expected: formStructure.logs.wildcard },
+        { fields: {}, expected: subjectsDefinitions.logs.wildcard },
         {
           fields: {
             block_height: '100',
@@ -82,7 +82,7 @@ describe('SubjectBuilder', () => {
     {
       name: 'utxos',
       cases: [
-        { fields: {}, expected: formStructure.utxos.wildcard },
+        { fields: {}, expected: subjectsDefinitions.utxos.wildcard },
         {
           fields: {
             utxo_type: 'some_type',
@@ -118,7 +118,7 @@ describe('SubjectBuilder', () => {
   describe('modules with variants', () => {
     // Generate test cases for modules with variants
     // @ts-ignore - simplifying types for tests
-    const variantModuleTests = Object.entries(formStructure)
+    const variantModuleTests = Object.entries(subjectsDefinitions)
       .filter(([_, mod]) => 'variants' in mod)
       // biome-ignore lint/suspicious/noExplicitAny: <explanation>
       .map(([moduleName, mod]: [string, any]) => ({

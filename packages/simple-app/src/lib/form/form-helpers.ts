@@ -1,10 +1,10 @@
 import type {
   Fields,
   FormField,
-  FormModuleType,
-  FormStructure,
+  ModuleKeys,
+  SubjectsDefinition,
   VariantModule,
-} from './form-types';
+} from '@fuels/streams/subjects-def';
 
 export function fieldsToArray(fields: Fields): FormField[] {
   return Object.entries(fields).map(([name, field]) => ({
@@ -15,21 +15,21 @@ export function fieldsToArray(fields: Fields): FormField[] {
 }
 
 export class FormFieldsManager {
-  constructor(private formStructure: FormStructure) {}
+  constructor(private formStructure: SubjectsDefinition) {}
 
-  hasVariants<K extends keyof FormStructure>(
-    mod: FormStructure[K],
-  ): mod is FormStructure[K] & VariantModule {
+  hasVariants<K extends ModuleKeys>(
+    mod: SubjectsDefinition[K],
+  ): mod is SubjectsDefinition[K] & VariantModule {
     return 'variants' in mod;
   }
 
-  getModule<K extends keyof FormStructure>(selectedModule: K) {
-    return this.formStructure[selectedModule] as FormStructure[K];
+  getModule<K extends ModuleKeys>(selectedModule: K) {
+    return this.formStructure[selectedModule] as SubjectsDefinition[K];
   }
 
   getModuleFields<
-    K extends keyof FormStructure,
-    M extends FormStructure[K] = FormStructure[K],
+    K extends ModuleKeys,
+    M extends SubjectsDefinition[K] = SubjectsDefinition[K],
   >(
     selectedModule: K,
     selectedVariant?: M extends VariantModule ? keyof M['variants'] : never,
@@ -54,7 +54,7 @@ export class FormFieldsManager {
   }
 
   getVariantOptions(
-    selectedModule: FormModuleType,
+    selectedModule: ModuleKeys,
   ): { value: string; label: string }[] {
     const mod = this.getModule(selectedModule);
     if (!this.hasVariants(mod)) return [];
@@ -67,7 +67,7 @@ export class FormFieldsManager {
 }
 
 export class SubjectBuilder {
-  constructor(private formStructure: FormStructure) {}
+  constructor(private formStructure: SubjectsDefinition) {}
 
   buildSubject(params: {
     selectedModule: string;
@@ -79,7 +79,7 @@ export class SubjectBuilder {
     if (!selectedModule) return '';
 
     const manager = new FormFieldsManager(this.formStructure);
-    const mod = manager.getModule(selectedModule as keyof FormStructure);
+    const mod = manager.getModule(selectedModule as ModuleKeys);
     const hasVariant = manager.hasVariants(mod);
     const noFieldsSelected = !Object.values(selectedFields ?? {}).some(Boolean);
     let format = '';

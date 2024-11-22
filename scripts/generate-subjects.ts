@@ -144,8 +144,8 @@ function mapRustTypeToTS(rustType: string): string {
 }
 
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-function generateInterface(name: string, props: Record<string, any>) {
-  const fields = Object.entries(props)
+function generateInterface(name: string, initFields: Record<string, any>) {
+  const fields = Object.entries(initFields)
     .map(([key, value]) => {
       const camelKey = v.camelCase(key);
       return `  ${camelKey}: ${mapRustTypeToTS(value.type)};`;
@@ -173,10 +173,10 @@ function generateSubjectClass(name: string, format: string, isGeneric = false) {
 }
 
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-function getUsedTypes(props: Record<string, any>): Set<string> {
+function getUsedTypes(fields: Record<string, any>): Set<string> {
   const usedTypes = new Set<string>();
 
-  Object.values(props).forEach((value) => {
+  Object.values(fields).forEach((value) => {
     const mappedType = mapRustTypeToTS(value.type);
     if (
       [
@@ -231,10 +231,10 @@ async function generateModuleSubjects(moduleName: string, moduleConfig: any) {
   if ('variants' in moduleConfig) {
     // biome-ignore lint/suspicious/noExplicitAny: <explanation>
     Object.values(moduleConfig.variants).forEach((variant: any) => {
-      getUsedTypes(variant.props).forEach((type) => usedTypes.add(type));
+      getUsedTypes(variant.fields).forEach((type) => usedTypes.add(type));
     });
   } else {
-    getUsedTypes(moduleConfig.props).forEach((type) => usedTypes.add(type));
+    getUsedTypes(moduleConfig.fields).forEach((type) => usedTypes.add(type));
   }
 
   // Add imports only for types that are used
@@ -252,7 +252,7 @@ async function generateModuleSubjects(moduleName: string, moduleConfig: any) {
     if (moduleConfig.variants.generic) {
       const genericVariant = moduleConfig.variants.generic;
       const baseName = v.replaceAll(genericVariant.subject, 'Subject', '');
-      content += generateInterface(baseName, genericVariant.props);
+      content += generateInterface(baseName, genericVariant.fields);
       content += '\n\n';
       content += generateSubjectClass(
         baseName,
@@ -268,7 +268,7 @@ async function generateModuleSubjects(moduleName: string, moduleConfig: any) {
       ([key, variant]: [string, any]) => {
         if (key === 'generic') return; // Skip generic as it's already handled
         const baseName = v.replaceAll(variant.subject, 'Subject', '');
-        content += generateInterface(baseName, variant.props);
+        content += generateInterface(baseName, variant.fields);
         content += '\n\n';
         content += generateSubjectClass(baseName, variant.format);
         content += '\n\n';
@@ -276,7 +276,7 @@ async function generateModuleSubjects(moduleName: string, moduleConfig: any) {
     );
   } else {
     const baseName = v.replaceAll(moduleConfig.subject, 'Subject', '');
-    content += generateInterface(baseName, moduleConfig.props);
+    content += generateInterface(baseName, moduleConfig.fields);
     content += '\n\n';
     content += generateSubjectClass(baseName, moduleConfig.format);
   }

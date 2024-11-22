@@ -1,21 +1,21 @@
+import {
+  type FormField,
+  type ModuleKeys,
+  type SelectOption,
+  type SubjectsDefinition,
+  subjectsDefinitions,
+} from '@fuels/streams/subjects-def';
 import { createActorContext } from '@xstate/react';
 import { type StateFrom, assign, setup } from 'xstate';
-import { formStructure } from './form-fields';
 import { FormFieldsManager, SubjectBuilder } from './form-helpers';
-import type {
-  FormField,
-  FormModuleType,
-  FormStructure,
-  SelectOption,
-} from './form-types';
 
-const fieldsManager = new FormFieldsManager(formStructure);
-const subjectBuilder = new SubjectBuilder(formStructure);
+const fieldsManager = new FormFieldsManager(subjectsDefinitions);
+const subjectBuilder = new SubjectBuilder(subjectsDefinitions);
 
 const formMachine = setup({
   types: {
     context: {} as {
-      selectedModule?: FormModuleType;
+      selectedModule?: ModuleKeys;
       selectedVariant: string | null;
       subject: string | null;
       formData: Record<string, string> | null;
@@ -26,7 +26,7 @@ const formMachine = setup({
       subjectClass: string | null;
     },
     events: {} as
-      | { type: 'CHANGE.MODULE'; value: keyof FormStructure }
+      | { type: 'CHANGE.MODULE'; value: keyof SubjectsDefinition }
       // biome-ignore lint/suspicious/noExplicitAny: <explanation>
       | { type: 'CHANGE.VARIANT'; value: any }
       | { type: 'CHANGE.FIELD'; fieldName: string; value: string },
@@ -34,14 +34,14 @@ const formMachine = setup({
   actions: {
     updateModuleFields: assign({
       currentFields: ({ event }) => {
-        return fieldsManager.getModuleFields(event.value as FormModuleType);
+        return fieldsManager.getModuleFields(event.value as ModuleKeys);
       },
       selectedFields: () => ({}),
       variantOptions: ({ event }) => {
-        return fieldsManager.getVariantOptions(event.value as FormModuleType);
+        return fieldsManager.getVariantOptions(event.value as ModuleKeys);
       },
       subjectClass: ({ event }) => {
-        const mod = fieldsManager.getModule(event.value as FormModuleType);
+        const mod = fieldsManager.getModule(event.value as ModuleKeys);
         if (!('variants' in mod)) return mod.subject ?? null;
         return (
           mod.variants[event.value as keyof typeof mod.variants]?.subject ??
@@ -114,7 +114,7 @@ const formMachine = setup({
         'CHANGE.MODULE': {
           actions: [
             assign({
-              selectedModule: ({ event }) => event.value as FormModuleType,
+              selectedModule: ({ event }) => event.value as ModuleKeys,
               selectedVariant: () => null,
               formData: () => ({}),
             }),
@@ -143,14 +143,15 @@ const formMachine = setup({
 type State = StateFrom<typeof formMachine>;
 
 const selectors = {
+  currentFields: (state: State) => state.context.currentFields,
+  formData: (state: State) => state.context.formData,
+  moduleOptions: (state: State) => state.context.moduleOptions,
+  selectedFields: (state: State) => state.context.selectedFields,
   selectedModule: (state: State) => state.context.selectedModule,
   selectedVariant: (state: State) => state.context.selectedVariant,
-  formData: (state: State) => state.context.formData,
-  currentFields: (state: State) => state.context.currentFields,
-  moduleOptions: (state: State) => state.context.moduleOptions,
-  variantOptions: (state: State) => state.context.variantOptions,
   subject: (state: State) => state.context.subject,
   subjectClass: (state: State) => state.context.subjectClass,
+  variantOptions: (state: State) => state.context.variantOptions,
 };
 
 export const DynamicFormContext = createActorContext(formMachine);
@@ -171,7 +172,10 @@ export function useDynamicForm() {
   );
   const subject = DynamicFormContext.useSelector(selectors.subject);
   const subjectClass = DynamicFormContext.useSelector(selectors.subjectClass);
-  const handleModuleChange = (value: keyof FormStructure) => {
+  const selectedFields = DynamicFormContext.useSelector(
+    selectors.selectedFields,
+  );
+  const handleModuleChange = (value: keyof SubjectsDefinition) => {
     actor.send({ type: 'CHANGE.MODULE', value });
   };
 
@@ -184,16 +188,17 @@ export function useDynamicForm() {
   };
 
   return {
-    selectedModule,
-    selectedVariant,
-    formData,
     currentFields,
-    moduleOptions,
-    variantOptions,
-    subject,
-    subjectClass,
+    formData,
+    handleFieldChange,
     handleModuleChange,
     handleVariantChange,
-    handleFieldChange,
+    moduleOptions,
+    selectedFields,
+    selectedModule,
+    selectedVariant,
+    subject,
+    subjectClass,
+    variantOptions,
   };
 }

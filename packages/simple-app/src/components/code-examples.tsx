@@ -1,19 +1,29 @@
+import type { ModuleKeys } from '@fuels/streams/subjects-def';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import { vs } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import { vs2015 } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import v from 'voca';
-import { type FormModuleType, useDynamicForm } from '../lib/form';
+import { useDynamicForm } from '../lib/form';
 import { useTheme } from './theme-provider';
 import { CardContent } from './ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 
 function getFuelExample(
   stream: string,
-  _subject: string,
   subjectClass: string | null,
+  selectedFields: Record<string, string>,
 ) {
   const baseClass = stream.replace('Stream', 'Subject');
   const subjectImport = subjectClass ?? baseClass;
+
+  const formattedFields = Object.entries(selectedFields)
+    .map(([key, value]) => `  ${v.camelCase(key)}: '${value}'`)
+    .join(',\n');
+
+  const subjectInit = Object.values(selectedFields).some(Boolean)
+    ? `let subject = ${subjectImport}.build({\n${formattedFields}\n});`
+    : `let subject = ${subjectImport}.build();`;
+
   return `import {
   Client,
   ClientOpts,
@@ -21,7 +31,7 @@ function getFuelExample(
   ${subjectImport}
 } from '@fuels/streams';
 
-let subject = ${subjectImport}.all();
+${subjectInit}
 
 async function main() {
   const opts = new ClientOpts();
@@ -41,13 +51,14 @@ main().catch(console.error);`;
 
 function getExamples(
   subject: string | null = 'blocks.>',
-  selectedModule: FormModuleType = 'blocks',
+  selectedModule: ModuleKeys = 'blocks',
   subjectClass: string | null = 'BlocksSubject',
+  selectedFields: Record<string, string> = {},
 ) {
   const stream = v.capitalize(`${selectedModule}Stream`);
 
   return {
-    fuel: getFuelExample(stream, subject ?? '', subjectClass),
+    fuel: getFuelExample(stream, subjectClass, selectedFields),
     natsNode: `import { connect } from 'nats';
 
 async function main() {
@@ -98,14 +109,16 @@ nats kv watch "fuel_${selectedModule}" "${subject}" \\
 }
 
 export function CodeExamples() {
-  const { subject, selectedModule, subjectClass } = useDynamicForm();
+  const { subject, selectedModule, selectedFields, subjectClass } =
+    useDynamicForm();
   const { isTheme } = useTheme();
+  const codeTheme = isTheme('dark') ? vs2015 : vs;
   const examples = getExamples(
     subject,
     selectedModule ?? 'blocks',
     subjectClass,
+    selectedFields ?? {},
   );
-  const codeTheme = isTheme('dark') ? vs2015 : vs;
 
   return (
     <CardContent className="pt-6">

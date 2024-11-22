@@ -81,11 +81,13 @@ export function StreamForm() {
                 <SelectValue placeholder="Select a variant" />
               </SelectTrigger>
               <SelectContent>
-                {variantOptions.map(({ value, label }) => (
-                  <SelectItem key={value} value={value}>
-                    {label}
-                  </SelectItem>
-                ))}
+                {variantOptions
+                  .filter(({ label }) => !label.includes('Generic'))
+                  .map(({ value, label }) => (
+                    <SelectItem key={value} value={value}>
+                      {label}
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
           </div>

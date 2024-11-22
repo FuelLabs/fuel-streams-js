@@ -7,7 +7,12 @@
   "main": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
-    "./subjects-defs": "./src/subjects-defs.ts"
+    "./subjects-def": "./src/subjects-def.ts"
+  },
+  "typesVersions": {
+    "*": {
+      "subjects-def": ["./src/subjects-def.ts"]
+    }
   },
   "publishConfig": {
     "main": "./dist/index.js",

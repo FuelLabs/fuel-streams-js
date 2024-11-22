@@ -10,6 +10,7 @@ import {
   type Subscription,
   TransactionsStream,
 } from '@fuels/streams';
+import type { ModuleKeys } from '@fuels/streams/subjects-def';
 import { createActorContext } from '@xstate/react';
 import {
   type StateFrom,
@@ -18,7 +19,6 @@ import {
   fromPromise,
   setup,
 } from 'xstate';
-import type { FormModuleType } from '../form/form-types';
 // import { createBrowserInspector } from '@statelyai/inspect';
 
 // const { inspect } = createBrowserInspector();
@@ -31,20 +31,20 @@ export type StreamData = {
 
 type StreamEvent =
   | { type: 'CONNECTED'; client: Client }
-  | { type: 'START'; subject: string; selectedModule: FormModuleType }
+  | { type: 'START'; subject: string; selectedModule: ModuleKeys }
   | { type: 'STOP' }
   | { type: 'CLEAR' }
   | { type: 'DATA'; data: StreamData };
 
 type StreamActorInput = {
   subject: string;
-  selectedModule: FormModuleType;
+  selectedModule: ModuleKeys;
   client: Client;
 };
 
 async function getStreamFromModule(
   client: Client,
-  mod: FormModuleType,
+  mod: ModuleKeys,
 ): Promise<Stream> {
   switch (mod) {
     case 'blocks':
@@ -98,7 +98,7 @@ const streamMachine = setup({
     context: {} as {
       client: Client | null;
       subject: string | null;
-      selectedModule: FormModuleType | null;
+      selectedModule: ModuleKeys | null;
       data: StreamData[];
     },
   },
@@ -179,7 +179,7 @@ const streamMachine = setup({
         id: 'subscribe',
         src: 'subscriptionActor',
         input: ({ context }) => ({
-          selectedModule: context.selectedModule as FormModuleType,
+          selectedModule: context.selectedModule as ModuleKeys,
           subject: context.subject as string,
           client: context.client as Client,
         }),

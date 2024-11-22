@@ -1,4 +1,4 @@
-const byIdProps = {
+const byIdFields = {
   tx_id: {
     type: 'B256',
   },
@@ -48,7 +48,7 @@ export const subjectsDefinitions = {
     subject: 'BlocksSubject',
     format: 'blocks.{producer}.{height}',
     wildcard: 'blocks.>',
-    props: {
+    fields: {
       producer: {
         type: 'Address',
       },
@@ -66,14 +66,14 @@ export const subjectsDefinitions = {
         subject: 'InputsByIdSubject',
         format: 'by_id.inputs.{tx_id}.{index}.{id_kind}.{id_value}',
         wildcard: 'by_id.inputs.>',
-        props: byIdProps,
+        fields: byIdFields,
       },
       generic: {
         name: 'Inputs Generic',
         subject: 'InputsSubject',
         format: 'inputs.{tx_id}.{index}.>',
         wildcard: 'inputs.>',
-        props: {
+        fields: {
           tx_id: {
             type: 'B256',
           },
@@ -87,7 +87,7 @@ export const subjectsDefinitions = {
         subject: 'InputsCoinSubject',
         format: 'inputs.{tx_id}.{index}.coin.{owner}.{asset_id}',
         wildcard: 'inputs.*.*.coin.*.*',
-        props: {
+        fields: {
           tx_id: {
             type: 'B256',
           },
@@ -107,7 +107,7 @@ export const subjectsDefinitions = {
         subject: 'InputsContractSubject',
         format: 'inputs.{tx_id}.{index}.contract.{contract_id}',
         wildcard: 'inputs.*.*.contract.*',
-        props: {
+        fields: {
           tx_id: {
             type: 'B256',
           },
@@ -124,7 +124,7 @@ export const subjectsDefinitions = {
         subject: 'InputsMessageSubject',
         format: 'inputs.{tx_id}.{index}.message.{sender}.{recipient}',
         wildcard: 'inputs.*.*.message.*.*',
-        props: {
+        fields: {
           tx_id: {
             type: 'B256',
           },
@@ -150,14 +150,14 @@ export const subjectsDefinitions = {
         subject: 'OutputsByIdSubject',
         format: 'by_id.outputs.{tx_id}.{index}.{id_kind}.{id_value}',
         wildcard: 'by_id.outputs.>',
-        props: byIdProps,
+        fields: byIdFields,
       },
       generic: {
         name: 'Outputs Generic',
         subject: 'OutputsSubject',
         format: 'outputs.*.{tx_id}.{index}.>',
         wildcard: 'outputs.>',
-        props: {
+        fields: {
           tx_id: {
             type: 'B256',
           },
@@ -171,7 +171,7 @@ export const subjectsDefinitions = {
         subject: 'OutputsCoinSubject',
         format: 'outputs.coin.{tx_id}.{index}.{to}.{asset_id}',
         wildcard: 'outputs.coin.>',
-        props: {
+        fields: {
           tx_id: {
             type: 'B256',
           },
@@ -191,7 +191,7 @@ export const subjectsDefinitions = {
         subject: 'OutputsContractSubject',
         format: 'outputs.contract.{tx_id}.{index}.{contract_id}',
         wildcard: 'outputs.contract.>',
-        props: {
+        fields: {
           tx_id: {
             type: 'B256',
           },
@@ -208,7 +208,7 @@ export const subjectsDefinitions = {
         subject: 'OutputsChangeSubject',
         format: 'outputs.change.{tx_id}.{index}.{to}.{asset_id}',
         wildcard: 'outputs.change.>',
-        props: {
+        fields: {
           tx_id: {
             type: 'B256',
           },
@@ -228,7 +228,7 @@ export const subjectsDefinitions = {
         subject: 'OutputsVariableSubject',
         format: 'outputs.variable.{tx_id}.{index}.{to}.{asset_id}',
         wildcard: 'outputs.variable.>',
-        props: {
+        fields: {
           tx_id: {
             type: 'B256',
           },
@@ -248,7 +248,7 @@ export const subjectsDefinitions = {
         subject: 'OutputsContractCreatedSubject',
         format: 'outputs.contract_created.{tx_id}.{index}.{contract_id}',
         wildcard: 'outputs.contract_created.>',
-        props: {
+        fields: {
           tx_id: {
             type: 'B256',
           },
@@ -271,14 +271,14 @@ export const subjectsDefinitions = {
         subject: 'ReceiptsByIdSubject',
         format: 'by_id.receipts.{tx_id}.{index}.{id_kind}.{id_value}',
         wildcard: 'by_id.receipts.>',
-        props: byIdProps,
+        fields: byIdFields,
       },
       generic: {
         name: 'Receipts Generic',
         subject: 'ReceiptsSubject',
         format: 'receipts.{tx_id}.{index}.>',
         wildcard: 'receipts.>',
-        props: {
+        fields: {
           tx_id: {
             type: 'B256',
           },
@@ -292,7 +292,7 @@ export const subjectsDefinitions = {
         subject: 'ReceiptsCallSubject',
         format: 'receipts.{tx_id}.{index}.call.{from}.{to}.{asset_id}',
         wildcard: 'receipts.*.*.call.*.*.*',
-        props: {
+        fields: {
           tx_id: {
             type: 'B256',
           },
@@ -315,7 +315,7 @@ export const subjectsDefinitions = {
         subject: 'ReceiptsReturnSubject',
         format: 'receipts.{tx_id}.{index}.return.{id}',
         wildcard: 'receipts.*.*.return.*',
-        props: {
+        fields: {
           tx_id: {
             type: 'B256',
           },
@@ -332,7 +332,7 @@ export const subjectsDefinitions = {
         subject: 'ReceiptsReturnDataSubject',
         format: 'receipts.{tx_id}.{index}.return_data.{id}',
         wildcard: 'receipts.*.*.return_data.*',
-        props: {
+        fields: {
           tx_id: {
             type: 'B256',
           },
@@ -349,7 +349,7 @@ export const subjectsDefinitions = {
         subject: 'ReceiptsPanicSubject',
         format: 'receipts.{tx_id}.{index}.panic.{id}',
         wildcard: 'receipts.*.*.panic.*',
-        props: {
+        fields: {
           tx_id: {
             type: 'B256',
           },
@@ -366,7 +366,7 @@ export const subjectsDefinitions = {
         subject: 'ReceiptsRevertSubject',
         format: 'receipts.{tx_id}.{index}.revert.{id}',
         wildcard: 'receipts.*.*.revert.*',
-        props: {
+        fields: {
           tx_id: {
             type: 'B256',
           },
@@ -383,7 +383,7 @@ export const subjectsDefinitions = {
         subject: 'ReceiptsLogSubject',
         format: 'receipts.{tx_id}.{index}.log.{id}',
         wildcard: 'receipts.*.*.log.*',
-        props: {
+        fields: {
           tx_id: {
             type: 'B256',
           },
@@ -400,7 +400,7 @@ export const subjectsDefinitions = {
         subject: 'ReceiptsLogDataSubject',
         format: 'receipts.{tx_id}.{index}.log_data.{id}',
         wildcard: 'receipts.*.*.log_data.*',
-        props: {
+        fields: {
           tx_id: {
             type: 'B256',
           },
@@ -417,7 +417,7 @@ export const subjectsDefinitions = {
         subject: 'ReceiptsTransferSubject',
         format: 'receipts.{tx_id}.{index}.transfer.{from}.{to}.{asset_id}',
         wildcard: 'receipts.*.*.transfer.*.*.*',
-        props: {
+        fields: {
           tx_id: {
             type: 'B256',
           },
@@ -440,7 +440,7 @@ export const subjectsDefinitions = {
         subject: 'ReceiptsTransferOutSubject',
         format: 'receipts.{tx_id}.{index}.transfer_out.{from}.{to}.{asset_id}',
         wildcard: 'receipts.*.*.transfer_out.*.*.*',
-        props: {
+        fields: {
           tx_id: {
             type: 'B256',
           },
@@ -463,7 +463,7 @@ export const subjectsDefinitions = {
         subject: 'ReceiptsMintSubject',
         format: 'receipts.{tx_id}.{index}.mint.{contract_id}.{sub_id}',
         wildcard: 'receipts.*.*.mint.*.*',
-        props: {
+        fields: {
           tx_id: {
             type: 'B256',
           },
@@ -483,7 +483,7 @@ export const subjectsDefinitions = {
         subject: 'ReceiptsBurnSubject',
         format: 'receipts.{tx_id}.{index}.burn.{contract_id}.{sub_id}',
         wildcard: 'receipts.*.*.burn.*.*',
-        props: {
+        fields: {
           tx_id: {
             type: 'B256',
           },
@@ -503,7 +503,7 @@ export const subjectsDefinitions = {
         subject: 'ReceiptsScriptResultSubject',
         format: 'receipts.{tx_id}.{index}.script_result',
         wildcard: 'receipts.*.*.script_result',
-        props: {
+        fields: {
           tx_id: {
             type: 'B256',
           },
@@ -517,7 +517,7 @@ export const subjectsDefinitions = {
         subject: 'ReceiptsMessageOutSubject',
         format: 'receipts.{tx_id}.{index}.message_out.{sender}.{recipient}',
         wildcard: 'receipts.*.*.message_out.*.*',
-        props: {
+        fields: {
           tx_id: {
             type: 'B256',
           },
@@ -543,14 +543,14 @@ export const subjectsDefinitions = {
         subject: 'TransactionsByIdSubject',
         format: 'by_id.transactions.{tx_id}.{index}.{id_kind}.{id_value}',
         wildcard: 'by_id.transactions.>',
-        props: byIdProps,
+        fields: byIdFields,
       },
       generic: {
         name: 'Transaction',
         subject: 'TransactionsSubject',
         format: 'transactions.{block_height}.{index}.{tx_id}.{status}.{kind}',
         wildcard: 'transactions.>',
-        props: {
+        fields: {
           block_height: {
             type: 'BlockHeight',
           },
@@ -577,7 +577,7 @@ export const subjectsDefinitions = {
     subject: 'LogsSubject',
     format: 'logs.{block_height}.{tx_id}.{receipt_index}.{log_id}',
     wildcard: 'logs.>',
-    props: {
+    fields: {
       block_height: {
         type: 'BlockHeight',
       },
@@ -597,7 +597,7 @@ export const subjectsDefinitions = {
     subject: 'UtxosSubject',
     format: 'utxos.{utxo_type}.{hash}',
     wildcard: 'utxos.>',
-    props: {
+    fields: {
       utxo_type: {
         type: 'UtxoType',
         options: utxoTypeOptions,
@@ -614,20 +614,20 @@ export type SelectOption = {
   label: string;
 };
 
-export type PropOptions = {
+export type FieldOptions = {
   type: string;
   options?: SelectOption[];
 };
 
-export type FormProp = {
+export type FormField = {
   name: string;
   type: string;
   options?: SelectOption[];
   value?: string;
 };
 
-export type PropsObj = {
-  [key: string]: PropOptions;
+export type Fields = {
+  [key: string]: FieldOptions;
 };
 
 export type ModuleBase = {
@@ -638,7 +638,7 @@ export type ModuleBase = {
 export type SimpleModule = ModuleBase & {
   subject: string;
   format: string;
-  props: PropsObj;
+  fields: Fields;
 };
 
 export type VariantDefinition = {
@@ -646,7 +646,7 @@ export type VariantDefinition = {
   subject: string;
   format: string;
   wildcard: string;
-  props: PropsObj;
+  fields: Fields;
 };
 
 export type VariantModule = ModuleBase & {
