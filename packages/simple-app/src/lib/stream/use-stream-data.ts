@@ -1,14 +1,14 @@
 import {
-  BlockStream,
+  BlocksStream,
   Client,
   ClientOpts,
-  InputStream,
-  LogStream,
-  OutputStream,
-  ReceiptStream,
+  InputsStream,
+  LogsStream,
+  OutputsStream,
+  ReceiptsStream,
   type Stream,
   type Subscription,
-  TransactionStream,
+  TransactionsStream,
 } from '@fuels/streams';
 import { createActorContext } from '@xstate/react';
 import {
@@ -48,17 +48,17 @@ async function getStreamFromModule(
 ): Promise<Stream> {
   switch (mod) {
     case 'blocks':
-      return BlockStream.init(client);
+      return BlocksStream.init(client);
     case 'transactions':
-      return TransactionStream.init(client);
+      return TransactionsStream.init(client);
     case 'logs':
-      return LogStream.init(client);
+      return LogsStream.init(client);
     case 'inputs':
-      return InputStream.init(client);
+      return InputsStream.init(client);
     case 'outputs':
-      return OutputStream.init(client);
+      return OutputsStream.init(client);
     case 'receipts':
-      return ReceiptStream.init(client);
+      return ReceiptsStream.init(client);
     default:
       throw new Error(`Unsupported module type: ${mod}`);
   }

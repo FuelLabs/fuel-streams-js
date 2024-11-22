@@ -1,5 +1,5 @@
 import chalk from 'chalk';
-import { Client, ClientOpts, InputStream, InputsSubject } from '../../src';
+import { Client, ClientOpts, InputsStream, InputsSubject } from '../../src';
 import { handleUnhandledError, printHeader } from '../helpers';
 
 async function main() {
@@ -7,8 +7,8 @@ async function main() {
 
   const opts = new ClientOpts();
   const client = await Client.connect(opts);
-  const stream = await InputStream.init(client);
-  const subscription = await stream.subscribeWithSubject(InputsSubject.all());
+  const stream = await InputsStream.init(client);
+  const subscription = await stream.subscribeWithSubject(InputsSubject.build());
 
   for await (const msg of subscription) {
     console.log(chalk.blue(`Received input message: ${msg.key}`));

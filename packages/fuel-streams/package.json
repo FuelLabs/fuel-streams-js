@@ -6,7 +6,8 @@
   "homepage": "https://github.com/FuelLabs/fuel-streams-js",
   "main": "./src/index.ts",
   "exports": {
-    ".": "./src/index.ts"
+    ".": "./src/index.ts",
+    "./subjects-defs": "./src/subjects-defs.ts"
   },
   "publishConfig": {
     "main": "./dist/index.js",
@@ -18,6 +19,12 @@
         "require": "./dist/index.js",
         "default": "./dist/index.js",
         "types": "./dist/index.d.ts"
+      },
+      "./subjects-defs": {
+        "import": "./dist/subjects-defs.mjs",
+        "require": "./dist/subjects-defs.js",
+        "default": "./dist/subjects-defs.js",
+        "types": "./dist/subjects-defs.d.ts"
       }
     }
   },

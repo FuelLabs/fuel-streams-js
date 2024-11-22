@@ -2,7 +2,7 @@ import chalk from 'chalk';
 import {
   Client,
   ClientOpts,
-  TransactionStream,
+  TransactionsStream,
   TransactionsSubject,
 } from '../../src';
 import { handleUnhandledError, printHeader } from '../helpers';
@@ -12,9 +12,9 @@ async function main() {
 
   const opts = new ClientOpts();
   const client = await Client.connect(opts);
-  const stream = await TransactionStream.init(client);
+  const stream = await TransactionsStream.init(client);
   const subscription = await stream.subscribeWithSubject(
-    TransactionsSubject.all(),
+    TransactionsSubject.build(),
   );
 
   for await (const msg of subscription) {

@@ -1,9 +1,10 @@
 import chalk from 'chalk';
+import { Address } from 'fuels';
 import {
   Client,
   ClientOpts,
-  ReceiptStream,
   ReceiptsCallSubject,
+  ReceiptsStream,
 } from '../../src';
 import { handleUnhandledError, printHeader } from '../helpers';
 
@@ -12,12 +13,13 @@ async function main() {
 
   const opts = new ClientOpts();
   const client = await Client.connect(opts);
-  const stream = await ReceiptStream.init(client);
+  const stream = await ReceiptsStream.init(client);
 
-  // Create a filtered subject
-  const filteredSubject = new ReceiptsCallSubject()
-    .withFrom('0x0000000000000000000000000000000000000000')
-    .withTo('0x0000000000000000000000000000000000000000');
+  // Create a filtered subject using build
+  const filteredSubject = ReceiptsCallSubject.build({
+    from: Address.fromString('0x0000000000000000000000000000000000000000'),
+    to: Address.fromString('0x0000000000000000000000000000000000000000'),
+  });
 
   const consumer = await stream.subscribeConsumer({
     filterSubjects: [filteredSubject],

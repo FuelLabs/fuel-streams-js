@@ -3,7 +3,7 @@ import { defineConfig } from 'tsup';
 
 export default defineConfig((options) => ({
   ...baseConfig(options, { withReact: false }),
-  entry: ['src/index.ts'],
+  entry: ['src/index.ts', 'src/subjects-defs.ts'],
   external: [],
   minify: 'terser',
   dts: true,
