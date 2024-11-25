@@ -20,17 +20,6 @@ import type {
   IdentifierKind,
 } from '../../types';
 import { SubjectBase } from '../subject-base';
-
-export enum OutputsWildcard {
-  All = 'outputs.>',
-  ById = 'by_id.outputs.>',
-  Coin = 'outputs.coin.>',
-  Contract = 'outputs.contract.>',
-  Change = 'outputs.change.>',
-  Variable = 'outputs.variable.>',
-  ContractCreated = 'outputs.contract_created.>',
-}
-
 type OutputsFields = {
   txId: Bytes32;
   index: number;

@@ -8,11 +8,6 @@
 
 import type { Address, BlockHeight } from '../../types';
 import { SubjectBase } from '../subject-base';
-
-export enum BlocksWildcard {
-  All = 'blocks.>',
-}
-
 type BlocksFields = {
   producer: Address;
   height: BlockHeight;

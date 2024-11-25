@@ -8,11 +8,6 @@
 
 import type { MessageId, UtxoType } from '../../types';
 import { SubjectBase } from '../subject-base';
-
-export enum UtxosWildcard {
-  All = 'utxos.>',
-}
-
 type UtxosFields = {
   utxoType: UtxoType;
   hash: MessageId;

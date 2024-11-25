@@ -8,11 +8,6 @@
 
 import type { BlockHeight, Bytes32 } from '../../types';
 import { SubjectBase } from '../subject-base';
-
-export enum LogsWildcard {
-  All = 'logs.>',
-}
-
 type LogsFields = {
   blockHeight: BlockHeight;
   txId: Bytes32;

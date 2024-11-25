@@ -9,59 +9,7 @@ import type { QueuedIterator } from '@nats-io/nats-core';
 import type { SubjectBase } from './modules/subject-base';
 import type { Client } from './nats-client';
 
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-type GenericRecord = Record<string, any>;
 export { DeliverPolicy };
-
-export abstract class Streameable<_T extends GenericRecord> {
-  abstract name(): string;
-  abstract wildcards(): string[];
-}
-
-export abstract class BaseStreameable<
-  T extends GenericRecord,
-  W extends Record<string, string>,
-> extends Streameable<T> {
-  constructor(
-    public payload: T,
-    private streamName: string,
-    private wildcardEnum: W,
-  ) {
-    super();
-  }
-
-  name(): string {
-    return this.streamName;
-  }
-
-  wildcards(): string[] {
-    return Object.values(this.wildcardEnum);
-  }
-}
-
-export class StreamFactory<S extends Streameable<GenericRecord>> {
-  stream!: Stream;
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  private static streams = new Map<string, StreamFactory<any>>();
-  private constructor(readonly bucketName: string) {}
-
-  public static get<S extends Streameable<GenericRecord>>(
-    name: string,
-  ): StreamFactory<S> {
-    if (!StreamFactory.streams.has(name)) {
-      StreamFactory.streams.set(name, new StreamFactory<S>(name));
-    }
-    return StreamFactory.streams.get(name) as StreamFactory<S>;
-  }
-
-  async init(client: Client) {
-    if (!this.stream) {
-      console.log(`Creating stream for ${this.bucketName}`);
-      this.stream = await Stream.create<S>(client, this.bucketName);
-    }
-    return this.stream;
-  }
-}
 
 export interface SubscribeConsumerConfig {
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
@@ -73,21 +21,25 @@ export class Stream {
   #store: KV;
   #client: Client;
   #name: string;
+  private static streams = new Map<string, Stream>();
 
-  constructor(name: string, store: KV, client: Client) {
+  private constructor(name: string, store: KV, client: Client) {
     this.#name = name;
     this.#store = store;
     this.#client = client;
   }
 
-  static async create<_T extends Streameable<GenericRecord>>(
-    client: Client,
-    bucketName: string,
-  ) {
+  static async get(client: Client, bucketName: string) {
     const namespace = client.opts?.getNamespace();
     const storeName = namespace?.streamName(bucketName) ?? bucketName;
-    const store = await client.getOrCreateKvStore(storeName, { history: 1 });
-    return new Stream(storeName, store, client);
+
+    if (!Stream.streams.has(storeName)) {
+      console.log(`Creating stream for ${storeName}`);
+      const store = await client.getOrCreateKvStore(storeName, { history: 1 });
+      Stream.streams.set(storeName, new Stream(storeName, store, client));
+    }
+
+    return Stream.streams.get(storeName)!;
   }
 
   getStore(): KV {

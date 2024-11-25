@@ -15,12 +15,6 @@ import type {
   TransactionStatus,
 } from '../../types';
 import { SubjectBase } from '../subject-base';
-
-export enum TransactionsWildcard {
-  All = 'transactions.>',
-  ById = 'by_id.transactions.>',
-}
-
 type TransactionsFields = {
   blockHeight: BlockHeight;
   index: number;

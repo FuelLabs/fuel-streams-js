@@ -85,48 +85,15 @@ export abstract class SubjectBase<TFields extends Record<string, unknown>> {
 function generateStream(moduleName: string) {
   const pascalModuleName = v.capitalize(moduleName);
   const streamName = `${pascalModuleName}Stream`;
-  const streamedName = `Streamed${pascalModuleName}`;
-  const payloadType = pascalModuleName.slice(0, pascalModuleName.length - 1);
-
   return `import type { Client } from '../../nats-client';
-import { StreamNames, type ${payloadType} } from '../../types';
-import { BaseStreameable, StreamFactory } from '../../stream';
-import { ${pascalModuleName}Wildcard } from './subjects';
-
-class ${streamedName} extends BaseStreameable<${payloadType}, typeof ${pascalModuleName}Wildcard> {
-  constructor(payload: ${payloadType}) {
-    super(payload, StreamNames.${pascalModuleName}, ${pascalModuleName}Wildcard);
-  }
-}
+import { Stream } from '../../stream';
+import { StreamNames } from '../../types';
 
 // biome-ignore lint/complexity/noStaticOnlyClass: <explanation>
 export class ${streamName} {
   static async init(client: Client) {
-    const stream = StreamFactory.get<${streamedName}>(StreamNames.${pascalModuleName});
-    return stream.init(client);
+    return Stream.get(client, StreamNames.${pascalModuleName});
   }
-}`;
-}
-
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
-function generateWildcardEnum(moduleName: string, moduleConfig: any) {
-  const pascalModuleName = v.capitalize(moduleName);
-  const wildcards = [`All = '${moduleConfig.wildcard}'`];
-
-  if ('variants' in moduleConfig) {
-    Object.entries(moduleConfig.variants).forEach(
-      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-      ([key, variant]: [string, any]) => {
-        if (key === 'generic') return;
-
-        const variantName = v.capitalize(v.camelCase(key));
-        wildcards.push(`${variantName} = '${variant.wildcard}'`);
-      },
-    );
-  }
-
-  return `export enum ${pascalModuleName}Wildcard {
-  ${wildcards.join(',\n  ')}
 }`;
 }
 
@@ -200,7 +167,7 @@ function getUsedTypes(fields: Record<string, any>): Set<string> {
 }
 
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-async function generateModuleSubjects(moduleName: string, moduleConfig: any) {
+async function generateModuleSubjects(_moduleName: string, moduleConfig: any) {
   // Generate list of subjects in this file
   const subjectNames: string[] = [];
   if ('variants' in moduleConfig) {
@@ -243,9 +210,6 @@ async function generateModuleSubjects(moduleName: string, moduleConfig: any) {
       .sort()
       .join(', ')} } from '../../types';\n`;
   }
-
-  content += '\n';
-  content += `${generateWildcardEnum(moduleName, moduleConfig)}\n\n`;
 
   if ('variants' in moduleConfig) {
     // First generate the base interface and generic subject if there's a generic variant

@@ -28,25 +28,6 @@ import type {
   IdentifierKind,
 } from '../../types';
 import { SubjectBase } from '../subject-base';
-
-export enum ReceiptsWildcard {
-  All = 'receipts.>',
-  ById = 'by_id.receipts.>',
-  Call = 'receipts.*.*.call.*.*.*',
-  Return = 'receipts.*.*.return.*',
-  ReturnData = 'receipts.*.*.return_data.*',
-  Panic = 'receipts.*.*.panic.*',
-  Revert = 'receipts.*.*.revert.*',
-  Log = 'receipts.*.*.log.*',
-  LogData = 'receipts.*.*.log_data.*',
-  Transfer = 'receipts.*.*.transfer.*.*.*',
-  TransferOut = 'receipts.*.*.transfer_out.*.*.*',
-  Mint = 'receipts.*.*.mint.*.*',
-  Burn = 'receipts.*.*.burn.*.*',
-  ScriptResult = 'receipts.*.*.script_result',
-  MessageOut = 'receipts.*.*.message_out.*.*',
-}
-
 type ReceiptsFields = {
   txId: Bytes32;
   index: number;
