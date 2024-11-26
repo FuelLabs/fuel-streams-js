@@ -6,7 +6,6 @@ import v from 'voca';
 import { useDynamicForm } from '../lib/form';
 import { useTheme } from './theme-provider';
 import { CardContent } from './ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 
 function getFuelExample(
   stream: string,
