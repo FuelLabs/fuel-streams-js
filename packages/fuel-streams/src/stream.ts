@@ -30,12 +30,11 @@ export class Stream {
   }
 
   static async get(client: Client, bucketName: string) {
-    const namespace = client.opts?.getNamespace();
-    const storeName = namespace?.streamName(bucketName) ?? bucketName;
+    const storeName = client.opts?.streamName(bucketName) ?? bucketName;
 
     if (!Stream.streams.has(storeName)) {
       console.log(`Creating stream for ${storeName}`);
-      const store = await client.getOrCreateKvStore(storeName, { history: 1 });
+      const store = await client.getOrCreateKvStore(storeName);
       Stream.streams.set(storeName, new Stream(storeName, store, client));
     }
 
@@ -62,7 +61,7 @@ export class Stream {
     const state = status.streamInfo.state;
     const streamName = this.#name;
     const consumers: Array<ConsumerInfo> = [];
-    const list = this.#client.getJetstreamManager().consumers.list(streamName);
+    const list = this.#client.jetStreamManager.consumers.list(streamName) ?? [];
 
     for await (const item of list) {
       consumers.push(item);
@@ -76,44 +75,36 @@ export class Stream {
   }
 
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  async subscribeWithSubject<S extends SubjectBase<any>>(subject: S) {
+  async subscribe<S extends SubjectBase<any>>(subject: S) {
     const kvOpts = { key: subject.parse() } as KvWatchOptions;
-    return this.#store.watch(kvOpts);
-  }
-
-  async subscribe(subject: string) {
-    const kvOpts = { key: subject } as KvWatchOptions;
     return this.#store.watch(kvOpts);
   }
 
   async subscribeConsumer(
     userConfig: Pick<SubscribeConsumerConfig, 'filterSubjects'>,
   ) {
-    const config = this.extendConsumerConfig(userConfig);
-    const consumer = await this.createConsumer(config);
-    return this.#client.getJetstream().consumers.get(consumer.name);
-  }
-
-  private extendConsumerConfig(userConfig: Partial<SubscribeConsumerConfig>) {
-    return {
-      name: `KV_${this.#name}`,
+    return this.createConsumer({
       filter_subjects: userConfig.filterSubjects?.map((i) => i.parse()),
       deliver_policy: DeliverPolicy.New,
       ack_policy: AckPolicy.None,
-    } as ConsumerConfig;
+    });
   }
 
   async createConsumer(config: Partial<ConsumerConfig>) {
     const extendedConfig = this.prefixFilterSubjects(config);
-    console.log(extendedConfig);
-    const streamName = `KV_${this.#name}`;
-    return this.#client
-      .getJetstreamManager()
-      .consumers.add(streamName, extendedConfig);
+    const streamName = this.getKvStreamName();
+    return this.#client.jetStream.consumers.getPushConsumer(
+      streamName,
+      extendedConfig,
+    );
   }
 
   async flushAwait() {
     return this.#client.closeSafely();
+  }
+
+  private getKvStreamName() {
+    return `KV_${this.#name}`;
   }
 }
 

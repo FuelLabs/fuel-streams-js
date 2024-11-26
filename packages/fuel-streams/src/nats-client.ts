@@ -1,14 +1,8 @@
-import {
-  type JetStreamClient,
-  type JetStreamManager,
-  type JetStreamManagerOptions,
-  jetstream,
-  jetstreamManager,
-} from '@nats-io/jetstream';
-import { type KV, type KvOptions, Kvm } from '@nats-io/kv';
+import type { JetStreamClient, JetStreamManager } from '@nats-io/jetstream';
+import { type KvOptions, Kvm } from '@nats-io/kv';
 import type { NatsConnection, Status } from '@nats-io/nats-core';
 import { wsconnect } from '@nats-io/transport-node';
-import type { ClientOpts } from './client-opts';
+import { ClientOpts, Network } from './client-opts';
 import { ClientStatus } from './constants';
 
 export type StatusStreamCallback = (status: ClientStatus) => void;
@@ -33,24 +27,20 @@ const mapEventStatus = (status: Status['type']) => {
   }
 };
 
-interface NatsClient {
-  start(opts: ClientOpts): Promise<void>;
-  getClientOpts(): ClientOpts;
-  closeSafely(): Promise<boolean>;
-  getStatusStream(callback: StatusStreamCallback): () => void;
-  getOrCreateKvStore(storeName: string, opts: Partial<KvOptions>): Promise<KV>;
-}
+type Opts = {
+  network?: keyof typeof Network;
+};
 
-export class Client implements NatsClient {
+export class Client {
   opts?: ClientOpts;
+  kvm!: Kvm;
+  jetStreamManager!: JetStreamManager;
+  jetStream!: JetStreamClient;
   private natsConnection?: NatsConnection;
-  private jetstreamManager?: JetStreamManager;
-  private jetstream?: JetStreamClient;
-  private kvm?: Kvm;
   private static instance?: Client;
   private constructor() {}
 
-  static async connect(opts: ClientOpts) {
+  static async connect(opts: Opts = { network: 'mainnet' }) {
     if (!Client.instance) {
       Client.instance = new Client();
       await Client.instance.start(opts);
@@ -58,23 +48,23 @@ export class Client implements NatsClient {
     return Client.instance;
   }
 
-  static getInstance(): Client {
+  static getInstance() {
     if (!Client.instance) {
       throw new Error('Client not initialized. Call connect() first.');
     }
     return Client.instance;
   }
 
-  async start(opts: ClientOpts) {
+  async start(clientOpts: Opts) {
+    const opts = new ClientOpts(Network[clientOpts.network ?? 'mainnet']);
     const nc = await wsconnect(opts.connectOpts());
     console.info(`Successfully connected to ${nc.getServer()} !`);
-    this.jetstreamManager = await jetstreamManager(nc);
-    this.jetstream = jetstream(nc, {
-      timeout: 10_000,
-    } as JetStreamManagerOptions);
-    this.kvm = new Kvm(this.jetstream);
+
+    this.kvm = new Kvm(nc);
     this.natsConnection = nc;
     this.opts = opts;
+    this.jetStreamManager = await this.kvm.js.jetstreamManager();
+    this.jetStream = this.jetStreamManager.jetstream();
   }
 
   getNatsConnection() {
@@ -82,11 +72,11 @@ export class Client implements NatsClient {
   }
 
   getJetstream() {
-    return this.jetstream as JetStreamClient;
+    return this.jetStream;
   }
 
   getJetstreamManager() {
-    return this.jetstreamManager as JetStreamManager;
+    return this.jetStreamManager;
   }
 
   getClientOpts() {
@@ -157,11 +147,10 @@ export class Client implements NatsClient {
     return () => controller.abort();
   }
 
-  async getOrCreateKvStore(storeName: string, opts: Partial<KvOptions>) {
+  async getOrCreateKvStore(storeName: string, opts: Partial<KvOptions> = {}) {
     if (!this.kvm) {
       throw new Error('Kvm client is not set.');
     }
-    // open or create the kv store
     return this.kvm?.create(storeName, opts);
   }
 }

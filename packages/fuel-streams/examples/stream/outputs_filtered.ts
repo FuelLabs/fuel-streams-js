@@ -1,18 +1,12 @@
 import chalk from 'chalk';
 import { Address } from 'fuels';
-import {
-  Client,
-  ClientOpts,
-  OutputsCoinSubject,
-  OutputsStream,
-} from '../../src';
+import { Client, OutputsCoinSubject, OutputsStream } from '../../src';
 import { handleUnhandledError, printHeader } from '../helpers';
 
 async function main() {
   printHeader('Filtered Output Streams Example');
 
-  const opts = new ClientOpts();
-  const client = await Client.connect(opts);
+  const client = await Client.connect({ network: 'testnet' });
   const stream = await OutputsStream.init(client);
 
   // Create a filtered subject using build
@@ -24,7 +18,7 @@ async function main() {
     filterSubjects: [filteredSubject],
   });
 
-  const iter = await consumer.consume({ max_messages: 10 });
+  const iter = await consumer.consume();
   for await (const msg of iter) {
     console.log(chalk.blue(`Received filtered output message: ${msg.subject}`));
   }

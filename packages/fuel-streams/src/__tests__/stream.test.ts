@@ -1,4 +1,3 @@
-import { ClientOpts } from 'src/client-opts';
 import { BlocksStream } from 'src/modules/blocks';
 import { Client } from 'src/nats-client';
 import type { Stream } from 'src/stream';
@@ -35,7 +34,7 @@ describe('BlockStream', () => {
   let stream: Stream;
 
   beforeEach(async () => {
-    client = await Client.connect(new ClientOpts());
+    client = await Client.connect({ network: 'testnet' });
     stream = await BlocksStream.init(client);
   });
 
