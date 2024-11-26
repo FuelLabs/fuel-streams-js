@@ -1,3 +1,5 @@
+import { useStreamData } from '@/lib/stream/use-stream-data';
+import type { Network } from '@fuels/streams';
 import type { ModuleKeys } from '@fuels/streams/subjects-def';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import { vs } from 'react-syntax-highlighter/dist/esm/styles/hljs';
@@ -8,6 +10,7 @@ import { useTheme } from './theme-provider';
 import { CardContent } from './ui/card';
 
 function getFuelExample(
+  network: keyof typeof Network,
   stream: string,
   subjectClass: string | null,
   selectedFields: Record<string, string>,
@@ -25,7 +28,6 @@ function getFuelExample(
 
   return `import {
   Client,
-  ClientOpts,
   ${stream},
   ${subjectImport}
 } from '@fuels/streams';
@@ -33,10 +35,9 @@ function getFuelExample(
 ${subjectInit}
 
 async function main() {
-  const opts = new ClientOpts();
-  const client = await Client.connect(opts);
+  const client = await Client.connect({ network: '${network}' });
   const stream = await ${stream}.init(client);
-  const subscription = await stream.subscribeWithSubject(subject);
+  const subscription = await stream.subscribe(subject);
   
   for await (const msg of subscription) {
     console.log('Received message:', msg.json());
@@ -49,6 +50,7 @@ main().catch(console.error);`;
 }
 
 function getExamples(
+  network: keyof typeof Network,
   subject: string | null = 'blocks.>',
   selectedModule: ModuleKeys = 'blocks',
   subjectClass: string | null = 'BlocksSubject',
@@ -57,7 +59,7 @@ function getExamples(
   const stream = v.capitalize(`${selectedModule}Stream`);
 
   return {
-    fuel: getFuelExample(stream, subjectClass, selectedFields),
+    fuel: getFuelExample(network, stream, subjectClass, selectedFields),
     natsNode: `import { connect } from 'nats';
 
 async function main() {
@@ -111,8 +113,10 @@ export function CodeExamples() {
   const { subject, selectedModule, selectedFields, subjectClass } =
     useDynamicForm();
   const { isTheme } = useTheme();
+  const { network } = useStreamData();
   const codeTheme = isTheme('dark') ? vs2015 : vs;
   const examples = getExamples(
+    network,
     subject,
     selectedModule ?? 'blocks',
     subjectClass,
