@@ -1,6 +1,6 @@
 import { subjectsDefinitions } from '@fuels/streams/subjects-def';
 import { describe, expect, it } from 'vitest';
-import { SubjectBuilder, fieldsToArray } from '../form-helpers';
+import { SubjectBuilder, fieldsToArray } from '../form/form-helpers';
 
 describe('SubjectBuilder', () => {
   const builder = new SubjectBuilder(subjectsDefinitions);

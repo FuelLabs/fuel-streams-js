@@ -1,9 +1,9 @@
 import {
   BlocksStream,
   Client,
-  ClientOpts,
   InputsStream,
   LogsStream,
+  type Network,
   OutputsStream,
   ReceiptsStream,
   type Stream,
@@ -12,6 +12,8 @@ import {
 } from '@fuels/streams';
 import type { ModuleKeys } from '@fuels/streams/subjects-def';
 import { createActorContext } from '@xstate/react';
+// import { createBrowserInspector } from '@statelyai/inspect';
+import { toast } from 'sonner';
 import {
   type StateFrom,
   assign,
@@ -19,7 +21,6 @@ import {
   fromPromise,
   setup,
 } from 'xstate';
-// import { createBrowserInspector } from '@statelyai/inspect';
 
 // const { inspect } = createBrowserInspector();
 
@@ -30,16 +31,20 @@ export type StreamData = {
 };
 
 type StreamEvent =
-  | { type: 'CONNECTED'; client: Client }
   | { type: 'START'; subject: string; selectedModule: ModuleKeys }
   | { type: 'STOP' }
   | { type: 'CLEAR' }
-  | { type: 'DATA'; data: StreamData };
+  | { type: 'DATA'; data: StreamData }
+  | { type: 'CHANGE_NETWORK'; network: string }
+  | { type: 'CHANGE_TAB'; tab: 'data' | 'code' };
 
 type StreamActorInput = {
   subject: string;
   selectedModule: ModuleKeys;
-  client: Client;
+};
+
+type ClientActorInput = {
+  network: keyof typeof Network;
 };
 
 async function getStreamFromModule(
@@ -64,9 +69,16 @@ async function getStreamFromModule(
   }
 }
 
-const clientActor = fromPromise(async () => {
-  return Client.connect(new ClientOpts());
-});
+const createClientActor = fromPromise<Client, ClientActorInput>(
+  async ({ input }) => Client.connect(input),
+);
+
+const switchNetworkActor = fromPromise<Client, ClientActorInput>(
+  async ({ input: { network } }) => {
+    const client = Client.getInstance();
+    return client.switchNetwork(network);
+  },
+);
 
 const subscriptionActor = fromCallback<StreamEvent, StreamActorInput>(
   ({ sendBack, input }) => {
@@ -74,9 +86,10 @@ const subscriptionActor = fromCallback<StreamEvent, StreamActorInput>(
     const abortController = new AbortController();
 
     (async () => {
-      const { client, selectedModule, subject } = input;
+      const { selectedModule, subject } = input;
+      const client = Client.getInstance();
       const stream = await getStreamFromModule(client, selectedModule);
-      subscription = await stream.subscribe(subject);
+      subscription = await stream.subscribeWithString(subject);
 
       if (abortController.signal.aborted) return;
       for await (const msg of subscription) {
@@ -93,18 +106,20 @@ const subscriptionActor = fromCallback<StreamEvent, StreamActorInput>(
   },
 );
 
-const streamMachine = setup({
+export const streamMachine = setup({
   types: {
     context: {} as {
-      client: Client | null;
       subject: string | null;
       selectedModule: ModuleKeys | null;
       data: StreamData[];
+      network: keyof typeof Network;
+      tab: 'data' | 'code';
     },
   },
   actors: {
     subscriptionActor,
-    clientActor,
+    createClientActor,
+    switchNetworkActor,
   },
   actions: {
     setSubjectAndModule: assign({
@@ -125,37 +140,56 @@ const streamMachine = setup({
         return [event.data].concat(context.data);
       },
     }),
-    setClient: assign({
-      client: ({ event }) => {
-        if (event.type !== 'CONNECTED') return null;
-        return event.client;
-      },
-    }),
     clearData: assign({
-      data: () => {
-        return [];
+      data: () => [],
+    }),
+    setNetwork: assign({
+      network: ({ event }) => {
+        if (event.type !== 'CHANGE_NETWORK') return 'mainnet';
+        return event.network;
       },
     }),
+    setTab: assign({
+      tab: ({ event }) => {
+        if (event.type !== 'CHANGE_TAB') return 'data';
+        return event.tab;
+      },
+    }),
+    clearState: assign({
+      subject: () => null,
+      selectedModule: () => null,
+      data: () => [],
+    }),
+    notifyNetworkChange: ({ context }) => {
+      toast.success(`Successfully connected to ${context.network}`);
+    },
+    notifyNetworkError: () => {
+      toast.error('Failed to connect to network');
+    },
   },
 }).createMachine({
   id: 'streamMachine',
   initial: 'connecting',
   context: () => ({
-    client: null,
     subject: null,
     selectedModule: null,
     data: [],
+    network: 'mainnet',
+    tab: 'data',
   }),
   states: {
     connecting: {
       invoke: {
         id: 'connect',
-        src: 'clientActor',
+        src: 'createClientActor',
+        input: ({ context }) => ({
+          network: context.network,
+        }),
         onDone: {
           target: 'idle',
-          actions: assign({
-            client: ({ event }) => event.output,
-          }),
+        },
+        onError: {
+          target: 'idle',
         },
       },
     },
@@ -169,8 +203,30 @@ const streamMachine = setup({
           actions: ['setSubjectAndModule'],
           target: 'subscribing',
         },
-        CLEAR: {
-          actions: ['clearData'],
+        CHANGE_NETWORK: {
+          target: 'switchingNetwork',
+          actions: ['setNetwork'],
+        },
+        CHANGE_TAB: {
+          actions: ['setTab'],
+        },
+      },
+    },
+    switchingNetwork: {
+      entry: ['clearState'],
+      invoke: {
+        id: 'switchNetwork',
+        src: 'switchNetworkActor',
+        input: ({ context }) => ({
+          network: context.network,
+        }),
+        onDone: {
+          target: 'idle',
+          actions: ['notifyNetworkChange'],
+        },
+        onError: {
+          target: 'idle',
+          actions: ['notifyNetworkError'],
         },
       },
     },
@@ -181,7 +237,6 @@ const streamMachine = setup({
         input: ({ context }) => ({
           selectedModule: context.selectedModule as ModuleKeys,
           subject: context.subject as string,
-          client: context.client as Client,
         }),
       },
       on: {
@@ -191,7 +246,16 @@ const streamMachine = setup({
         STOP: {
           target: 'idle',
         },
+        CHANGE_NETWORK: {
+          target: 'switchingNetwork',
+          actions: ['setNetwork'],
+        },
       },
+    },
+  },
+  on: {
+    CLEAR: {
+      actions: ['clearData'],
     },
   },
 });
@@ -200,8 +264,12 @@ type State = StateFrom<typeof streamMachine>;
 
 const selectors = {
   isSubscribing: (state: State) => state.matches('subscribing'),
-  isConnecting: (state: State) => state.matches('connecting'),
+  isConnecting: (state: State) => {
+    return state.matches('connecting') || state.matches('switchingNetwork');
+  },
   data: (state: State) => state.context.data,
+  network: (state: State) => state.context.network,
+  tab: (state: State) => state.context.tab,
 };
 
 export const StreamDataContext = createActorContext(streamMachine);
@@ -211,6 +279,8 @@ export function useStreamData() {
   const isSubscribing = StreamDataContext.useSelector(selectors.isSubscribing);
   const isConnecting = StreamDataContext.useSelector(selectors.isConnecting);
   const data = StreamDataContext.useSelector(selectors.data);
+  const network = StreamDataContext.useSelector(selectors.network);
+  const tab = StreamDataContext.useSelector(selectors.tab);
 
   function start(data: Omit<StreamActorInput, 'client'>) {
     actor.send({ type: 'START', ...data });
@@ -224,11 +294,25 @@ export function useStreamData() {
     actor.send({ type: 'CLEAR' });
   }
 
+  function changeNetwork(network: string) {
+    stop();
+    actor.send({ type: 'CHANGE_NETWORK', network });
+  }
+
+  function changeTab(tab: 'data' | 'code') {
+    stop();
+    actor.send({ type: 'CHANGE_TAB', tab });
+  }
+
   return {
     start,
     stop,
     clear,
+    changeNetwork,
+    changeTab,
     data,
+    network,
+    tab,
     isConnecting,
     isSubscribing,
   };

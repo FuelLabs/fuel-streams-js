@@ -1,17 +1,16 @@
 import chalk from 'chalk';
-import { Client, ClientOpts, LogsStream, LogsSubject } from '../../src';
+import { Client, LogsStream, LogsSubject } from '../../src';
 import { handleUnhandledError, printHeader } from '../helpers';
 
 async function main() {
   printHeader('Log Streams Example');
 
-  const opts = new ClientOpts();
-  const client = await Client.connect(opts);
+  const client = await Client.connect({ network: 'testnet' });
   const stream = await LogsStream.init(client);
-  const subscription = await stream.subscribeWithSubject(LogsSubject.build());
+  const subscription = await stream.subscribe(LogsSubject.build());
 
   for await (const msg of subscription) {
-    console.log(chalk.blue(`Received log message: ${msg.key}`));
+    console.log(chalk.blue(`Received log message: ${msg.subject}`));
     // Here you could add more processing of the log message if needed
   }
 

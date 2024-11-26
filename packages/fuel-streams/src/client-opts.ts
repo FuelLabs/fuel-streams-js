@@ -3,34 +3,16 @@ import {
   usernamePasswordAuthenticator as connector,
 } from '@nats-io/nats-core';
 
-export class NatsNamespace {
-  static Fuel = 'fuel';
-  private namespace: string;
-
-  static default() {
-    return new NatsNamespace(NatsNamespace.Fuel);
-  }
-
-  constructor(namespace?: string) {
-    if (namespace) {
-      this.namespace = namespace;
-    } else {
-      this.namespace = NatsNamespace.Fuel;
-    }
-  }
-
-  subjectName(value: string) {
-    return `${this.namespace}.${value}`;
-  }
-
-  streamName(value: string) {
-    return `${this.namespace}_${value}`;
-  }
+export enum Network {
+  testnet = 'testnet',
+  mainnet = 'mainnet',
 }
 
 export class ClientOpts {
   private timeoutSecs = 5;
-  private namespace = NatsNamespace.default();
+  private namespace = 'fuel';
+
+  constructor(private readonly network: Network) {}
 
   getProviderUrl() {
     return this.url;
@@ -40,22 +22,24 @@ export class ClientOpts {
     return this.timeoutSecs;
   }
 
+  getNetwork() {
+    return this.network;
+  }
+
   static connId() {
-    return `connection-${ClientOpts.randomInt()}`;
+    return `connection-${randomInt()}`;
   }
 
   static randomInt() {
     return Math.floor(Math.random() * 1000000);
   }
 
-  withCustomNamespace(namespace: string) {
-    this.namespace = new NatsNamespace(namespace);
-    return this;
+  subjectName(value: string) {
+    return `${this.namespace}.${value}`;
   }
 
-  withDefaultNamespace() {
-    this.namespace = new NatsNamespace();
-    return this;
+  streamName(value: string) {
+    return `${this.namespace}_${value}`;
   }
 
   getNamespace() {
@@ -70,17 +54,24 @@ export class ClientOpts {
       servers: this.url,
       timeout: this.timeoutSecs * 1000,
       authenticator,
-      maxReconnectAttempts: 0,
-      reconnect: false,
+      maxReconnectAttempts: -1,
+      reconnect: true,
+      reconnectTimeWait: 2000,
+      maxReconnectTimeWait: 10000,
+      waitOnFirstConnect: true,
+      pingInterval: 10000,
+      maxPingOut: 3,
+      noEcho: true,
     } as ConnectionOptions;
   }
 
   get url() {
-    if (process.env.NODE_ENV === 'production') {
-      console.warn(
-        'Warning: Using insecure WebSocket connection. This is not recommended for production.',
-      );
-    }
-    return 'wss://stream-testnet.fuel.network:8443';
+    const subdomain =
+      this.network === Network.mainnet ? 'stream' : 'stream-testnet';
+    return `wss://${subdomain}.fuel.network:8443`;
   }
+}
+
+function randomInt() {
+  return Math.floor(Math.random() * 1000000);
 }

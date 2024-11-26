@@ -1,16 +1,10 @@
-import {
-  Client,
-  ClientOpts,
-  TransactionsByIdSubject,
-  TransactionsStream,
-} from '../../src';
+import { Client, TransactionsByIdSubject, TransactionsStream } from '../../src';
 import { handleUnhandledError, printHeader } from '../helpers';
 
 async function main() {
   printHeader('Filtered Transaction Streams Example');
 
-  const opts = new ClientOpts();
-  const client = await Client.connect(opts);
+  const client = await Client.connect({ network: 'testnet' });
   const stream = await TransactionsStream.init(client);
 
   // Create a filtered subject using build
@@ -19,7 +13,7 @@ async function main() {
     filterSubjects: [filteredSubject],
   });
 
-  const iter = await consumer.consume({ max_messages: 10 });
+  const iter = await consumer.consume();
   for await (const msg of iter) {
     console.log(msg.data);
   }
