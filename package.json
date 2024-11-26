@@ -17,8 +17,10 @@
     "lint:ci": "biome lint --max-diagnostics=1000 --diagnostic-level=error .",
     "packages:version": "node ./scripts/version.js",
     "prepare": "husky",
-    "test": "vitest",
-    "test:ci": "turbo run test -- --run --coverage.enabled --coverage.reporter=json-summary --coverage.reporter=json",
+    "test": "turbo test",
+    "test:e2e": "turbo test:e2e",
+    "test:coverage": "turbo test:coverage",
+    "test:ci": "turbo run test:coverage -- --coverage.enabled --coverage.reporter=json-summary --coverage.reporter=json",
     "ts:check": "turbo run ts:check"
   },
   "devDependencies": {
