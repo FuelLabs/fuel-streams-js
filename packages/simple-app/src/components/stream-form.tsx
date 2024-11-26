@@ -39,11 +39,7 @@ export function StreamForm() {
   }
 
   return (
-    <div
-      className="space-y-4"
-      role="form"
-      aria-label="Stream Configuration Form"
-    >
+    <div className="space-y-4" aria-label="Stream Configuration Form">
       <div className={variantOptions.length > 0 ? 'flex gap-4' : ''}>
         <div className={variantOptions.length > 0 ? 'w-1/2' : 'w-full'}>
           <label
@@ -61,7 +57,7 @@ export function StreamForm() {
                 <SelectItem
                   key={value}
                   value={value}
-                  aria-label={`Module option: ${label}`}
+                  aria-label={`Module: ${label}`}
                 >
                   {label}
                 </SelectItem>
@@ -97,7 +93,7 @@ export function StreamForm() {
                     <SelectItem
                       key={value}
                       value={value}
-                      aria-label={`Variant option: ${label}`}
+                      aria-label={`Variant: ${label}`}
                     >
                       {label}
                     </SelectItem>
@@ -141,7 +137,7 @@ export function StreamForm() {
                   <SelectItem
                     key={value}
                     value={value}
-                    aria-label={`${formatLabel(field.name)} option: ${label}`}
+                    aria-label={`${formatLabel(field.name)}: ${label}`}
                   >
                     {label}
                   </SelectItem>

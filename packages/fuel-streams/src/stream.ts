@@ -19,9 +19,8 @@ export class Stream {
   private store: KV;
   private client: Client;
   private name: string;
-  private static streams = new Map<string, Stream>();
 
-  private constructor(name: string, store: KV, client: Client) {
+  public constructor(name: string, store: KV, client: Client) {
     this.name = name;
     this.store = store;
     this.client = client;
@@ -29,14 +28,9 @@ export class Stream {
 
   static async get(client: Client, bucketName: string) {
     const storeName = client.opts?.streamName(bucketName) ?? bucketName;
-
-    if (!Stream.streams.has(storeName)) {
-      console.log(`Creating stream for ${storeName}`);
-      const store = await client.getOrCreateKvStore(storeName);
-      Stream.streams.set(storeName, new Stream(storeName, store, client));
-    }
-
-    return Stream.streams.get(storeName)!;
+    console.log(`Creating stream for ${storeName}`);
+    const store = await client.getOrCreateKvStore(storeName);
+    return new Stream(storeName, store, client);
   }
 
   getStore(): KV {

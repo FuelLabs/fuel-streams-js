@@ -39,6 +39,14 @@ describe('Fuel Streams Application', () => {
     expect(page.getByRole('combobox', { name: 'Select module' })).toBeTruthy();
     expect(page.getByRole('button', { name: 'Start Listening' })).toBeTruthy();
 
+    // Check initial network state
+    const networkSelect = page.getByRole('combobox', {
+      name: 'Select network',
+    });
+    expect(networkSelect).toBeTruthy();
+    const networkValue = await networkSelect.textContent();
+    expect(networkValue).toContain('Ignition Mainnet');
+
     // Check initial stream view state
     expect(
       page.getByRole('status', { name: 'No stream data available' }),
@@ -134,5 +142,54 @@ describe('Fuel Streams Application', () => {
       localStorage.getItem('fuel-streams-theme'),
     );
     expect(theme).toBe('dark');
+  });
+
+  test('should handle network switching', async () => {
+    // Get network select dropdown in the header and verify default state
+    const networkSelect = page.getByRole('combobox', {
+      name: 'Select network',
+    });
+    expect(networkSelect).toBeTruthy();
+    const initialNetworkValue = await networkSelect.textContent();
+    expect(initialNetworkValue).toContain('Ignition Mainnet');
+
+    // Click to open network options
+    await networkSelect.click();
+
+    // Select testnet
+    await page.getByRole('option', { name: 'Fuel Testnet' }).click();
+
+    // Wait for network switch notification
+    await page.waitForSelector('text=Successfully connected to testnet', {
+      state: 'visible',
+    });
+
+    // Start a stream to test network switching behavior
+    const moduleSelect = page.getByRole('combobox', { name: 'Select module' });
+    await moduleSelect.click();
+    await page.getByRole('option').first().click();
+
+    const startButton = page.getByRole('button', { name: 'Start Listening' });
+    await startButton.click();
+
+    // Switch network back to mainnet while streaming
+    await networkSelect.click();
+    await page.getByRole('option', { name: 'Ignition Mainnet' }).click();
+
+    // Wait for network switch notification
+    await page.waitForSelector('text=Successfully connected to mainnet', {
+      state: 'visible',
+    });
+
+    // Verify stream is reset after network switch
+    await page.waitForSelector('[aria-label="No stream data available"]', {
+      state: 'visible',
+    });
+    expect(page.getByLabel('No stream data available')).toBeTruthy();
+    expect(page.getByRole('button', { name: 'Start Listening' })).toBeTruthy();
+
+    // Verify final network state is mainnet
+    const finalNetworkValue = await networkSelect.textContent();
+    expect(finalNetworkValue).toContain('Ignition Mainnet');
   });
 });

@@ -16,12 +16,11 @@ export function StreamConfiguration({ className }: StreamConfigurationProps) {
   return (
     <Card
       className={cn('shadow-none rounded-none border-0', className)}
-      role="region"
       aria-label="Stream Configuration Panel"
     >
       <CardHeader layout="row" className="h-20 border-b mb-4">
         <div className="flex-1">
-          <CardTitle className="text-lg" role="heading" aria-level={2}>
+          <CardTitle className="text-lg" aria-level={2}>
             Stream Configuration
           </CardTitle>
           <CardDescription>

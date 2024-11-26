@@ -72,8 +72,12 @@ export function Header() {
           value={network}
           onValueChange={changeNetwork}
           disabled={isConnecting}
+          defaultValue="mainnet"
         >
-          <SelectTrigger className="h-9 gap-2 shadow-none">
+          <SelectTrigger
+            className="h-9 gap-2 shadow-none"
+            aria-label="Select network"
+          >
             {isConnecting ? (
               <Spinner className="text-muted-foreground/50" />
             ) : (
@@ -82,11 +86,15 @@ export function Header() {
                 className="text-muted-foreground/50"
               />
             )}
-            <SelectValue placeholder="Select network" />
+            <SelectValue placeholder="Select Network" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="mainnet">Ignition Mainnet</SelectItem>
-            <SelectItem value="testnet">Fuel Testnet</SelectItem>
+            <SelectItem value="mainnet" aria-label="Ignition Mainnet">
+              Ignition Mainnet
+            </SelectItem>
+            <SelectItem value="testnet" aria-label="Fuel Testnet">
+              Fuel Testnet
+            </SelectItem>
           </SelectContent>
         </Select>
         <div className="flex items-center gap-1 ml-6">

@@ -6,7 +6,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 // Mock the Stream class
 vi.mock('src/stream', () => ({
   Stream: {
-    streams: new Map(),
     get: vi.fn().mockImplementation(async (client, bucketName) => {
       const streamName = client.opts.streamName(bucketName);
       const mockAsyncIterator = {

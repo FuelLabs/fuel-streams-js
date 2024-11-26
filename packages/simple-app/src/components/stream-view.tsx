@@ -35,12 +35,11 @@ export function StreamView({ className }: StreamViewProps) {
   return (
     <Card
       className={cn('shadow-none rounded-none border-0', className)}
-      role="region"
       aria-label="Stream View Panel"
     >
       <CardHeader layout="row" className="h-20 border-b">
         <div className="flex-1">
-          <CardTitle className="text-lg" role="heading" aria-level={2}>
+          <CardTitle className="text-lg" aria-level={2}>
             {tab === 'data' ? 'Data Stream' : 'Code Examples'}
           </CardTitle>
           <CardDescription>
@@ -53,7 +52,6 @@ export function StreamView({ className }: StreamViewProps) {
       {subject && (
         <div
           className="flex justify-between items-center px-6 py-2 border-b"
-          role="status"
           aria-label="Current Subject Query"
         >
           <code className="text-sm text-muted-foreground">
@@ -104,7 +102,6 @@ function DataVisualization() {
             className={`flex items-center justify-center text-muted-foreground ${
               subject ? 'h-[calc(100vh-350px)]' : 'h-[calc(100vh-250px)]'
             }`}
-            role="status"
             aria-label="No stream data available"
           >
             No stream data available. Click "Start Listening" to begin receiving
@@ -125,7 +122,6 @@ function DataVisualization() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.4, ease: 'easeOut' }}
-                    role="article"
                     aria-label={`Stream data for ${item.subject}`}
                   >
                     <Card className="min-w-full w-full shadow-none rounded-sm">
