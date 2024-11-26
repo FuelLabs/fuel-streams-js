@@ -33,10 +33,14 @@ export function StreamView({ className }: StreamViewProps) {
   const { clear, tab } = useStreamData();
 
   return (
-    <Card className={cn('shadow-none rounded-none border-0', className)}>
+    <Card
+      className={cn('shadow-none rounded-none border-0', className)}
+      role="region"
+      aria-label="Stream View Panel"
+    >
       <CardHeader layout="row" className="h-20 border-b">
         <div className="flex-1">
-          <CardTitle className="text-lg">
+          <CardTitle className="text-lg" role="heading" aria-level={2}>
             {tab === 'data' ? 'Data Stream' : 'Code Examples'}
           </CardTitle>
           <CardDescription>
@@ -47,11 +51,20 @@ export function StreamView({ className }: StreamViewProps) {
         </div>
       </CardHeader>
       {subject && (
-        <div className="flex justify-between items-center px-6 py-2 border-b">
+        <div
+          className="flex justify-between items-center px-6 py-2 border-b"
+          role="status"
+          aria-label="Current Subject Query"
+        >
           <code className="text-sm text-muted-foreground">
             Subject Query: {subject}
           </code>
-          <Button size="sm" variant="ghost" onClick={clear}>
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={clear}
+            aria-label="Clear Stream Data"
+          >
             <Eraser size={16} /> Clear
           </Button>
         </div>
@@ -71,8 +84,17 @@ function DataVisualization() {
     <CardContent className="pt-6">
       <ScrollArea className="w-full h-[calc(100vh-200px)]" ref={scrollAreaRef}>
         {isConnecting ? (
-          <div className="flex flex-col items-center justify-center gap-4 h-[calc(100vh-250px)]">
-            <Spinner size={32} className="text-muted-foreground" />
+          <div
+            className="flex flex-col items-center justify-center gap-4 h-[calc(100vh-250px)]"
+            role="alert"
+            aria-busy="true"
+            aria-label="Connection Status"
+          >
+            <Spinner
+              size={32}
+              className="text-muted-foreground"
+              aria-hidden="true"
+            />
             <span className="text-sm text-muted-foreground">
               Connecting to network...
             </span>
@@ -82,13 +104,19 @@ function DataVisualization() {
             className={`flex items-center justify-center text-muted-foreground ${
               subject ? 'h-[calc(100vh-350px)]' : 'h-[calc(100vh-250px)]'
             }`}
+            role="status"
+            aria-label="No stream data available"
           >
             No stream data available. Click "Start Listening" to begin receiving
             data.
           </div>
         ) : (
           <>
-            <div className="flex flex-col gap-4">
+            <div
+              className="flex flex-col gap-4"
+              role="log"
+              aria-label="Stream Data"
+            >
               <AnimatePresence>
                 {data.map((item) => (
                   <motion.div
@@ -97,6 +125,8 @@ function DataVisualization() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.4, ease: 'easeOut' }}
+                    role="article"
+                    aria-label={`Stream data for ${item.subject}`}
                   >
                     <Card className="min-w-full w-full shadow-none rounded-sm">
                       <CardHeader className="py-0 px-4 mb-4 bg-muted border-b">

@@ -1,5 +1,6 @@
 ---
 "@fuels/streams": minor
+"simple-app": minor
 ---
 
 Improve Stream API and enhance demo application UI
@@ -54,3 +55,6 @@ await client.switchNetwork("testnet");
   - Improve UI layout and responsiveness
   - Add loading states and better error handling
   - Enhance code examples visualization
+  - Add E2E testing setup with Vitest
+  - Improve CI workflows for better test handling
+  - Update build and test scripts in Turbo pipeline

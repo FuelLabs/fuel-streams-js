@@ -12,7 +12,7 @@ import { FormFieldsManager, SubjectBuilder } from './form-helpers';
 const fieldsManager = new FormFieldsManager(subjectsDefinitions);
 const subjectBuilder = new SubjectBuilder(subjectsDefinitions);
 
-const formMachine = setup({
+export const formMachine = setup({
   types: {
     context: {} as {
       selectedModule?: ModuleKeys;

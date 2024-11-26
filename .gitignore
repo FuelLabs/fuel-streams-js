@@ -27,7 +27,7 @@ yarn-error.log*
 
 # Test
 /test-results/
-/playwright-report/
+playwright-report
 /blob-report/
 /playwright/.cache/
 /e2e-tests/playwright-report

@@ -23,12 +23,16 @@ export function App() {
 
 function AppContent() {
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div
+      className="min-h-screen bg-background text-foreground"
+      role="application"
+      aria-label="Fuel Streams Application"
+    >
       <Header />
-      <div className="grid grid-cols-[500px_1fr] h-[calc(100vh-56px)]">
+      <main className="grid grid-cols-[500px_1fr] h-[calc(100vh-56px)]">
         <StreamConfiguration className="border-r" />
         <StreamView />
-      </div>
+      </main>
     </div>
   );
 }

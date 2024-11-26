@@ -39,7 +39,11 @@ export function StreamForm() {
   }
 
   return (
-    <div className="space-y-4">
+    <div
+      className="space-y-4"
+      role="form"
+      aria-label="Stream Configuration Form"
+    >
       <div className={variantOptions.length > 0 ? 'flex gap-4' : ''}>
         <div className={variantOptions.length > 0 ? 'w-1/2' : 'w-full'}>
           <label
@@ -49,12 +53,16 @@ export function StreamForm() {
             Module
           </label>
           <Select onValueChange={handleModuleChange}>
-            <SelectTrigger>
+            <SelectTrigger id="module-select" aria-label="Select module">
               <SelectValue placeholder="Select a module" />
             </SelectTrigger>
             <SelectContent>
               {moduleOptions.map(({ value, label }) => (
-                <SelectItem key={value} value={value}>
+                <SelectItem
+                  key={value}
+                  value={value}
+                  aria-label={`Module option: ${label}`}
+                >
                   {label}
                 </SelectItem>
               ))}
@@ -74,16 +82,23 @@ export function StreamForm() {
               value={selectedVariant ?? ''}
             >
               {selectedVariant && (
-                <SelectClear onClick={() => handleVariantChange('')} />
+                <SelectClear
+                  onClick={() => handleVariantChange('')}
+                  aria-label="Clear variant selection"
+                />
               )}
-              <SelectTrigger>
+              <SelectTrigger id="variant-select" aria-label="Select variant">
                 <SelectValue placeholder="Select a variant" />
               </SelectTrigger>
               <SelectContent>
                 {variantOptions
                   .filter(({ label }) => !label.includes('Generic'))
                   .map(({ value, label }) => (
-                    <SelectItem key={value} value={value}>
+                    <SelectItem
+                      key={value}
+                      value={value}
+                      aria-label={`Variant option: ${label}`}
+                    >
                       {label}
                     </SelectItem>
                   ))}
@@ -110,16 +125,24 @@ export function StreamForm() {
               {formData?.[field.name] && (
                 <SelectClear
                   onClick={() => handleFieldChange(field.name, '')}
+                  aria-label={`Clear ${formatLabel(field.name)} selection`}
                 />
               )}
-              <SelectTrigger>
+              <SelectTrigger
+                id={field.name}
+                aria-label={`Select ${formatLabel(field.name)}`}
+              >
                 <SelectValue
                   placeholder={`Select ${formatLabel(field.name)}`}
                 />
               </SelectTrigger>
               <SelectContent>
                 {field.options.map(({ value, label }) => (
-                  <SelectItem key={value} value={value}>
+                  <SelectItem
+                    key={value}
+                    value={value}
+                    aria-label={`${formatLabel(field.name)} option: ${label}`}
+                  >
                     {label}
                   </SelectItem>
                 ))}
@@ -132,6 +155,7 @@ export function StreamForm() {
               placeholder={field.type}
               onChange={(e) => handleFieldChange(field.name, e.target.value)}
               value={formData?.[field.name] || ''}
+              aria-label={formatLabel(field.name)}
             />
           )}
         </div>
@@ -143,6 +167,7 @@ export function StreamForm() {
         disabled={!selectedModule}
         variant={isSubscribing ? 'destructive' : 'default'}
         className="w-full"
+        aria-label={isSubscribing ? 'Stop Listening' : 'Start Listening'}
       >
         {isSubscribing ? (
           <>

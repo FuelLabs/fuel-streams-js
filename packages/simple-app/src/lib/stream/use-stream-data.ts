@@ -106,7 +106,7 @@ const subscriptionActor = fromCallback<StreamEvent, StreamActorInput>(
   },
 );
 
-const streamMachine = setup({
+export const streamMachine = setup({
   types: {
     context: {} as {
       subject: string | null;

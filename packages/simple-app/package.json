@@ -8,9 +8,9 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "vitest",
+    "test": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "test:e2e": "vitest run -c vitest.e2e.config.ts tests/vitest/app.test.ts"
+    "test:e2e": "vitest run -c vitest.e2e.config.ts"
   },
   "dependencies": {
     "@fuels/streams": "workspace:*",

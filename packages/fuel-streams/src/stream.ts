@@ -16,15 +16,15 @@ export interface SubscribeConsumerConfig<C extends Array<unknown>> {
 }
 
 export class Stream {
-  #store: KV;
-  #client: Client;
-  #name: string;
+  private store: KV;
+  private client: Client;
+  private name: string;
   private static streams = new Map<string, Stream>();
 
   private constructor(name: string, store: KV, client: Client) {
-    this.#name = name;
-    this.#store = store;
-    this.#client = client;
+    this.name = name;
+    this.store = store;
+    this.client = client;
   }
 
   static async get(client: Client, bucketName: string) {
@@ -40,7 +40,7 @@ export class Stream {
   }
 
   getStore(): KV {
-    return this.#store;
+    return this.store;
   }
 
   private prefixFilterSubject(subject: string) {
@@ -55,11 +55,11 @@ export class Stream {
   }
 
   async getConsumersAndState() {
-    const status = await this.#store.status();
+    const status = await this.store.status();
     const state = status.streamInfo.state;
-    const streamName = this.#name;
+    const streamName = this.name;
     const consumers: Array<ConsumerInfo> = [];
-    const list = this.#client.jetStreamManager.consumers.list(streamName) ?? [];
+    const list = this.client.jetStreamManager.consumers.list(streamName) ?? [];
 
     for await (const item of list) {
       consumers.push(item);
@@ -69,7 +69,7 @@ export class Stream {
   }
 
   async getStreamName() {
-    return this.#name;
+    return this.name;
   }
 
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
@@ -103,18 +103,18 @@ export class Stream {
   async createConsumer(config: Partial<ConsumerConfig>) {
     const extendedConfig = this.prefixFilterSubjects(config);
     const streamName = this.getKvStreamName();
-    return this.#client.jetStream.consumers.getPushConsumer(
+    return this.client.jetStream.consumers.getPushConsumer(
       streamName,
       extendedConfig,
     );
   }
 
   async flushAwait() {
-    return this.#client.closeSafely();
+    return this.client.closeSafely();
   }
 
   private getKvStreamName() {
-    return `KV_${this.#name}`;
+    return `KV_${this.name}`;
   }
 }
 
