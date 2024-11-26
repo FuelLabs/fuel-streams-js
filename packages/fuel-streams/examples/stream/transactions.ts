@@ -10,7 +10,7 @@ async function main() {
   const subscription = await stream.subscribe(TransactionsSubject.build());
 
   for await (const msg of subscription) {
-    console.log(chalk.blue(`Received transaction message: ${msg.key}`));
+    console.log(chalk.blue(`Received transaction message: ${msg.subject}`));
     // Here you could add more processing of the transaction message if needed
   }
 

@@ -2,19 +2,17 @@ import {
   AckPolicy,
   type ConsumerConfig,
   type ConsumerInfo,
+  type ConsumerMessages,
   DeliverPolicy,
 } from '@nats-io/jetstream';
-import type { KV, KvEntry, KvWatchOptions } from '@nats-io/kv';
-import type { QueuedIterator } from '@nats-io/nats-core';
+import type { KV } from '@nats-io/kv';
 import type { SubjectBase } from './modules/subject-base';
 import type { Client } from './nats-client';
 
 export { DeliverPolicy };
 
-export interface SubscribeConsumerConfig {
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  filterSubjects: Array<SubjectBase<any>>;
-  deliverPolicy: DeliverPolicy;
+export interface SubscribeConsumerConfig<C extends Array<unknown>> {
+  filterSubjects: C;
 }
 
 export class Stream {
@@ -76,17 +74,29 @@ export class Stream {
 
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   async subscribe<S extends SubjectBase<any>>(subject: S) {
-    const kvOpts = { key: subject.parse() } as KvWatchOptions;
-    return this.#store.watch(kvOpts);
+    const consumer = await this.subscribeConsumer({
+      filterSubjects: [subject],
+    });
+    return consumer.consume();
   }
 
-  async subscribeConsumer(
-    userConfig: Pick<SubscribeConsumerConfig, 'filterSubjects'>,
+  async subscribeWithString(subject: string) {
+    const consumer = await this.subscribeConsumer({
+      filterSubjects: [subject],
+    });
+    return consumer.consume();
+  }
+
+  async subscribeConsumer<C extends Array<unknown>>(
+    userConfig: SubscribeConsumerConfig<C>,
   ) {
     return this.createConsumer({
-      filter_subjects: userConfig.filterSubjects?.map((i) => i.parse()),
-      deliver_policy: DeliverPolicy.New,
       ack_policy: AckPolicy.None,
+      deliver_policy: DeliverPolicy.New,
+      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+      filter_subjects: userConfig.filterSubjects?.map((i: any) => {
+        return typeof i.parse === 'function' ? i.parse() : i;
+      }),
     });
   }
 
@@ -108,5 +118,4 @@ export class Stream {
   }
 }
 
-export type Subscription = QueuedIterator<KvEntry>;
-export type SubscriptionIterator = AsyncIterator<KvEntry>;
+export type Subscription = ConsumerMessages;

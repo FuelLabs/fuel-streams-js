@@ -10,7 +10,7 @@ async function main() {
   const subscription = await stream.subscribe(ReceiptsSubject.build());
 
   for await (const msg of subscription) {
-    console.log(chalk.blue(`Received receipt message: ${msg.key}`));
+    console.log(chalk.blue(`Received receipt message: ${msg.subject}`));
     // Here you could add more processing of the receipt message if needed
   }
 

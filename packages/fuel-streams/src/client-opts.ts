@@ -54,8 +54,14 @@ export class ClientOpts {
       servers: this.url,
       timeout: this.timeoutSecs * 1000,
       authenticator,
-      maxReconnectAttempts: 0,
-      reconnect: false,
+      maxReconnectAttempts: -1,
+      reconnect: true,
+      reconnectTimeWait: 2000,
+      maxReconnectTimeWait: 10000,
+      waitOnFirstConnect: true,
+      pingInterval: 10000,
+      maxPingOut: 3,
+      noEcho: true,
     } as ConnectionOptions;
   }
 

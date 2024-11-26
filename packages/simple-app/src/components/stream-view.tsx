@@ -1,5 +1,4 @@
 import { Button } from '@/components/ui/button';
-import { ButtonGroup, ButtonGroupItem } from '@/components/ui/button-group';
 import {
   Card,
   CardContent,
@@ -8,75 +7,51 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+import { Spinner } from '@/components/ui/spinner';
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
-import { cardStyles } from '@/styles/card-styles';
+import { cn } from '@/lib/utils';
 import ReactJsonView from '@microlink/react-json-view';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Code, Database, Eraser } from 'lucide-react';
-import { useRef, useState } from 'react';
+import { Eraser } from 'lucide-react';
+import { useRef } from 'react';
 import { useDynamicForm } from '../lib/form';
 import { useStreamData } from '../lib/stream/use-stream-data';
 import { CodeExamples } from './code-examples';
 import { useTheme } from './theme-provider';
 
-export function StreamView() {
-  const { subject } = useDynamicForm();
-  const { clear, stop, isSubscribing } = useStreamData();
-  const [tab, setTab] = useState<'data' | 'code'>('data');
+type StreamViewProps = {
+  className?: string;
+};
 
-  function handleTabChange(value: 'data' | 'code') {
-    stop();
-    setTab(value);
-  }
+export function StreamView({ className }: StreamViewProps) {
+  const { subject } = useDynamicForm();
+  const { clear, tab } = useStreamData();
 
   return (
-    <Card className={cardStyles({ type: 'stream' })}>
+    <Card className={cn('shadow-none rounded-none border-0', className)}>
       <CardHeader layout="row" className="h-20 border-b">
         <div className="flex-1">
           <CardTitle className="text-lg">
-            {tab === 'data' ? 'Stream Data' : 'Code Examples'}
+            {tab === 'data' ? 'Data Stream' : 'Code Examples'}
           </CardTitle>
-          <CardDescription className="text-sm text-muted-foreground">
+          <CardDescription>
             {tab === 'data'
               ? 'Real-time data stream output will appear here'
               : 'Example code snippets for implementing the stream'}
           </CardDescription>
         </div>
-        <ButtonGroup defaultValue="data">
-          <ButtonGroupItem
-            onClick={() => handleTabChange('data')}
-            active={tab === 'data'}
-            disabled={isSubscribing}
-            value="data"
-          >
-            <Database size={16} /> View Data
-          </ButtonGroupItem>
-          <ButtonGroupItem
-            onClick={() => handleTabChange('code')}
-            active={tab === 'code'}
-            disabled={isSubscribing}
-            value="code"
-          >
-            <Code size={16} /> Code Examples
-          </ButtonGroupItem>
-        </ButtonGroup>
       </CardHeader>
       {subject && (
         <div className="flex justify-between items-center px-6 py-2 border-b">
           <code className="text-sm text-muted-foreground">
             Subject Query: {subject}
           </code>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={clear}
-            disabled={isSubscribing}
-          >
+          <Button size="sm" variant="ghost" onClick={clear}>
             <Eraser size={16} /> Clear
           </Button>
         </div>
@@ -88,14 +63,21 @@ export function StreamView() {
 
 function DataVisualization() {
   const { subject } = useDynamicForm();
-  const { data } = useStreamData();
+  const { data, isConnecting } = useStreamData();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const { isTheme } = useTheme();
 
   return (
     <CardContent className="pt-6">
       <ScrollArea className="w-full h-[calc(100vh-200px)]" ref={scrollAreaRef}>
-        {data.length === 0 ? (
+        {isConnecting ? (
+          <div className="flex flex-col items-center justify-center gap-4 h-[calc(100vh-250px)]">
+            <Spinner size={32} className="text-muted-foreground" />
+            <span className="text-sm text-muted-foreground">
+              Connecting to network...
+            </span>
+          </div>
+        ) : data.length === 0 ? (
           <div
             className={`flex items-center justify-center text-muted-foreground ${
               subject ? 'h-[calc(100vh-350px)]' : 'h-[calc(100vh-250px)]'

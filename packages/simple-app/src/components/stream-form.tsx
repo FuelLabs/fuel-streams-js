@@ -12,7 +12,6 @@ import { useDynamicForm } from '@/lib/form';
 import { useStreamData } from '@/lib/stream/use-stream-data';
 import { Play, Square } from 'lucide-react';
 import v from 'voca';
-import { ThemeToggle } from './theme-toggle';
 
 function formatLabel(name: string): string {
   return v.titleCase(v.replaceAll(name, '_', ' '));
@@ -157,10 +156,6 @@ export function StreamForm() {
           </>
         )}
       </Button>
-
-      <div className="flex items-center gap-2 absolute bottom-6 left-6">
-        <ThemeToggle />
-      </div>
     </div>
   );
 }

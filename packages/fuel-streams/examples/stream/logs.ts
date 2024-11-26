@@ -10,7 +10,7 @@ async function main() {
   const subscription = await stream.subscribe(LogsSubject.build());
 
   for await (const msg of subscription) {
-    console.log(chalk.blue(`Received log message: ${msg.key}`));
+    console.log(chalk.blue(`Received log message: ${msg.subject}`));
     // Here you could add more processing of the log message if needed
   }
 

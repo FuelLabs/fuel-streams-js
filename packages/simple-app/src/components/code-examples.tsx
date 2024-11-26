@@ -121,51 +121,20 @@ export function CodeExamples() {
   );
 
   return (
-    <CardContent className="pt-6">
-      <Tabs defaultValue="fuel" className="w-full">
-        <TabsList className="mb-4">
-          <TabsTrigger value="fuel">Fuels TS SDK</TabsTrigger>
-          <TabsTrigger value="nats-node">NATS.js (Node)</TabsTrigger>
-          <TabsTrigger value="nats-browser">NATS.js (Browser)</TabsTrigger>
-          <TabsTrigger value="nats-cli">NATS CLI</TabsTrigger>
-        </TabsList>
-        <TabsContent value="fuel" className="text-sm">
-          <SyntaxHighlighter
-            language="typescript"
-            style={codeTheme}
-            customStyle={{ background: 'transparent' }}
-          >
-            {examples.fuel}
-          </SyntaxHighlighter>
-        </TabsContent>
-        <TabsContent value="nats-node" className="text-sm">
-          <SyntaxHighlighter
-            language="typescript"
-            style={codeTheme}
-            customStyle={{ background: 'transparent' }}
-          >
-            {examples.natsNode}
-          </SyntaxHighlighter>
-        </TabsContent>
-        <TabsContent value="nats-browser" className="text-sm">
-          <SyntaxHighlighter
-            language="typescript"
-            style={codeTheme}
-            customStyle={{ background: 'transparent' }}
-          >
-            {examples.natsBrowser}
-          </SyntaxHighlighter>
-        </TabsContent>
-        <TabsContent value="nats-cli" className="text-sm">
-          <SyntaxHighlighter
-            language="bash"
-            style={codeTheme}
-            customStyle={{ background: 'transparent' }}
-          >
-            {examples.natsCli}
-          </SyntaxHighlighter>
-        </TabsContent>
-      </Tabs>
+    <CardContent className="pt-6 text-sm">
+      <SyntaxHighlighter
+        lineNumberStyle={{
+          opacity: 0.2,
+          marginRight: '1em',
+          textAlign: 'right',
+        }}
+        showLineNumbers
+        language="typescript"
+        style={codeTheme}
+        customStyle={{ background: 'transparent' }}
+      >
+        {examples.fuel}
+      </SyntaxHighlighter>
     </CardContent>
   );
 }

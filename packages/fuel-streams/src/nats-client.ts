@@ -55,16 +55,45 @@ export class Client {
     return Client.instance;
   }
 
-  async start(clientOpts: Opts) {
-    const opts = new ClientOpts(Network[clientOpts.network ?? 'mainnet']);
-    const nc = await wsconnect(opts.connectOpts());
-    console.info(`Successfully connected to ${nc.getServer()} !`);
+  async switchNetwork(network: keyof typeof Network) {
+    try {
+      if (this.natsConnection) {
+        await this.closeSafely();
+        await new Promise((resolve) => setTimeout(resolve, 1500));
+      }
 
-    this.kvm = new Kvm(nc);
-    this.natsConnection = nc;
-    this.opts = opts;
-    this.jetStreamManager = await this.kvm.js.jetstreamManager();
-    this.jetStream = this.jetStreamManager.jetstream();
+      // Clear the instance before creating a new connection
+      Client.instance = undefined;
+      this.natsConnection = undefined;
+
+      return Client.connect({ network });
+    } catch (error) {
+      console.error('Error switching network:', error);
+      throw error;
+    }
+  }
+
+  async start(clientOpts: Opts) {
+    try {
+      const opts = new ClientOpts(Network[clientOpts.network ?? 'mainnet']);
+      const nc = await wsconnect(opts.connectOpts());
+
+      // Ensure we're properly connected before proceeding
+      if (nc.isClosed()) {
+        throw new Error('Connection closed immediately after creation');
+      }
+
+      console.info(`Successfully connected to ${nc.getServer()} !`);
+
+      this.natsConnection = nc;
+      this.opts = opts;
+      this.kvm = new Kvm(nc);
+      this.jetStreamManager = await this.kvm.js.jetstreamManager();
+      this.jetStream = this.jetStreamManager.jetstream();
+    } catch (error) {
+      console.error('Error starting client:', error);
+      throw error;
+    }
   }
 
   getNatsConnection() {
@@ -87,36 +116,25 @@ export class Client {
   }
 
   async closeSafely() {
-    if (!this.natsConnection) {
-      throw new Error('Nats client is not set.');
+    const nc = this.natsConnection;
+    if (!nc || nc.isClosed()) {
+      return;
     }
 
     try {
-      if (this.isConnectionClosing()) {
-        return true;
-      }
-
-      await this.natsConnection.drain();
-      await this.natsConnection.close();
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-
-      return true;
+      const done = nc.closed();
+      await nc.close();
+      await done;
     } catch (error) {
-      console.error('Error while closing NATS connection:', error);
-      // Force close if graceful shutdown fails
-      if (this.natsConnection && !this.natsConnection.isClosed()) {
-        await this.natsConnection.close();
-      }
-      return false;
+      console.error('Error during connection closure:', error);
+      throw error;
+    } finally {
+      this.natsConnection = undefined;
     }
   }
 
   isConnectionClosing() {
-    return (
-      !this.natsConnection ||
-      this.natsConnection.isClosed() ||
-      this.natsConnection.isDraining()
-    );
+    return !this.natsConnection || this.natsConnection.isClosed();
   }
 
   getStatusStream(callback: StatusStreamCallback): () => void {
@@ -127,7 +145,6 @@ export class Client {
     }
 
     const statusStream = this.natsConnection.status();
-    console.log(statusStream);
     const controller = new AbortController();
 
     // Start monitoring status changes
