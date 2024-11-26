@@ -10,6 +10,8 @@ dist
 
 # Coverage
 coverage
+*.lcov
+.nyc_output
 
 # Debug
 npm-debug.log*
@@ -31,6 +33,7 @@ yarn-error.log*
 /e2e-tests/playwright-report
 .env
 /e2e-tests/test-results
+.vitest-result
 
 # Logs
 logs
@@ -45,16 +48,4 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
-*.local
-
-# Editor directories and files
-.vscode/*
-!.vscode/extensions.json
-.idea
-.DS_Store
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
 
