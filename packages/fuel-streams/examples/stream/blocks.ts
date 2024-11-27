@@ -9,11 +9,8 @@ async function main() {
   const stream = await BlocksStream.init(client);
   const subscription = await stream.subscribe(BlocksSubject.build());
 
-  for await (const msg of subscription) {
-    console.log(chalk.blue(`Received block message: ${msg.subject}`));
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-    const data = msg.json() as any;
-    console.log(data.payload.V1.header);
+  for await (const block of subscription) {
+    console.log(chalk.blue(`Received block: ${block}`));
   }
 
   await stream.flushAwait();

@@ -8,6 +8,7 @@
 
 import type { Address, BlockHeight } from '../../types';
 import { SubjectBase } from '../subject-base';
+
 type BlocksFields = {
   producer: Address;
   height: BlockHeight;

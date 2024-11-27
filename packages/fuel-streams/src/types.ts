@@ -5,18 +5,30 @@
 
 import type {
   AddressLike,
+  BN,
   BytesLike,
   ContractIdLike,
   AssetId as FuelAssetId,
   Block as FuelsBlock,
   Input as FuelsInput,
+  InputCoin as FuelsInputCoin,
+  InputContract as FuelsInputContract,
+  InputMessage as FuelsInputMessage,
   ReceiptLog as FuelsLog,
+  ReceiptLogData as FuelsLogData,
   Output as FuelsOutput,
+  OutputChange as FuelsOutputChange,
+  OutputCoin as FuelsOutputCoin,
+  OutputContract as FuelsOutputContract,
+  OutputContractCreated as FuelsOutputContractCreated,
+  OutputVariable as FuelsOutputVariable,
   Receipt as FuelsReceipt,
   Transaction as FuelsTransaction,
-  UtxoId,
 } from 'fuels';
 
+// ----------------------------------------------------------------------------
+// Base Types
+// ----------------------------------------------------------------------------
 export type Bytes32 = BytesLike;
 export type Address = AddressLike;
 export type AssetId = FuelAssetId;
@@ -24,28 +36,19 @@ export type ContractId = ContractIdLike;
 export type BlockHeight = number;
 export type MessageId = string;
 
-export enum IdentifierKind {
-  AssetID = 'asset_id',
-  ContractID = 'contract_id',
-}
+export type UtxoId = {
+  txId: string;
+  outputIndex: number;
+};
 
-export enum TransactionKind {
-  Create = 'create',
-  Mint = 'mint',
-  Script = 'script',
-  Upgrade = 'ugrade',
-  Upload = 'upload',
-  Blob = 'blob',
-}
+export type TxPointer = {
+  blockHeight: number;
+  txIndex: number;
+};
 
-export enum TransactionStatus {
-  Failed = 'failed',
-  Submitted = 'submitted',
-  SqueezedOut = 'squeezedOut',
-  Success = 'success',
-  None = 'none',
-}
-
+// ----------------------------------------------------------------------------
+// Stream Types
+// ----------------------------------------------------------------------------
 export enum StreamNames {
   Blocks = 'blocks',
   Inputs = 'inputs',
@@ -65,12 +68,224 @@ export enum ClientStatus {
   Stale = 'stale',
 }
 
-export type Block = FuelsBlock;
-export type Transaction = FuelsTransaction;
-export type Input = FuelsInput;
+// ----------------------------------------------------------------------------
+// Identifier Types
+// ----------------------------------------------------------------------------
+export enum IdentifierKind {
+  AssetID = 'asset_id',
+  ContractID = 'contract_id',
+}
+
+// ----------------------------------------------------------------------------
+// Block Types
+// ----------------------------------------------------------------------------
+export type RawBlock = {
+  id: string;
+  height: number;
+  time: number[];
+  transactions: string[];
+  version: 'V1';
+  consensus: {
+    type: 'Genesis' | 'PoAConsensus';
+    signature?: string;
+    chainConfigHash?: string;
+    coinsRoot?: string;
+    contractsRoot?: string;
+    messagesRoot?: string;
+    transactionsRoot?: string;
+  };
+  header: {
+    daHeight: number;
+    stateTransitionBytecodeVersion: number;
+    transactionsCount: number;
+    transactionsRoot: string;
+    messageOutboxRoot: string;
+    eventInboxRoot: string;
+    prevRoot: string;
+    applicationHash: string;
+    consensusParametersVersion: number;
+    height: number;
+    messageReceiptCount: number;
+    time: number[];
+    version: 'V1';
+    id: string;
+  };
+};
+
+export type Block = FuelsBlock & {
+  consensus: RawBlock['consensus'];
+  version: RawBlock['version'];
+};
+
+// ----------------------------------------------------------------------------
+// Output Types
+// ----------------------------------------------------------------------------
+export type RawCoinOutput = {
+  type: 'Coin';
+  amount: number;
+  assetId: string;
+  to: string;
+};
+
+export type RawContractOutput = {
+  type: 'Contract';
+  balanceRoot: number[];
+  stateRoot: number[];
+  inputIndex: number;
+};
+
+export type RawChangeOutput = {
+  type: 'Change';
+  amount: number;
+  assetId: string;
+  to: string;
+};
+
+export type RawVariableOutput = {
+  type: 'Variable';
+  amount: number;
+  assetId: string;
+  to: string;
+};
+
+export type RawContractCreated = {
+  type: 'ContractCreated';
+  contractId: string;
+  stateRoot: number[];
+};
+
+export type RawOutput =
+  | RawCoinOutput
+  | RawContractOutput
+  | RawChangeOutput
+  | RawVariableOutput
+  | RawContractCreated;
+
+export type OutputCoin = FuelsOutputCoin;
+export type OutputContract = FuelsOutputContract;
+export type OutputChange = FuelsOutputChange;
+export type OutputVariable = FuelsOutputVariable;
+export type OutputContractCreated = FuelsOutputContractCreated;
 export type Output = FuelsOutput;
+export { OutputType } from 'fuels';
+
+// ----------------------------------------------------------------------------
+// Input Types
+// ----------------------------------------------------------------------------
+export type RawInputCoin = {
+  type: 'Coin';
+  amount: number;
+  assetId: string;
+  owner: string;
+  predicate: number[];
+  predicateData: number[];
+  predicateGasUsed: number;
+  txPointer: TxPointer;
+  utxoId: UtxoId;
+  witnessIndex: number;
+};
+
+export type RawInputContract = {
+  type: 'Contract';
+  balanceRoot: number[];
+  stateRoot: number[];
+  txPointer: TxPointer;
+  utxoId: UtxoId;
+  contractId: string;
+};
+
+export type RawInputMessage = {
+  type: 'Message';
+  amount: number;
+  data?: number[];
+  nonce: string;
+  predicate: number[];
+  predicateData: number[];
+  predicateGasUsed: number;
+  recipient: string;
+  sender: string;
+  witnessIndex: number;
+};
+
+export type RawInput = RawInputCoin | RawInputContract | RawInputMessage;
+export type InputCoin = FuelsInputCoin;
+export type InputContract = FuelsInputContract;
+export type InputMessage = FuelsInputMessage;
+export type Input = FuelsInput;
+export { InputType } from 'fuels';
+
+// ----------------------------------------------------------------------------
+// Receipt Types
+// ----------------------------------------------------------------------------
+export type RawReceipt = {
+  type:
+    | 'Call'
+    | 'Return'
+    | 'ReturnData'
+    | 'Panic'
+    | 'Revert'
+    | 'Log'
+    | 'LogData'
+    | 'Transfer'
+    | 'TransferOut'
+    | 'ScriptResult'
+    | 'MessageOut'
+    | 'Mint'
+    | 'Burn';
+  amount?: number;
+  assetId?: string;
+  contractId?: string;
+  data?: number[];
+  digest?: number[];
+  gas?: number;
+  gasUsed?: number;
+  id?: string;
+  is?: number;
+  len?: number;
+  nonce?: string;
+  param1?: number;
+  param2?: number;
+  pc?: number;
+  ptr?: number;
+  ra?: number;
+  rb?: number;
+  rc?: number;
+  rd?: number;
+  reason?: number;
+  recipient?: string;
+  result?: number;
+  sender?: string;
+  subId?: number[];
+  to?: string;
+  toAddress?: string;
+  val?: number;
+};
+
 export type Receipt = FuelsReceipt;
-export type Log = FuelsLog;
+export { ReceiptType } from 'fuels';
+
+// ----------------------------------------------------------------------------
+// UTXO Types
+// ----------------------------------------------------------------------------
+export type RawUtxo = {
+  utxoId: UtxoId;
+  sender?: string;
+  recipient?: string;
+  nonce?: string;
+  data?: number[];
+  amount?: number;
+  txId: string;
+};
+
+export type Utxo = {
+  utxoId: UtxoId;
+  sender?: string;
+  recipient?: string;
+  nonce?: string;
+  data?: string;
+  amount?: BN;
+  txId: string;
+};
 
 export enum UtxoType {
   Contract = 'Contract',
@@ -78,12 +293,99 @@ export enum UtxoType {
   Message = 'Message',
 }
 
-export type Utxo = {
-  id: UtxoId;
-  sender?: Address;
-  recipient?: Address;
-  nonce?: string;
-  data?: Uint8Array;
-  amount?: bigint;
-  txId: Bytes32;
+// ----------------------------------------------------------------------------
+// Log Types
+// ----------------------------------------------------------------------------
+export type RawLogWithoutData = {
+  type: 'WithoutData';
+  id: string;
+  ra: number;
+  rb: number;
+  rc: number;
+  rd: number;
+  pc: number;
+  is: number;
 };
+
+export type RawLogWithData = {
+  type: 'WithData';
+  id: string;
+  ra: number;
+  rb: number;
+  ptr: number;
+  len: number;
+  digest: number[];
+  pc: number;
+  is: number;
+  data?: number[];
+};
+
+export type RawLog = RawLogWithoutData | RawLogWithData;
+export type Log = FuelsLog | FuelsLogData;
+
+// ----------------------------------------------------------------------------
+// Transaction Types
+// ----------------------------------------------------------------------------
+export type RawTransaction = {
+  id: string;
+  kind: TransactionKind;
+  bytecodeRoot?: string;
+  bytecodeWitnessIndex?: number;
+  blobId?: string;
+  inputAssetIds?: string[];
+  inputContract?: RawInputContract;
+  inputContracts?: string[];
+  inputs: RawInput[];
+  outputContract?: RawContractOutput;
+  outputs: RawOutput[];
+  isCreate: boolean;
+  isMint: boolean;
+  isScript: boolean;
+  isUpgrade: boolean;
+  isUpload: boolean;
+  maturity?: number;
+  mintAmount?: number;
+  mintAssetId?: string;
+  mintGasPrice?: number;
+  policies?: {
+    maxFee: number;
+    witnessLimit: number;
+    maturity: number;
+    maxSize: number;
+  };
+  proofSet: string[];
+  rawPayload: number[];
+  receiptsRoot?: string;
+  salt?: string;
+  script?: number[];
+  scriptData?: number[];
+  scriptGasLimit?: number;
+  status: TransactionStatus;
+  storageSlots: number[][];
+  subsectionIndex?: number;
+  subsectionsNumber?: number;
+  txPointer?: TxPointer;
+  upgradePurpose?: number;
+  witnesses: number[][];
+  receipts: RawReceipt[];
+};
+
+export type Transaction = FuelsTransaction;
+export { TransactionType } from 'fuels';
+
+export enum TransactionKind {
+  Create = 'create',
+  Mint = 'mint',
+  Script = 'script',
+  Upgrade = 'upgrade',
+  Upload = 'upload',
+  Blob = 'blob',
+}
+
+export enum TransactionStatus {
+  Failed = 'failed',
+  Submitted = 'submitted',
+  SqueezedOut = 'squeezedOut',
+  Success = 'success',
+  None = 'none',
+}

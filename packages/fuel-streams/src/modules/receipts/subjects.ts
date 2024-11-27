@@ -28,6 +28,7 @@ import type {
   IdentifierKind,
 } from '../../types';
 import { SubjectBase } from '../subject-base';
+
 type ReceiptsFields = {
   txId: Bytes32;
   index: number;

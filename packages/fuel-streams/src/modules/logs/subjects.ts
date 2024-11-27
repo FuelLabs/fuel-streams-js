@@ -8,6 +8,7 @@
 
 import type { BlockHeight, Bytes32 } from '../../types';
 import { SubjectBase } from '../subject-base';
+
 type LogsFields = {
   blockHeight: BlockHeight;
   txId: Bytes32;

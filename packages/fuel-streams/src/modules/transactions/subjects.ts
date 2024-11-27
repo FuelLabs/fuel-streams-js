@@ -15,6 +15,7 @@ import type {
   TransactionStatus,
 } from '../../types';
 import { SubjectBase } from '../subject-base';
+
 type TransactionsFields = {
   blockHeight: BlockHeight;
   index: number;

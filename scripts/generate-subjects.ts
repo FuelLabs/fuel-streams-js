@@ -85,14 +85,22 @@ export abstract class SubjectBase<TFields extends Record<string, unknown>> {
 function generateStream(moduleName: string) {
   const pascalModuleName = v.capitalize(moduleName);
   const streamName = `${pascalModuleName}Stream`;
+  const payloadType = pascalModuleName.slice(0, pascalModuleName.length - 1);
+
   return `import type { Client } from '../../nats-client';
 import { Stream } from '../../stream';
-import { StreamNames } from '../../types';
+import { StreamNames, type ${payloadType} } from '../../types';
+import { ${payloadType}Parser } from '../../parsers';
 
 // biome-ignore lint/complexity/noStaticOnlyClass: <explanation>
 export class ${streamName} {
   static async init(client: Client) {
-    return Stream.get(client, StreamNames.${pascalModuleName});
+    const parser = new ${payloadType}Parser();
+    return Stream.get<${payloadType}>(
+      client,
+      StreamNames.${pascalModuleName},
+      parser,
+    );
   }
 }`;
 }
@@ -208,7 +216,7 @@ async function generateModuleSubjects(_moduleName: string, moduleConfig: any) {
   if (usedTypes.size > 0) {
     content += `import type { ${Array.from(usedTypes)
       .sort()
-      .join(', ')} } from '../../types';\n`;
+      .join(', ')} } from '../../types';\n\n`;
   }
 
   if ('variants' in moduleConfig) {

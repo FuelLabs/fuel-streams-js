@@ -1,6 +1,7 @@
 import { BlocksStream } from 'src/modules/blocks';
 import { Client } from 'src/nats-client';
 import type { Stream } from 'src/stream';
+import type { Block } from 'src/types';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock the Stream class
@@ -75,7 +76,7 @@ vi.mock('src/nats-client', () => ({
 
 describe('Stream', () => {
   let client: Client;
-  let stream: Stream;
+  let stream: Stream<Block>;
 
   beforeEach(async () => {
     client = await Client.connect({ network: 'testnet' });
@@ -101,7 +102,7 @@ describe('Stream', () => {
     expect(subscription).toBeDefined();
 
     for await (const msg of subscription) {
-      expect(msg.json()).toEqual({ data: 'test' });
+      expect(msg).toEqual({ data: 'test' });
       break;
     }
   });
@@ -133,14 +134,13 @@ describe('Stream', () => {
   });
 
   it('should subscribe with consumer config', async () => {
-    const consumer = await stream.subscribeConsumer({
+    const subscription = await stream.subscribeConsumer({
       filterSubjects: ['test-subject'],
     });
-    expect(consumer).toBeDefined();
+    expect(subscription).toBeDefined();
 
-    const messages = await consumer.consume();
-    for await (const msg of messages) {
-      expect(msg.json()).toEqual({ data: 'test' });
+    for await (const data of subscription) {
+      expect(data).toEqual({ data: 'test' });
       break;
     }
   });

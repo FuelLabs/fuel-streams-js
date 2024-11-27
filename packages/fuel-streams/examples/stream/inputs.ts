@@ -9,9 +9,8 @@ async function main() {
   const stream = await InputsStream.init(client);
   const subscription = await stream.subscribe(InputsSubject.build());
 
-  for await (const msg of subscription) {
-    console.log(chalk.blue(`Received input message: ${msg.subject}`));
-    // Here you could add more processing of the input message if needed
+  for await (const data of subscription) {
+    console.log(chalk.blue(`Received input: ${data}`));
   }
 
   await stream.flushAwait();

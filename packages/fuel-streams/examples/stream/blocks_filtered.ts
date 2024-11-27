@@ -10,13 +10,12 @@ async function main() {
 
   // Create a filtered subject using build
   const filteredSubject = BlocksSubject.build();
-  const consumer = await stream.subscribeConsumer({
+  const subscription = await stream.subscribeConsumer({
     filterSubjects: [filteredSubject],
   });
 
-  const iter = await consumer.consume();
-  for await (const msg of iter) {
-    console.log(chalk.blue(`Received filtered block message: ${msg.subject}`));
+  for await (const data of subscription) {
+    console.log(chalk.blue(`Received filtered block: ${data}`));
   }
 
   await stream.flushAwait();

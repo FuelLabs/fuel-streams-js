@@ -13,13 +13,12 @@ async function main() {
     txId: '0x1234567890abcdef1234567890abcdef1234567890abcdef',
   });
 
-  const consumer = await stream.subscribeConsumer({
+  const subscription = await stream.subscribeConsumer({
     filterSubjects: [filteredSubject],
   });
 
-  const iter = await consumer.consume();
-  for await (const msg of iter) {
-    console.log(chalk.blue(`Received filtered log message: ${msg.subject}`));
+  for await (const data of subscription) {
+    console.log(chalk.blue(`Received filtered log: ${data}`));
   }
 
   await stream.flushAwait();

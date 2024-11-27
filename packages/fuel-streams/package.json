@@ -39,17 +39,30 @@
     "example:blocks_filtered": "tsx ./examples/stream/blocks_filtered.ts",
     "example:transactions": "tsx ./examples/stream/transactions.ts",
     "example:transactions_filtered": "tsx ./examples/stream/transactions_filtered.ts",
-    "example:ws": "tsx ./examples/stream/ws.ts",
+    "example:receipts": "tsx ./examples/stream/receipts.ts",
+    "example:receipts_filtered": "tsx ./examples/stream/receipts_filtered.ts",
+    "example:outputs": "tsx ./examples/stream/outputs.ts",
+    "example:outputs_filtered": "tsx ./examples/stream/outputs_filtered.ts",
+    "example:inputs": "tsx ./examples/stream/inputs.ts",
+    "example:inputs_filtered": "tsx ./examples/stream/inputs_filtered.ts",
+    "example:logs": "tsx ./examples/stream/logs.ts",
+    "example:logs_filtered": "tsx ./examples/stream/logs_filtered.ts",
     "build": "tsup",
     "build:watch": "tsup --watch",
     "ts:check": "tsc --noEmit",
     "test": "vitest run"
   },
   "dependencies": {
+    "@mobily/ts-belt": "3.13.1",
     "@nats-io/jetstream": "3.0.0-32",
     "@nats-io/kv": "3.0.0-26",
     "@nats-io/nats-core": "3.0.0-45",
     "@nats-io/transport-node": "3.0.0-30",
-    "fuels": "^0.97.0"
+    "fuels": "^0.97.0",
+    "ramda": "0.30.1",
+    "tai64": "1.0.0"
+  },
+  "devDependencies": {
+    "@types/ramda": "0.30.2"
   }
 }

@@ -6,8 +6,7 @@ import {
   type Network,
   OutputsStream,
   ReceiptsStream,
-  type Stream,
-  type Subscription,
+  type StreamData,
   TransactionsStream,
 } from '@fuels/streams';
 import type { ModuleKeys } from '@fuels/streams/subjects-def';
@@ -24,17 +23,11 @@ import {
 
 // const { inspect } = createBrowserInspector();
 
-export type StreamData = {
-  subject: string;
-  payload: unknown;
-  timestamp: string;
-};
-
 type StreamEvent =
   | { type: 'START'; subject: string; selectedModule: ModuleKeys }
   | { type: 'STOP' }
   | { type: 'CLEAR' }
-  | { type: 'DATA'; data: StreamData }
+  | { type: 'DATA'; data: StreamData<unknown> }
   | { type: 'CHANGE_NETWORK'; network: string }
   | { type: 'CHANGE_TAB'; tab: 'data' | 'code' };
 
@@ -47,10 +40,7 @@ type ClientActorInput = {
   network: keyof typeof Network;
 };
 
-async function getStreamFromModule(
-  client: Client,
-  mod: ModuleKeys,
-): Promise<Stream> {
+async function getStreamFromModule(client: Client, mod: ModuleKeys) {
   switch (mod) {
     case 'blocks':
       return BlocksStream.init(client);
@@ -82,26 +72,23 @@ const switchNetworkActor = fromPromise<Client, ClientActorInput>(
 
 const subscriptionActor = fromCallback<StreamEvent, StreamActorInput>(
   ({ sendBack, input }) => {
-    let subscription: Subscription;
     const abortController = new AbortController();
 
     (async () => {
       const { selectedModule, subject } = input;
       const client = Client.getInstance();
       const stream = await getStreamFromModule(client, selectedModule);
-      subscription = await stream.subscribeWithString(subject);
+      const subscription = await stream.subscribeWithString(subject);
 
       if (abortController.signal.aborted) return;
-      for await (const msg of subscription) {
+      for await (const data of subscription) {
         if (abortController.signal.aborted) break;
-        const payload = msg.json();
-        sendBack({ type: 'DATA', data: payload });
+        sendBack({ type: 'DATA', data });
       }
     })();
 
     return () => {
       abortController.abort();
-      subscription?.stop();
     };
   },
 );
@@ -111,7 +98,7 @@ export const streamMachine = setup({
     context: {} as {
       subject: string | null;
       selectedModule: ModuleKeys | null;
-      data: StreamData[];
+      data: StreamData<unknown>[];
       network: keyof typeof Network;
       tab: 'data' | 'code';
     },

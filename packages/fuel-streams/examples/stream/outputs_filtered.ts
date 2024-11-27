@@ -14,13 +14,12 @@ async function main() {
     to: Address.fromString('0x0000000000000000000000000000000000000000'),
   });
 
-  const consumer = await stream.subscribeConsumer({
+  const subscription = await stream.subscribeConsumer({
     filterSubjects: [filteredSubject],
   });
 
-  const iter = await consumer.consume();
-  for await (const msg of iter) {
-    console.log(chalk.blue(`Received filtered output message: ${msg.subject}`));
+  for await (const data of subscription) {
+    console.log(chalk.blue(`Received filtered output: ${data}`));
   }
 
   await stream.flushAwait();

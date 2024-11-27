@@ -2,7 +2,6 @@ import {
   AckPolicy,
   type ConsumerConfig,
   type ConsumerInfo,
-  type ConsumerMessages,
   DeliverPolicy,
 } from '@nats-io/jetstream';
 import type { KV } from '@nats-io/kv';
@@ -11,26 +10,42 @@ import type { Client } from './nats-client';
 
 export { DeliverPolicy };
 
+// biome-ignore lint/suspicious/noExplicitAny: <explanation>
+export type GenericRecord = Record<string, any>;
+export type StreamData<T> = {
+  subject: string;
+  timestamp: string;
+  payload: T;
+};
+
 export interface SubscribeConsumerConfig<C extends Array<unknown>> {
   filterSubjects: C;
 }
 
-export class Stream {
-  private store: KV;
-  private client: Client;
-  private name: string;
+export type StreamIterator<T extends StreamData<unknown>> =
+  AsyncIterableIterator<T>;
 
-  public constructor(name: string, store: KV, client: Client) {
-    this.name = name;
-    this.store = store;
-    this.client = client;
-  }
+export interface StreamParser<T extends GenericRecord> {
+  parse(data: unknown): T;
+}
 
-  static async get(client: Client, bucketName: string) {
+export class Stream<T extends GenericRecord> {
+  public constructor(
+    private name: string,
+    private store: KV,
+    private client: Client,
+    // @ts-ignore
+    private parser: StreamParser<T>,
+  ) {}
+
+  static async get<C extends GenericRecord>(
+    client: Client,
+    bucketName: string,
+    parser: StreamParser<C>,
+  ) {
     const storeName = client.opts?.streamName(bucketName) ?? bucketName;
-    console.log(`Creating stream for ${storeName}`);
     const store = await client.getOrCreateKvStore(storeName);
-    return new Stream(storeName, store, client);
+    return new Stream<C>(storeName, store, client, parser);
   }
 
   getStore(): KV {
@@ -68,30 +83,61 @@ export class Stream {
 
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   async subscribe<S extends SubjectBase<any>>(subject: S) {
-    const consumer = await this.subscribeConsumer({
+    return this.subscribeConsumer({
       filterSubjects: [subject],
     });
-    return consumer.consume();
   }
 
   async subscribeWithString(subject: string) {
-    const consumer = await this.subscribeConsumer({
+    return this.subscribeConsumer({
       filterSubjects: [subject],
     });
-    return consumer.consume();
   }
 
-  async subscribeConsumer<C extends Array<unknown>>(
+  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+  async subscribeConsumer<C extends Array<string | SubjectBase<any>>>(
     userConfig: SubscribeConsumerConfig<C>,
-  ) {
-    return this.createConsumer({
+  ): Promise<StreamIterator<StreamData<T>>> {
+    const consumer = await this.createConsumer({
       ack_policy: AckPolicy.None,
       deliver_policy: DeliverPolicy.New,
-      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-      filter_subjects: userConfig.filterSubjects?.map((i: any) => {
-        return typeof i.parse === 'function' ? i.parse() : i;
+      filter_subjects: userConfig.filterSubjects?.map((subject) => {
+        return typeof subject === 'object' && 'parse' in subject
+          ? subject.parse()
+          : subject;
       }),
     });
+
+    const iterator = await consumer.consume();
+    const asyncIterator: StreamIterator<StreamData<T>> = {
+      async *[Symbol.asyncIterator]() {
+        for await (const msg of iterator) {
+          const data = msg.json() as StreamData<T>;
+          // const payload = parser.parse(data.payload);
+          const payload = data.payload;
+          yield { ...data, payload };
+        }
+      },
+      next: async () => {
+        for await (const msg of iterator) {
+          const data = msg.json() as StreamData<T>;
+          // const payload = parser.parse(data.payload);
+          const payload = data.payload;
+          return { done: false, value: { ...data, payload } };
+        }
+        return { done: true, value: undefined };
+      },
+      return: async () => {
+        iterator.stop();
+        return { done: true, value: undefined };
+      },
+      throw: async (error: Error) => {
+        iterator.stop();
+        throw error;
+      },
+    };
+
+    return asyncIterator;
   }
 
   async createConsumer(config: Partial<ConsumerConfig>) {
@@ -111,5 +157,3 @@ export class Stream {
     return `KV_${this.name}`;
   }
 }
-
-export type Subscription = ConsumerMessages;

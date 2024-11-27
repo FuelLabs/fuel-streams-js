@@ -20,6 +20,7 @@ import type {
   IdentifierKind,
 } from '../../types';
 import { SubjectBase } from '../subject-base';
+
 type OutputsFields = {
   txId: Bytes32;
   index: number;

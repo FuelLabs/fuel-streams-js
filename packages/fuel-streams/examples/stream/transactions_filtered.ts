@@ -1,3 +1,4 @@
+import chalk from 'chalk';
 import { Client, TransactionsByIdSubject, TransactionsStream } from '../../src';
 import { handleUnhandledError, printHeader } from '../helpers';
 
@@ -9,13 +10,12 @@ async function main() {
 
   // Create a filtered subject using build
   const filteredSubject = TransactionsByIdSubject.build();
-  const consumer = await stream.subscribeConsumer({
+  const subscription = await stream.subscribeConsumer({
     filterSubjects: [filteredSubject],
   });
 
-  const iter = await consumer.consume();
-  for await (const msg of iter) {
-    console.log(msg.data);
+  for await (const data of subscription) {
+    console.log(chalk.blue(`Received filtered transaction: ${data}`));
   }
 
   await stream.flushAwait();

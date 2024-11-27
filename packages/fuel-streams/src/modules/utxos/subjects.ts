@@ -8,6 +8,7 @@
 
 import type { MessageId, UtxoType } from '../../types';
 import { SubjectBase } from '../subject-base';
+
 type UtxosFields = {
   utxoType: UtxoType;
   hash: MessageId;
