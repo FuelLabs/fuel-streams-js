@@ -1,6 +1,6 @@
 {
   "name": "@fuels/streams",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Official data streaming Typescript library for Fuel Network",
   "author": "Fuel Labs <contact@fuel.sh> (https://fuel.network/)",
   "homepage": "https://github.com/FuelLabs/fuel-streams-js",
