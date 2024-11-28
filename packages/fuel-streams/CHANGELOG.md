@@ -1,5 +1,11 @@
 # @fuels/streams
 
+## 0.3.0
+
+### Minor Changes
+
+- [`60ca003`](https://github.com/FuelLabs/fuel-streams-js/commit/60ca00331f198797deca343f523cb472a9dc2f89) Thanks [@pedronauck](https://github.com/pedronauck)! - Fix: bumping release for changeset
+
 ## 0.2.0
 
 ### Minor Changes
