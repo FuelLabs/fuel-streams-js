@@ -1,5 +1,11 @@
 # @fuels/streams
 
+## 0.2.0
+
+### Minor Changes
+
+- [`69c0f69`](https://github.com/FuelLabs/fuel-streams-js/commit/69c0f692707fd13f40a39afb89f690a79105ec1e) Thanks [@pedronauck](https://github.com/pedronauck)! - Feat: add compatibility with fuels sdk types
+
 ## 0.1.0
 
 ### Minor Changes
