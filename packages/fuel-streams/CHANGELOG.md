@@ -1,5 +1,11 @@
 # @fuels/streams
 
+## 0.2.1
+
+### Patch Changes
+
+- [`bb9fdf5`](https://github.com/FuelLabs/fuel-streams-js/commit/bb9fdf5d3d01ae1ba0c138509ea4f461d02752cc) Thanks [@pedronauck](https://github.com/pedronauck)! - Fix: bumping release for changeset
+
 ## 0.2.0
 
 ### Minor Changes
