@@ -1,76 +1,58 @@
-import { bn, hexlify } from 'fuels';
-import { InputType, OutputType, ReceiptType, TransactionType } from 'fuels';
+import { bn as toBN } from 'fuels';
 import { evolve } from 'ramda';
-import { TAI64 } from 'tai64';
 import type { StreamParser } from './stream';
-import type {
-  Block,
-  Input,
-  InputCoin,
-  InputContract,
-  InputMessage,
-  Log,
-  Output,
-  OutputChange,
-  OutputCoin,
-  OutputContract,
-  OutputContractCreated,
-  OutputVariable,
-  RawBlock,
-  RawChangeOutput,
-  RawCoinOutput,
-  RawContractCreated,
-  RawContractOutput,
-  RawInput,
-  RawInputCoin,
-  RawInputContract,
-  RawInputMessage,
-  RawLog,
-  RawLogWithData,
-  RawLogWithoutData,
-  RawOutput,
-  RawReceipt,
-  RawTransaction,
-  RawUtxo,
-  RawVariableOutput,
-  Receipt,
-  Transaction,
-  Utxo,
+import {
+  type Block,
+  type Input,
+  type InputCoin,
+  type InputContract,
+  type InputMessage,
+  InputType,
+  type Log,
+  type Output,
+  type OutputChange,
+  type OutputCoin,
+  type OutputContract,
+  type OutputContractCreated,
+  OutputType,
+  type OutputVariable,
+  type RawBlock,
+  type RawChangeOutput,
+  type RawCoinOutput,
+  type RawContractCreated,
+  type RawContractOutput,
+  type RawInput,
+  type RawInputCoin,
+  type RawInputContract,
+  type RawInputMessage,
+  type RawLog,
+  type RawLogWithData,
+  type RawLogWithoutData,
+  type RawOutput,
+  type RawReceipt,
+  type RawTransaction,
+  type RawUtxo,
+  type RawVariableOutput,
+  type Receipt,
+  ReceiptType,
+  type Transaction,
+  type Utxo,
 } from './types';
 
-const to = {
-  bn: (v?: number) => (v ? bn(v) : null),
-  hex: (v?: number[]) =>
-    v?.length ? `0x${hexlify(Uint8Array.from(v))}` : null,
-  tai64: (v?: number[]) =>
-    v?.length ? TAI64.fromByteArray(v).toString() : null,
-} as const;
-
-const TRANSACTION_KIND_MAP = {
-  create: TransactionType.Create,
-  mint: TransactionType.Mint,
-  script: TransactionType.Script,
-  upgrade: TransactionType.Upgrade,
-  upload: TransactionType.Upload,
-  blob: TransactionType.Blob,
-} as const;
-
-export class BlockParser implements StreamParser<Block> {
+export class BlockParser implements StreamParser<Block, RawBlock> {
   parse(data: RawBlock): Block {
-    const { transactions, ...rest } = data;
     const transformations = {
-      height: to.bn,
-      time: to.tai64,
+      height: toBN,
       header: {
-        daHeight: to.bn,
+        daHeight: toBN,
+        height: toBN,
         stateTransitionBytecodeVersion: String,
         transactionsCount: String,
+        messageReceiptCount: String,
+        consensusParametersVersion: String,
       },
     };
-    return evolve(transformations, {
-      ...rest,
-      transactionIds: transactions,
-    }) as Block;
+    return evolve(transformations, data) as Block;
   }
 }
 
@@ -79,18 +61,16 @@ export class InputCoinParser {
     const { utxoId, ...rest } = data;
     const transformations = {
       type: () => InputType.Coin,
-      amount: to.bn,
-      predicateGasUsed: to.bn,
-      predicate: to.hex,
-      predicateData: to.hex,
+      amount: toBN,
+      predicateGasUsed: toBN,
     };
 
     return evolve(transformations, {
       ...rest,
       txID: utxoId.txId,
       outputIndex: utxoId.outputIndex,
-      predicateDataLength: to.bn(rest.predicateData?.length),
-      predicateLength: to.bn(rest.predicate?.length),
+      predicateDataLength: toBN(rest.predicateData?.length),
+      predicateLength: toBN(rest.predicate?.length),
     }) as InputCoin;
   }
 }
@@ -98,12 +78,7 @@ export class InputCoinParser {
 export class InputContractParser {
   parse(data: RawInputContract): InputContract {
     const { utxoId, ...rest } = data;
-    const transformations = {
-      type: () => InputType.Contract,
-      balanceRoot: to.hex,
-      stateRoot: to.hex,
-    };
-
+    const transformations = { type: () => InputType.Contract };
     return evolve(transformations, {
       ...rest,
       txID: utxoId.txId,
@@ -117,22 +92,19 @@ export class InputMessageParser {
   parse(data: RawInputMessage): InputMessage {
     const transformations = {
       type: () => InputType.Message,
-      amount: to.bn,
-      predicateGasUsed: to.bn,
-      predicate: to.hex,
-      predicateData: to.hex,
-      data: to.hex,
+      amount: toBN,
+      predicateGasUsed: toBN,
     };
 
     return evolve(transformations, {
       ...data,
-      predicateDataLength: to.bn(data.predicateData.length),
-      predicateLength: to.bn(data.predicate.length),
+      predicateDataLength: toBN(data.predicateData.length),
+      predicateLength: toBN(data.predicate.length),
     }) as InputMessage;
   }
 }
 
-export class InputParser implements StreamParser<Input> {
+export class InputParser implements StreamParser<Input, RawInput> {
   private coinParser = new InputCoinParser();
   private contractParser = new InputContractParser();
   private messageParser = new InputMessageParser();
@@ -151,56 +123,40 @@ export class InputParser implements StreamParser<Input> {
 
 export class OutputCoinParser {
   parse(data: RawCoinOutput): OutputCoin {
-    const transformations = {
-      type: () => OutputType.Coin,
-      amount: bn,
-    };
+    const transformations = { type: () => OutputType.Coin, amount: toBN };
     return evolve(transformations, data) as OutputCoin;
   }
 }
 
 export class OutputContractParser {
   parse(data: RawContractOutput): OutputContract {
-    const transformations = {
-      type: () => OutputType.Contract,
-      balanceRoot: to.hex,
-      stateRoot: to.hex,
-    };
+    const transformations = { type: () => OutputType.Contract };
     return evolve(transformations, data) as OutputContract;
   }
 }
 
 export class OutputChangeParser {
   parse(data: RawChangeOutput): OutputChange {
-    const transformations = {
-      type: () => OutputType.Change,
-      amount: to.bn,
-    };
+    const transformations = { type: () => OutputType.Change, amount: toBN };
     return evolve(transformations, data) as OutputChange;
   }
 }
 
 export class OutputVariableParser {
   parse(data: RawVariableOutput): OutputVariable {
-    const transformations = {
-      type: () => OutputType.Variable,
-      amount: to.bn,
-    };
+    const transformations = { type: () => OutputType.Variable, amount: toBN };
     return evolve(transformations, data) as OutputVariable;
   }
 }
 
 export class OutputContractCreatedParser {
   parse(data: RawContractCreated): OutputContractCreated {
-    const transformations = {
-      type: () => OutputType.ContractCreated,
-      stateRoot: to.hex,
-    };
+    const transformations = { type: () => OutputType.ContractCreated };
     return evolve(transformations, data) as OutputContractCreated;
   }
 }
 
-export class OutputParser implements StreamParser<Output> {
+export class OutputParser implements StreamParser<Output, RawOutput> {
   private coinParser = new OutputCoinParser();
   private contractParser = new OutputContractParser();
   private changeParser = new OutputChangeParser();
@@ -227,20 +183,20 @@ export class LogWithoutDataParser {
   parse(data: RawLogWithoutData): Log {
     const transformations = {
       type: () => ReceiptType.Log,
-      ra: to.bn,
-      rb: to.bn,
-      rc: to.bn,
-      rd: to.bn,
-      pc: to.bn,
-      is: to.bn,
+      ra: toBN,
+      rb: toBN,
+      rc: toBN,
+      rd: toBN,
+      pc: toBN,
+      is: toBN,
     };
 
     return evolve(transformations, {
       ...data,
-      val0: to.bn(data.ra),
-      val1: to.bn(data.rb),
-      val2: to.bn(data.rc),
-      val3: to.bn(data.rd),
+      val0: toBN(data.ra),
+      val1: toBN(data.rb),
+      val2: toBN(data.rc),
+      val3: toBN(data.rd),
     }) as Log;
   }
 }
@@ -249,25 +205,23 @@ export class LogWithDataParser {
   parse(data: RawLogWithData): Log {
     const transformations = {
       type: () => ReceiptType.LogData,
-      ra: to.bn,
-      rb: to.bn,
-      ptr: to.bn,
-      len: to.bn,
-      pc: to.bn,
-      is: to.bn,
-      digest: to.hex,
-      data: to.hex,
+      ra: toBN,
+      rb: toBN,
+      ptr: toBN,
+      len: toBN,
+      pc: toBN,
+      is: toBN,
     };
 
     return evolve(transformations, {
       ...data,
-      val0: to.bn(data.ra),
-      val1: to.bn(data.rb),
+      val0: toBN(data.ra),
+      val1: toBN(data.rb),
     }) as Log;
   }
 }
 
-export class LogParser implements StreamParser<Log> {
+export class LogParser implements StreamParser<Log, RawLog> {
   private withoutDataParser = new LogWithoutDataParser();
   private withDataParser = new LogWithDataParser();
 
@@ -281,49 +235,41 @@ export class LogParser implements StreamParser<Log> {
   }
 }
 
-export class ReceiptParser implements StreamParser<Receipt> {
+export class ReceiptParser implements StreamParser<Receipt, RawReceipt> {
   parse(data: RawReceipt): Receipt {
     const transformations = {
       type: (v: RawReceipt['type']) => ReceiptType[v],
-      amount: to.bn,
-      gas: to.bn,
-      gasUsed: to.bn,
-      is: to.bn,
-      len: to.bn,
-      param1: to.bn,
-      param2: to.bn,
-      pc: to.bn,
-      ptr: to.bn,
-      ra: to.bn,
-      rb: to.bn,
-      rc: to.bn,
-      rd: to.bn,
-      reason: to.bn,
-      result: to.bn,
-      val: to.bn,
-      data: to.hex,
-      digest: to.hex,
-      subId: to.hex,
+      amount: toBN,
+      gas: toBN,
+      gasUsed: toBN,
+      is: toBN,
+      len: toBN,
+      param1: toBN,
+      param2: toBN,
+      pc: toBN,
+      ptr: toBN,
+      ra: toBN,
+      rb: toBN,
+      rc: toBN,
+      rd: toBN,
+      reason: toBN,
+      result: toBN,
+      val: toBN,
     };
 
     return evolve(transformations, data) as Receipt;
   }
 }
 
-export class TransactionParser implements StreamParser<Transaction> {
+export class TransactionParser
+  implements StreamParser<Transaction, RawTransaction>
+{
   private inputParser = new InputParser();
   private outputParser = new OutputParser();
   private receiptParser = new ReceiptParser();
 
-  private toStorageSlots(v: number[][]) {
-    return v.map(([key, value]: number[]) => ({
-      key: to.hex([key]),
-      value: to.hex([value]),
-    }));
-  }
-
-  private toWitnesses(v: number[][]) {
-    return v.map((w: number[]) => ({ dataLength: w.length, data: to.hex(w) }));
+  private toWitnesses(v: string[]) {
+    return v.map((data) => ({ dataLength: data.length, data }));
   }
 
   private parseInputs(inputs: RawInput[]) {
@@ -340,41 +286,31 @@ export class TransactionParser implements StreamParser<Transaction> {
 
   parse(data: RawTransaction): Transaction {
     const transformations = {
-      mintAmount: to.bn,
-      mintGasPrice: to.bn,
-      scriptGasLimit: to.bn,
-      amount: to.bn,
-      gas: to.bn,
-      gasUsed: to.bn,
+      mintAmount: toBN,
+      mintGasPrice: toBN,
+      scriptGasLimit: toBN,
+      amount: toBN,
+      gas: toBN,
+      gasUsed: toBN,
       policies: {
-        maxFee: to.bn,
-        witnessLimit: to.bn,
-        maturity: to.bn,
-        maxSize: to.bn,
+        maxFee: toBN,
+        witnessLimit: toBN,
+        maturity: toBN,
+        maxSize: toBN,
       },
-      rawPayload: to.hex,
-      script: to.hex,
-      scriptData: to.hex,
-      storageSlots: this.toStorageSlots,
       witnesses: this.toWitnesses,
       inputs: this.parseInputs.bind(this),
       outputs: this.parseOutputs.bind(this),
       receipts: this.parseReceipts.bind(this),
     };
 
-    return evolve(transformations, {
-      ...data,
-      type: TRANSACTION_KIND_MAP[data.kind],
-    }) as Transaction;
+    return evolve(transformations, data) as Transaction;
   }
 }
 
-export class UtxoParser implements StreamParser<Utxo> {
+export class UtxoParser implements StreamParser<Utxo, RawUtxo> {
   parse(data: RawUtxo): Utxo {
-    const transformations = {
-      amount: to.bn,
-      data: to.hex,
-    };
+    const transformations = { amount: toBN };
     return evolve(transformations, data) as Utxo;
   }
 }

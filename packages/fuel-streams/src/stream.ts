@@ -12,40 +12,43 @@ export { DeliverPolicy };
 
 // biome-ignore lint/suspicious/noExplicitAny: <explanation>
 export type GenericRecord = Record<string, any>;
-export type StreamData<T> = {
+export type StreamData<T, R> = {
   subject: string;
   timestamp: string;
   payload: T;
+  rawPayload: R;
 };
 
 export interface SubscribeConsumerConfig<C extends Array<unknown>> {
   filterSubjects: C;
 }
 
-export type StreamIterator<T extends StreamData<unknown>> =
+export type StreamIterator<T extends StreamData<unknown, unknown>> =
   AsyncIterableIterator<T>;
 
-export interface StreamParser<T extends GenericRecord> {
-  parse(data: unknown): T;
+export interface StreamParser<
+  T extends GenericRecord,
+  R extends GenericRecord,
+> {
+  parse(data: R): T;
 }
 
-export class Stream<T extends GenericRecord> {
+export class Stream<T extends GenericRecord, R extends GenericRecord> {
   public constructor(
     private name: string,
     private store: KV,
     private client: Client,
-    // @ts-ignore
-    private parser: StreamParser<T>,
+    private parser: StreamParser<T, R>,
   ) {}
 
-  static async get<C extends GenericRecord>(
+  static async get<C extends GenericRecord, R extends GenericRecord>(
     client: Client,
     bucketName: string,
-    parser: StreamParser<C>,
+    parser: StreamParser<C, R>,
   ) {
     const storeName = client.opts?.streamName(bucketName) ?? bucketName;
     const store = await client.getOrCreateKvStore(storeName);
-    return new Stream<C>(storeName, store, client, parser);
+    return new Stream<C, R>(storeName, store, client, parser);
   }
 
   getStore(): KV {
@@ -97,7 +100,7 @@ export class Stream<T extends GenericRecord> {
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   async subscribeConsumer<C extends Array<string | SubjectBase<any>>>(
     userConfig: SubscribeConsumerConfig<C>,
-  ): Promise<StreamIterator<StreamData<T>>> {
+  ): Promise<StreamIterator<StreamData<T, R>>> {
     const consumer = await this.createConsumer({
       ack_policy: AckPolicy.None,
       deliver_policy: DeliverPolicy.New,
@@ -108,22 +111,33 @@ export class Stream<T extends GenericRecord> {
       }),
     });
 
+    const parser = this.parser;
     const iterator = await consumer.consume();
-    const asyncIterator: StreamIterator<StreamData<T>> = {
+    const asyncIterator: StreamIterator<StreamData<T, R>> = {
       async *[Symbol.asyncIterator]() {
         for await (const msg of iterator) {
-          const data = msg.json() as StreamData<T>;
-          // const payload = parser.parse(data.payload);
-          const payload = data.payload;
-          yield { ...data, payload };
+          const data = msg.json() as {
+            subject: string;
+            payload: R;
+            timestamp: string;
+          };
+          const payload = parser.parse(data.payload);
+          yield { ...data, payload, rawPayload: data.payload };
         }
       },
       next: async () => {
         for await (const msg of iterator) {
-          const data = msg.json() as StreamData<T>;
-          // const payload = parser.parse(data.payload);
-          const payload = data.payload;
-          return { done: false, value: { ...data, payload } };
+          const data = msg.json() as {
+            subject: string;
+            payload: R;
+            timestamp: string;
+          };
+          const payload = parser.parse(data.payload);
+          // const payload = data.payload;
+          return {
+            done: false,
+            value: { ...data, payload, rawPayload: data.payload },
+          };
         }
         return { done: true, value: undefined };
       },

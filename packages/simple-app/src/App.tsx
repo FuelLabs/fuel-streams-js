@@ -29,7 +29,7 @@ function AppContent() {
       aria-label="Fuel Streams Application"
     >
       <Header />
-      <main className="grid grid-cols-[500px_1fr] h-[calc(100vh-56px)]">
+      <main className="grid grid-cols-[500px_1fr] h-[calc(100vh-56px)] max-w-screen w-screen">
         <StreamConfiguration className="border-r" />
         <StreamView />
       </main>

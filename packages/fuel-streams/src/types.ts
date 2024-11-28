@@ -24,6 +24,7 @@ import type {
   OutputVariable as FuelsOutputVariable,
   Receipt as FuelsReceipt,
   Transaction as FuelsTransaction,
+  TransactionType,
 } from 'fuels';
 
 // ----------------------------------------------------------------------------
@@ -82,8 +83,8 @@ export enum IdentifierKind {
 export type RawBlock = {
   id: string;
   height: number;
-  time: number[];
-  transactions: string[];
+  time: string;
+  transactionIds: string[];
   version: 'V1';
   consensus: {
     type: 'Genesis' | 'PoAConsensus';
@@ -106,7 +107,7 @@ export type RawBlock = {
     consensusParametersVersion: number;
     height: number;
     messageReceiptCount: number;
-    time: number[];
+    time: string;
     version: 'V1';
     id: string;
   };
@@ -129,8 +130,8 @@ export type RawCoinOutput = {
 
 export type RawContractOutput = {
   type: 'Contract';
-  balanceRoot: number[];
-  stateRoot: number[];
+  balanceRoot: string;
+  stateRoot: string;
   inputIndex: number;
 };
 
@@ -151,7 +152,7 @@ export type RawVariableOutput = {
 export type RawContractCreated = {
   type: 'ContractCreated';
   contractId: string;
-  stateRoot: number[];
+  stateRoot: string;
 };
 
 export type RawOutput =
@@ -177,9 +178,11 @@ export type RawInputCoin = {
   amount: number;
   assetId: string;
   owner: string;
-  predicate: number[];
-  predicateData: number[];
+  predicate: string;
+  predicateData: string;
   predicateGasUsed: number;
+  predicateDataLength: number;
+  predicateLength: number;
   txPointer: TxPointer;
   utxoId: UtxoId;
   witnessIndex: number;
@@ -187,8 +190,8 @@ export type RawInputCoin = {
 
 export type RawInputContract = {
   type: 'Contract';
-  balanceRoot: number[];
-  stateRoot: number[];
+  balanceRoot: string;
+  stateRoot: string;
   txPointer: TxPointer;
   utxoId: UtxoId;
   contractId: string;
@@ -197,11 +200,13 @@ export type RawInputContract = {
 export type RawInputMessage = {
   type: 'Message';
   amount: number;
-  data?: number[];
+  data?: string;
   nonce: string;
-  predicate: number[];
-  predicateData: number[];
+  predicate: string;
+  predicateData: string;
   predicateGasUsed: number;
+  predicateDataLength: number;
+  predicateLength: number;
   recipient: string;
   sender: string;
   witnessIndex: number;
@@ -235,8 +240,8 @@ export type RawReceipt = {
   amount?: number;
   assetId?: string;
   contractId?: string;
-  data?: number[];
-  digest?: number[];
+  data?: string;
+  digest?: string;
   gas?: number;
   gasUsed?: number;
   id?: string;
@@ -255,7 +260,7 @@ export type RawReceipt = {
   recipient?: string;
   result?: number;
   sender?: string;
-  subId?: number[];
+  subId?: string;
   to?: string;
   toAddress?: string;
   val?: number;
@@ -272,7 +277,7 @@ export type RawUtxo = {
   sender?: string;
   recipient?: string;
   nonce?: string;
-  data?: number[];
+  data?: string;
   amount?: number;
   txId: string;
 };
@@ -314,10 +319,10 @@ export type RawLogWithData = {
   rb: number;
   ptr: number;
   len: number;
-  digest: number[];
+  digest: string;
   pc: number;
   is: number;
-  data?: number[];
+  data?: string;
 };
 
 export type RawLog = RawLogWithoutData | RawLogWithData;
@@ -328,7 +333,7 @@ export type Log = FuelsLog | FuelsLogData;
 // ----------------------------------------------------------------------------
 export type RawTransaction = {
   id: string;
-  kind: TransactionKind;
+  type: TransactionType;
   bytecodeRoot?: string;
   bytecodeWitnessIndex?: number;
   blobId?: string;
@@ -354,19 +359,19 @@ export type RawTransaction = {
     maxSize: number;
   };
   proofSet: string[];
-  rawPayload: number[];
+  rawPayload: string;
   receiptsRoot?: string;
   salt?: string;
-  script?: number[];
-  scriptData?: number[];
+  script?: string;
+  scriptData?: string;
   scriptGasLimit?: number;
   status: TransactionStatus;
-  storageSlots: number[][];
+  storageSlots: { key: string; value: string }[];
   subsectionIndex?: number;
   subsectionsNumber?: number;
   txPointer?: TxPointer;
   upgradePurpose?: number;
-  witnesses: number[][];
+  witnesses: string[];
   receipts: RawReceipt[];
 };
 

@@ -1,7 +1,7 @@
 import { BlocksStream } from 'src/modules/blocks';
 import { Client } from 'src/nats-client';
 import type { Stream } from 'src/stream';
-import type { Block } from 'src/types';
+import type { Block, RawBlock } from 'src/types';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 // Mock the Stream class
@@ -76,7 +76,7 @@ vi.mock('src/nats-client', () => ({
 
 describe('Stream', () => {
   let client: Client;
-  let stream: Stream<Block>;
+  let stream: Stream<Block, RawBlock>;
 
   beforeEach(async () => {
     client = await Client.connect({ network: 'testnet' });

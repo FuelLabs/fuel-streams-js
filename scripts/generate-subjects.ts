@@ -89,14 +89,14 @@ function generateStream(moduleName: string) {
 
   return `import type { Client } from '../../nats-client';
 import { Stream } from '../../stream';
-import { StreamNames, type ${payloadType} } from '../../types';
+import { StreamNames, type ${payloadType}, type Raw${payloadType} } from '../../types';
 import { ${payloadType}Parser } from '../../parsers';
 
 // biome-ignore lint/complexity/noStaticOnlyClass: <explanation>
 export class ${streamName} {
   static async init(client: Client) {
     const parser = new ${payloadType}Parser();
-    return Stream.get<${payloadType}>(
+    return Stream.get<${payloadType}, Raw${payloadType}>(
       client,
       StreamNames.${pascalModuleName},
       parser,

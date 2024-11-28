@@ -27,7 +27,7 @@ type StreamEvent =
   | { type: 'START'; subject: string; selectedModule: ModuleKeys }
   | { type: 'STOP' }
   | { type: 'CLEAR' }
-  | { type: 'DATA'; data: StreamData<unknown> }
+  | { type: 'DATA'; data: StreamData<unknown, unknown> }
   | { type: 'CHANGE_NETWORK'; network: string }
   | { type: 'CHANGE_TAB'; tab: 'data' | 'code' };
 
@@ -98,7 +98,7 @@ export const streamMachine = setup({
     context: {} as {
       subject: string | null;
       selectedModule: ModuleKeys | null;
-      data: StreamData<unknown>[];
+      data: StreamData<unknown, unknown>[];
       network: keyof typeof Network;
       tab: 'data' | 'code';
     },
