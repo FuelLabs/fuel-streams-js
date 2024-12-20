@@ -7,6 +7,7 @@
   "homepage": "https://github.com/FuelLabs/fuel-streams-js",
   "scripts": {
     "build": "turbo build",
+    "dev:app": "turbo dev --filter simple-app",
     "build:libs": "turbo build --filter @fuels/streams",
     "build:watch": "turbo build:watch",
     "changeset": "changeset",
