@@ -1,0 +1,25 @@
+{
+  "name": "@fuels/streams-ws",
+  "version": "1.0.0",
+  "description": "Official data streaming Typescript library for Fuel Network",
+  "author": "Fuel Labs <contact@fuel.sh> (https://fuel.network/)",
+  "homepage": "https://github.com/FuelLabs/fuel-streams-js",
+  "main": "./src/index.ts",
+  "scripts": {
+    "build": "tsup",
+    "build:watch": "tsup --watch",
+    "ts:check": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "keywords": [],
+  "license": "ISC",
+  "dependencies": {
+    "isomorphic-ws": "5.0.0"
+  },
+  "devDependencies": {
+    "cross-fetch": "4.0.0",
+    "mock-socket": "9.3.1",
+    "vitest": "~2.1.6",
+    "vitest-websocket-mock": "0.4.0"
+  }
+}
