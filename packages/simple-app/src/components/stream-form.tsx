@@ -8,8 +8,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Switch } from '@/components/ui/switch';
 import { useDynamicForm } from '@/lib/form';
 import { useStreamData } from '@/lib/stream/use-stream-data';
+import { DeliverPolicy } from '@fuels/streams';
 import { Play, Square } from 'lucide-react';
 import v from 'voca';
 
@@ -31,7 +33,8 @@ export function StreamForm() {
     subject,
   } = useDynamicForm();
 
-  const { start, stop, isSubscribing } = useStreamData();
+  const { start, stop, isSubscribing, changeDeliveryPolicy, deliverPolicy } =
+    useStreamData();
 
   function handleSubmit() {
     if (!selectedModule || !subject) return;
@@ -40,6 +43,23 @@ export function StreamForm() {
 
   return (
     <div className="space-y-4" aria-label="Stream Configuration Form">
+      <div className="flex items-center gap-4">
+        <Switch
+          className="mt-1/5"
+          id="historical-data"
+          checked={deliverPolicy === DeliverPolicy.All}
+          onCheckedChange={(checked) =>
+            changeDeliveryPolicy(
+              checked ? DeliverPolicy.All : DeliverPolicy.New,
+            )
+          }
+          aria-label="Toggle historical data"
+        />
+        <label htmlFor="historical-data" className="text-sm font-medium">
+          Enable historical data
+        </label>
+      </div>
+
       <div className={variantOptions.length > 0 ? 'flex gap-4' : ''}>
         <div className={variantOptions.length > 0 ? 'w-1/2' : 'w-full'}>
           <label

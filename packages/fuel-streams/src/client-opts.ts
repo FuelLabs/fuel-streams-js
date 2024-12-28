@@ -47,8 +47,8 @@ export class ClientOpts {
   }
 
   connectOpts() {
-    const username = 'default_user';
-    const password = '';
+    const username = 'admin';
+    const password = 'admin';
     const authenticator = connector(username, password);
     return {
       servers: this.url,
@@ -66,9 +66,9 @@ export class ClientOpts {
   }
 
   get url() {
-    const subdomain =
-      this.network === Network.mainnet ? 'stream' : 'stream-testnet';
-    return `wss://${subdomain}.fuel.network:8443`;
+    // const subdomain =
+    //   this.network === Network.mainnet ? "stream" : "stream-testnet";
+    return 'ws://k8s-fuelstre-fuelstre-d1a733c184-c10339d402ab28fd.elb.us-east-1.amazonaws.com:8443';
   }
 }
 

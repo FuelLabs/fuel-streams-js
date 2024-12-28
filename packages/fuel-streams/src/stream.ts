@@ -21,6 +21,7 @@ export type StreamData<T, R> = {
 
 export interface SubscribeConsumerConfig<C extends Array<unknown>> {
   filterSubjects: C;
+  deliverPolicy: DeliverPolicy;
 }
 
 export type StreamIterator<T extends StreamData<unknown, unknown>> =
@@ -85,31 +86,34 @@ export class Stream<T extends GenericRecord, R extends GenericRecord> {
   }
 
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-  async subscribe<S extends SubjectBase<any>>(subject: S) {
-    return this.subscribeConsumer({
-      filterSubjects: [subject],
-    });
+  async subscribe<S extends SubjectBase<any>>(
+    subject: S,
+    deliverPolicy: DeliverPolicy = DeliverPolicy.New,
+  ) {
+    return this.subscribeConsumer({ filterSubjects: [subject], deliverPolicy });
   }
 
-  async subscribeWithString(subject: string) {
-    return this.subscribeConsumer({
-      filterSubjects: [subject],
-    });
+  async subscribeWithString(
+    subject: string,
+    deliverPolicy: DeliverPolicy = DeliverPolicy.New,
+  ) {
+    return this.subscribeConsumer({ filterSubjects: [subject], deliverPolicy });
   }
 
   // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   async subscribeConsumer<C extends Array<string | SubjectBase<any>>>(
     userConfig: SubscribeConsumerConfig<C>,
   ): Promise<StreamIterator<StreamData<T, R>>> {
-    const consumer = await this.createConsumer({
-      ack_policy: AckPolicy.None,
-      deliver_policy: DeliverPolicy.New,
+    const opts = {
+      deliver_policy: userConfig.deliverPolicy,
       filter_subjects: userConfig.filterSubjects?.map((subject) => {
         return typeof subject === 'object' && 'parse' in subject
           ? subject.parse()
           : subject;
       }),
-    });
+    } as Partial<ConsumerConfig>;
+    console.log('opts', opts);
+    const consumer = await this.createConsumer(opts);
 
     const parser = this.parser;
     const iterator = await consumer.consume();

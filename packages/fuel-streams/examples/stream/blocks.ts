@@ -9,8 +9,8 @@ async function main() {
   const stream = await BlocksStream.init(client);
   const subscription = await stream.subscribe(BlocksSubject.build());
 
-  for await (const block of subscription) {
-    console.log(chalk.blue(`Received block: ${block}`));
+  for await (const data of subscription) {
+    console.log(chalk.blue(`Received block: ${data}`));
   }
 
   await stream.flushAwait();

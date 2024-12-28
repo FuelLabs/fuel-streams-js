@@ -34,7 +34,7 @@ import {
   type RawUtxo,
   type RawVariableOutput,
   type Receipt,
-  ReceiptType,
+  // ReceiptType,
   type Transaction,
   type Utxo,
 } from './types';
@@ -181,43 +181,47 @@ export class OutputParser implements StreamParser<Output, RawOutput> {
 
 export class LogWithoutDataParser {
   parse(data: RawLogWithoutData): Log {
-    const transformations = {
-      type: () => ReceiptType.Log,
-      ra: toBN,
-      rb: toBN,
-      rc: toBN,
-      rd: toBN,
-      pc: toBN,
-      is: toBN,
-    };
+    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+    return data as any;
+    // const transformations = {
+    //   type: () => ReceiptType.Log,
+    //   ra: toBN,
+    //   rb: toBN,
+    //   rc: toBN,
+    //   rd: toBN,
+    //   pc: toBN,
+    //   is: toBN,
+    // };
 
-    return evolve(transformations, {
-      ...data,
-      val0: toBN(data.ra),
-      val1: toBN(data.rb),
-      val2: toBN(data.rc),
-      val3: toBN(data.rd),
-    }) as Log;
+    // return evolve(transformations, {
+    //   ...data,
+    //   val0: toBN(data.ra),
+    //   val1: toBN(data.rb),
+    //   val2: toBN(data.rc),
+    //   val3: toBN(data.rd),
+    // }) as Log;
   }
 }
 
 export class LogWithDataParser {
   parse(data: RawLogWithData): Log {
-    const transformations = {
-      type: () => ReceiptType.LogData,
-      ra: toBN,
-      rb: toBN,
-      ptr: toBN,
-      len: toBN,
-      pc: toBN,
-      is: toBN,
-    };
+    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+    return data as any;
+    // const transformations = {
+    //   type: () => ReceiptType.LogData,
+    //   ra: toBN,
+    //   rb: toBN,
+    //   ptr: toBN,
+    //   len: toBN,
+    //   pc: toBN,
+    //   is: toBN,
+    // };
 
-    return evolve(transformations, {
-      ...data,
-      val0: toBN(data.ra),
-      val1: toBN(data.rb),
-    }) as Log;
+    // return evolve(transformations, {
+    //   ...data,
+    //   val0: toBN(data.ra),
+    //   val1: toBN(data.rb),
+    // }) as Log;
   }
 }
 
@@ -237,27 +241,29 @@ export class LogParser implements StreamParser<Log, RawLog> {
 
 export class ReceiptParser implements StreamParser<Receipt, RawReceipt> {
   parse(data: RawReceipt): Receipt {
-    const transformations = {
-      type: (v: RawReceipt['type']) => ReceiptType[v],
-      amount: toBN,
-      gas: toBN,
-      gasUsed: toBN,
-      is: toBN,
-      len: toBN,
-      param1: toBN,
-      param2: toBN,
-      pc: toBN,
-      ptr: toBN,
-      ra: toBN,
-      rb: toBN,
-      rc: toBN,
-      rd: toBN,
-      reason: toBN,
-      result: toBN,
-      val: toBN,
-    };
+    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
+    return data as any;
+    // const transformations = {
+    //   type: (v: RawReceipt['type']) => ReceiptType[v],
+    //   amount: toBN,
+    //   gas: toBN,
+    //   gasUsed: toBN,
+    //   is: toBN,
+    //   len: toBN,
+    //   param1: toBN,
+    //   param2: toBN,
+    //   pc: toBN,
+    //   ptr: toBN,
+    //   ra: toBN,
+    //   rb: toBN,
+    //   rc: toBN,
+    //   rd: toBN,
+    //   reason: toBN,
+    //   result: toBN,
+    //   val: toBN,
+    // };
 
-    return evolve(transformations, data) as Receipt;
+    // return evolve({}, data) as Receipt;
   }
 }
 

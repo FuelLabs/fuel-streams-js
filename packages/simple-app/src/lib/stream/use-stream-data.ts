@@ -1,6 +1,7 @@
 import {
   BlocksStream,
   Client,
+  DeliverPolicy,
   InputsStream,
   LogsStream,
   type Network,
@@ -29,11 +30,13 @@ type StreamEvent =
   | { type: 'CLEAR' }
   | { type: 'DATA'; data: StreamData<unknown, unknown> }
   | { type: 'CHANGE_NETWORK'; network: string }
-  | { type: 'CHANGE_TAB'; tab: 'data' | 'code' };
+  | { type: 'CHANGE_TAB'; tab: 'data' | 'code' }
+  | { type: 'CHANGE_DELIVERY_POLICY'; policy: DeliverPolicy };
 
 type StreamActorInput = {
   subject: string;
   selectedModule: ModuleKeys;
+  deliverPolicy: DeliverPolicy;
 };
 
 type ClientActorInput = {
@@ -75,10 +78,13 @@ const subscriptionActor = fromCallback<StreamEvent, StreamActorInput>(
     const abortController = new AbortController();
 
     (async () => {
-      const { selectedModule, subject } = input;
+      const { selectedModule, subject, deliverPolicy } = input;
       const client = Client.getInstance();
       const stream = await getStreamFromModule(client, selectedModule);
-      const subscription = await stream.subscribeWithString(subject);
+      const subscription = await stream.subscribeWithString(
+        subject,
+        deliverPolicy,
+      );
 
       if (abortController.signal.aborted) return;
       for await (const data of subscription) {
@@ -101,6 +107,7 @@ export const streamMachine = setup({
       data: StreamData<unknown, unknown>[];
       network: keyof typeof Network;
       tab: 'data' | 'code';
+      deliverPolicy: DeliverPolicy;
     },
   },
   actors: {
@@ -124,7 +131,7 @@ export const streamMachine = setup({
     newDataFromSubscription: assign({
       data: ({ context, event }) => {
         if (event.type !== 'DATA') return [];
-        return [event.data].concat(context.data);
+        return [event.data, ...context.data.slice(0, 19)];
       },
     }),
     clearData: assign({
@@ -140,6 +147,12 @@ export const streamMachine = setup({
       tab: ({ event }) => {
         if (event.type !== 'CHANGE_TAB') return 'data';
         return event.tab;
+      },
+    }),
+    setDeliveryPolicy: assign({
+      deliverPolicy: ({ event }) => {
+        if (event.type !== 'CHANGE_DELIVERY_POLICY') return DeliverPolicy.New;
+        return event.policy;
       },
     }),
     clearState: assign({
@@ -163,6 +176,7 @@ export const streamMachine = setup({
     data: [],
     network: 'mainnet',
     tab: 'data',
+    deliverPolicy: DeliverPolicy.New,
   }),
   states: {
     connecting: {
@@ -197,6 +211,9 @@ export const streamMachine = setup({
         CHANGE_TAB: {
           actions: ['setTab'],
         },
+        CHANGE_DELIVERY_POLICY: {
+          actions: ['setDeliveryPolicy'],
+        },
       },
     },
     switchingNetwork: {
@@ -224,6 +241,7 @@ export const streamMachine = setup({
         input: ({ context }) => ({
           selectedModule: context.selectedModule as ModuleKeys,
           subject: context.subject as string,
+          deliverPolicy: context.deliverPolicy,
         }),
       },
       on: {
@@ -257,6 +275,7 @@ const selectors = {
   data: (state: State) => state.context.data,
   network: (state: State) => state.context.network,
   tab: (state: State) => state.context.tab,
+  deliverPolicy: (state: State) => state.context.deliverPolicy,
 };
 
 export const StreamDataContext = createActorContext(streamMachine);
@@ -268,8 +287,9 @@ export function useStreamData() {
   const data = StreamDataContext.useSelector(selectors.data);
   const network = StreamDataContext.useSelector(selectors.network);
   const tab = StreamDataContext.useSelector(selectors.tab);
+  const deliverPolicy = StreamDataContext.useSelector(selectors.deliverPolicy);
 
-  function start(data: Omit<StreamActorInput, 'client'>) {
+  function start(data: Omit<StreamActorInput, 'client' | 'deliverPolicy'>) {
     actor.send({ type: 'START', ...data });
   }
 
@@ -291,15 +311,21 @@ export function useStreamData() {
     actor.send({ type: 'CHANGE_TAB', tab });
   }
 
+  function changeDeliveryPolicy(policy: DeliverPolicy) {
+    actor.send({ type: 'CHANGE_DELIVERY_POLICY', policy });
+  }
+
   return {
     start,
     stop,
     clear,
     changeNetwork,
     changeTab,
+    changeDeliveryPolicy,
     data,
     network,
     tab,
+    deliverPolicy,
     isConnecting,
     isSubscribing,
   };

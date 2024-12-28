@@ -1,4 +1,5 @@
 import type { JetStreamClient, JetStreamManager } from '@nats-io/jetstream';
+import { jetstream } from '@nats-io/jetstream';
 import { type KvOptions, Kvm } from '@nats-io/kv';
 import type { NatsConnection, Status } from '@nats-io/nats-core';
 import { wsconnect } from '@nats-io/transport-node';
@@ -84,10 +85,10 @@ export class Client {
       }
 
       console.info(`Successfully connected to ${nc.getServer()} !`);
-
+      const js = jetstream(nc, { domain: 'CORE' });
       this.natsConnection = nc;
       this.opts = opts;
-      this.kvm = new Kvm(nc);
+      this.kvm = new Kvm(js);
       this.jetStreamManager = await this.kvm.js.jetstreamManager();
       this.jetStream = this.jetStreamManager.jetstream();
     } catch (error) {
