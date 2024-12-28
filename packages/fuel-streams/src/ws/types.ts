@@ -1,4 +1,4 @@
-import type { GenericRecord } from 'src/modules/subject-base';
+import type { GenericRecord } from '../modules/subject-base';
 
 export enum FuelNetwork {
   Local = 'local',

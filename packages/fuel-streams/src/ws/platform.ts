@@ -18,9 +18,15 @@ if (typeof window !== 'undefined') {
 } else {
   // Node.js environment
   try {
-    // Dynamic imports to avoid bundling node modules in browser builds
-    const WebSocket = require('ws');
-    wsImpl = WebSocket;
+    // Use dynamic import instead of require
+    import('ws')
+      .then((WebSocket) => {
+        // @ts-ignore
+        wsImpl = WebSocket.default;
+      })
+      .catch(() => {
+        throw new Error('Please install ws package for Node.js environment');
+      });
     fetchImpl = fetch; // Use global fetch in Node.js environments
   } catch (_e) {
     throw new Error('Please install ws package for Node.js environment');

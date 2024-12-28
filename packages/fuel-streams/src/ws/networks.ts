@@ -19,7 +19,7 @@ export function getWebUrl(network: FuelNetwork): URL {
     case FuelNetwork.Local:
       return new URL('http://localhost:9003');
     case FuelNetwork.Staging:
-      return new URL('http://localhost:9003');
+      return new URL('https://stream-staging.fuel.network');
     case FuelNetwork.Testnet:
       return new URL('https://stream-testnet.fuel.network');
     case FuelNetwork.Mainnet:
@@ -32,7 +32,7 @@ export function getWsUrl(network: FuelNetwork): URL {
     case FuelNetwork.Local:
       return new URL('ws://0.0.0.0:9003');
     case FuelNetwork.Staging:
-      return new URL('ws://localhost:9003');
+      return new URL('wss://stream-staging.fuel.network');
     case FuelNetwork.Testnet:
       return new URL('wss://stream-testnet.fuel.network');
     case FuelNetwork.Mainnet:
