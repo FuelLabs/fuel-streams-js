@@ -1,5 +1,11 @@
 # @fuels/streams
 
+## 0.4.0
+
+### Minor Changes
+
+- [`a9e92e4`](https://github.com/FuelLabs/fuel-streams-js/commit/a9e92e487fe79b35bca661310437d7bcafd0f1bc) Thanks [@pedronauck](https://github.com/pedronauck)! - feat: Adapt to work with the new WebServer API
+
 ## 0.3.1
 
 ### Patch Changes
