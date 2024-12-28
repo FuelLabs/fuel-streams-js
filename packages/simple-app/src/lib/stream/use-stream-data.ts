@@ -1,18 +1,8 @@
-import {
-  BlocksStream,
-  Client,
-  DeliverPolicy,
-  InputsStream,
-  LogsStream,
-  type Network,
-  OutputsStream,
-  ReceiptsStream,
-  type StreamData,
-  TransactionsStream,
-} from '@fuels/streams';
+import { DeliverPolicy, FuelNetwork } from '@fuels/streams';
+// import { createBrowserInspector } from '@statelyai/inspect';
+import { Client, type Connection } from '@fuels/streams';
 import type { ModuleKeys } from '@fuels/streams/subjects-def';
 import { createActorContext } from '@xstate/react';
-// import { createBrowserInspector } from '@statelyai/inspect';
 import { toast } from 'sonner';
 import {
   type StateFrom,
@@ -28,73 +18,55 @@ type StreamEvent =
   | { type: 'START'; subject: string; selectedModule: ModuleKeys }
   | { type: 'STOP' }
   | { type: 'CLEAR' }
-  | { type: 'DATA'; data: StreamData<unknown, unknown> }
-  | { type: 'CHANGE_NETWORK'; network: string }
+  | { type: 'DATA'; data: { subject: string; payload: any } }
+  | { type: 'CHANGE_NETWORK'; network: FuelNetwork }
   | { type: 'CHANGE_TAB'; tab: 'data' | 'code' }
   | { type: 'CHANGE_DELIVERY_POLICY'; policy: DeliverPolicy };
 
 type StreamActorInput = {
   subject: string;
-  selectedModule: ModuleKeys;
   deliverPolicy: DeliverPolicy;
+  network: FuelNetwork;
 };
 
 type ClientActorInput = {
-  network: keyof typeof Network;
+  network: FuelNetwork;
 };
 
-async function getStreamFromModule(client: Client, mod: ModuleKeys) {
-  switch (mod) {
-    case 'blocks':
-      return BlocksStream.init(client);
-    case 'transactions':
-      return TransactionsStream.init(client);
-    case 'logs':
-      return LogsStream.init(client);
-    case 'inputs':
-      return InputsStream.init(client);
-    case 'outputs':
-      return OutputsStream.init(client);
-    case 'receipts':
-      return ReceiptsStream.init(client);
-    default:
-      throw new Error(`Unsupported module type: ${mod}`);
-  }
-}
-
-const createClientActor = fromPromise<Client, ClientActorInput>(
-  async ({ input }) => Client.connect(input),
+const createClientActor = fromPromise<Connection, ClientActorInput>(
+  async ({ input: { network } }) => {
+    const client = await Client.new(network);
+    return client.connect();
+  },
 );
 
-const switchNetworkActor = fromPromise<Client, ClientActorInput>(
+const switchNetworkActor = fromPromise<Connection, ClientActorInput>(
   async ({ input: { network } }) => {
-    const client = Client.getInstance();
-    return client.switchNetwork(network);
+    const client = await Client.new(network);
+    return client.connect();
   },
 );
 
 const subscriptionActor = fromCallback<StreamEvent, StreamActorInput>(
   ({ sendBack, input }) => {
-    const abortController = new AbortController();
+    let cleanup: (() => void) | undefined;
 
     (async () => {
-      const { selectedModule, subject, deliverPolicy } = input;
-      const client = Client.getInstance();
-      const stream = await getStreamFromModule(client, selectedModule);
-      const subscription = await stream.subscribeWithString(
+      const { subject, deliverPolicy, network } = input;
+      const client = await Client.getInstance(network);
+      const connection = await client.connect();
+      const subscription = await connection.subscribeWithString(
         subject,
         deliverPolicy,
       );
 
-      if (abortController.signal.aborted) return;
-      for await (const data of subscription) {
-        if (abortController.signal.aborted) break;
+      cleanup = subscription.onMessage((data) => {
         sendBack({ type: 'DATA', data });
-      }
+      });
     })();
 
     return () => {
-      abortController.abort();
+      cleanup?.();
     };
   },
 );
@@ -104,8 +76,8 @@ export const streamMachine = setup({
     context: {} as {
       subject: string | null;
       selectedModule: ModuleKeys | null;
-      data: StreamData<unknown, unknown>[];
-      network: keyof typeof Network;
+      data: Array<any>;
+      network: FuelNetwork;
       tab: 'data' | 'code';
       deliverPolicy: DeliverPolicy;
     },
@@ -174,7 +146,7 @@ export const streamMachine = setup({
     subject: null,
     selectedModule: null,
     data: [],
-    network: 'mainnet',
+    network: FuelNetwork.Staging,
     tab: 'data',
     deliverPolicy: DeliverPolicy.New,
   }),
@@ -239,9 +211,9 @@ export const streamMachine = setup({
         id: 'subscribe',
         src: 'subscriptionActor',
         input: ({ context }) => ({
-          selectedModule: context.selectedModule as ModuleKeys,
           subject: context.subject as string,
           deliverPolicy: context.deliverPolicy,
+          network: context.network,
         }),
       },
       on: {
@@ -289,7 +261,7 @@ export function useStreamData() {
   const tab = StreamDataContext.useSelector(selectors.tab);
   const deliverPolicy = StreamDataContext.useSelector(selectors.deliverPolicy);
 
-  function start(data: Omit<StreamActorInput, 'client' | 'deliverPolicy'>) {
+  function start(data: Pick<StreamActorInput, 'subject'>) {
     actor.send({ type: 'START', ...data });
   }
 
@@ -301,7 +273,7 @@ export function useStreamData() {
     actor.send({ type: 'CLEAR' });
   }
 
-  function changeNetwork(network: string) {
+  function changeNetwork(network: FuelNetwork) {
     stop();
     actor.send({ type: 'CHANGE_NETWORK', network });
   }

@@ -5,9 +5,32 @@
 
 import v from 'voca';
 
-export abstract class SubjectBase<TFields extends Record<string, unknown>> {
+export type GenericRecord = Record<string, any>;
+
+export interface EntityParser<
+  T extends GenericRecord,
+  R extends GenericRecord,
+> {
+  parse(data: R): T;
+}
+
+export abstract class SubjectBase<
+  TFields extends GenericRecord,
+  T extends GenericRecord,
+  R extends GenericRecord,
+> {
   constructor(protected fields: Partial<TFields> = {}) {}
   protected abstract format: string;
+
+  abstract entityParser(): EntityParser<T, R>;
+
+  // This is a hack to make the compiler happy
+  _entity(): T {
+    return {} as T;
+  }
+  _rawEntity(): R {
+    return {} as R;
+  }
 
   parse(): string {
     const fields = Object.entries(this.fields).reduce<Record<string, string>>(
@@ -29,17 +52,16 @@ export abstract class SubjectBase<TFields extends Record<string, unknown>> {
     return this;
   }
 
-  static build<T extends SubjectBase<Record<string, unknown>>>(
-    this: new () => T,
-    fields: Partial<Parameters<T['build']>[0]> = {},
-  ): T {
+  static build<
+    T extends SubjectBase<GenericRecord, GenericRecord, GenericRecord>,
+  >(this: new () => T, fields: Partial<Parameters<T['build']>[0]> = {}): T {
     // biome-ignore lint/complexity/noThisInStatic: <explanation>
     return new this().build(fields);
   }
 
-  static wildcard<T extends SubjectBase<Record<string, unknown>>>(
-    this: new () => T,
-  ): string {
+  static wildcard<
+    T extends SubjectBase<GenericRecord, GenericRecord, GenericRecord>,
+  >(this: new () => T): string {
     // biome-ignore lint/complexity/noThisInStatic: <explanation>
     return new this().parse();
   }

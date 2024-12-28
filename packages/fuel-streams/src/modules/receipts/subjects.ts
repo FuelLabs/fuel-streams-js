@@ -20,6 +20,8 @@
  * - ReceiptsMessageOutSubject
  */
 
+import { ReceiptParser } from '../../parsers';
+import type { RawReceipt, Receipt } from '../../types';
 import type {
   Address,
   AssetId,
@@ -34,8 +36,15 @@ type ReceiptsFields = {
   index: number;
 };
 
-export class ReceiptsSubject extends SubjectBase<ReceiptsFields> {
+export class ReceiptsSubject extends SubjectBase<
+  ReceiptsFields,
+  Receipt,
+  RawReceipt
+> {
   protected format = 'receipts.{tx_id}.{index}.>';
+  entityParser() {
+    return new ReceiptParser();
+  }
 }
 
 type ReceiptsByIdFields = {
@@ -45,8 +54,15 @@ type ReceiptsByIdFields = {
   idValue: Bytes32;
 };
 
-export class ReceiptsByIdSubject extends SubjectBase<ReceiptsByIdFields> {
+export class ReceiptsByIdSubject extends SubjectBase<
+  ReceiptsByIdFields,
+  Receipt,
+  RawReceipt
+> {
   protected format = 'by_id.receipts.{tx_id}.{index}.{id_kind}.{id_value}';
+  entityParser() {
+    return new ReceiptParser();
+  }
 }
 
 type ReceiptsCallFields = {
@@ -57,8 +73,15 @@ type ReceiptsCallFields = {
   assetId: AssetId;
 };
 
-export class ReceiptsCallSubject extends SubjectBase<ReceiptsCallFields> {
+export class ReceiptsCallSubject extends SubjectBase<
+  ReceiptsCallFields,
+  Receipt,
+  RawReceipt
+> {
   protected format = 'receipts.{tx_id}.{index}.call.{from}.{to}.{asset_id}';
+  entityParser() {
+    return new ReceiptParser();
+  }
 }
 
 type ReceiptsReturnFields = {
@@ -67,8 +90,15 @@ type ReceiptsReturnFields = {
   id: ContractId;
 };
 
-export class ReceiptsReturnSubject extends SubjectBase<ReceiptsReturnFields> {
+export class ReceiptsReturnSubject extends SubjectBase<
+  ReceiptsReturnFields,
+  Receipt,
+  RawReceipt
+> {
   protected format = 'receipts.{tx_id}.{index}.return.{id}';
+  entityParser() {
+    return new ReceiptParser();
+  }
 }
 
 type ReceiptsReturnDataFields = {
@@ -77,8 +107,15 @@ type ReceiptsReturnDataFields = {
   id: ContractId;
 };
 
-export class ReceiptsReturnDataSubject extends SubjectBase<ReceiptsReturnDataFields> {
+export class ReceiptsReturnDataSubject extends SubjectBase<
+  ReceiptsReturnDataFields,
+  Receipt,
+  RawReceipt
+> {
   protected format = 'receipts.{tx_id}.{index}.return_data.{id}';
+  entityParser() {
+    return new ReceiptParser();
+  }
 }
 
 type ReceiptsPanicFields = {
@@ -87,8 +124,15 @@ type ReceiptsPanicFields = {
   id: ContractId;
 };
 
-export class ReceiptsPanicSubject extends SubjectBase<ReceiptsPanicFields> {
+export class ReceiptsPanicSubject extends SubjectBase<
+  ReceiptsPanicFields,
+  Receipt,
+  RawReceipt
+> {
   protected format = 'receipts.{tx_id}.{index}.panic.{id}';
+  entityParser() {
+    return new ReceiptParser();
+  }
 }
 
 type ReceiptsRevertFields = {
@@ -97,8 +141,15 @@ type ReceiptsRevertFields = {
   id: ContractId;
 };
 
-export class ReceiptsRevertSubject extends SubjectBase<ReceiptsRevertFields> {
+export class ReceiptsRevertSubject extends SubjectBase<
+  ReceiptsRevertFields,
+  Receipt,
+  RawReceipt
+> {
   protected format = 'receipts.{tx_id}.{index}.revert.{id}';
+  entityParser() {
+    return new ReceiptParser();
+  }
 }
 
 type ReceiptsLogFields = {
@@ -107,8 +158,15 @@ type ReceiptsLogFields = {
   id: ContractId;
 };
 
-export class ReceiptsLogSubject extends SubjectBase<ReceiptsLogFields> {
+export class ReceiptsLogSubject extends SubjectBase<
+  ReceiptsLogFields,
+  Receipt,
+  RawReceipt
+> {
   protected format = 'receipts.{tx_id}.{index}.log.{id}';
+  entityParser() {
+    return new ReceiptParser();
+  }
 }
 
 type ReceiptsLogDataFields = {
@@ -117,8 +175,15 @@ type ReceiptsLogDataFields = {
   id: ContractId;
 };
 
-export class ReceiptsLogDataSubject extends SubjectBase<ReceiptsLogDataFields> {
+export class ReceiptsLogDataSubject extends SubjectBase<
+  ReceiptsLogDataFields,
+  Receipt,
+  RawReceipt
+> {
   protected format = 'receipts.{tx_id}.{index}.log_data.{id}';
+  entityParser() {
+    return new ReceiptParser();
+  }
 }
 
 type ReceiptsTransferFields = {
@@ -129,8 +194,15 @@ type ReceiptsTransferFields = {
   assetId: AssetId;
 };
 
-export class ReceiptsTransferSubject extends SubjectBase<ReceiptsTransferFields> {
+export class ReceiptsTransferSubject extends SubjectBase<
+  ReceiptsTransferFields,
+  Receipt,
+  RawReceipt
+> {
   protected format = 'receipts.{tx_id}.{index}.transfer.{from}.{to}.{asset_id}';
+  entityParser() {
+    return new ReceiptParser();
+  }
 }
 
 type ReceiptsTransferOutFields = {
@@ -141,9 +213,16 @@ type ReceiptsTransferOutFields = {
   assetId: AssetId;
 };
 
-export class ReceiptsTransferOutSubject extends SubjectBase<ReceiptsTransferOutFields> {
+export class ReceiptsTransferOutSubject extends SubjectBase<
+  ReceiptsTransferOutFields,
+  Receipt,
+  RawReceipt
+> {
   protected format =
     'receipts.{tx_id}.{index}.transfer_out.{from}.{to}.{asset_id}';
+  entityParser() {
+    return new ReceiptParser();
+  }
 }
 
 type ReceiptsMintFields = {
@@ -153,8 +232,15 @@ type ReceiptsMintFields = {
   subId: Bytes32;
 };
 
-export class ReceiptsMintSubject extends SubjectBase<ReceiptsMintFields> {
+export class ReceiptsMintSubject extends SubjectBase<
+  ReceiptsMintFields,
+  Receipt,
+  RawReceipt
+> {
   protected format = 'receipts.{tx_id}.{index}.mint.{contract_id}.{sub_id}';
+  entityParser() {
+    return new ReceiptParser();
+  }
 }
 
 type ReceiptsBurnFields = {
@@ -164,8 +250,15 @@ type ReceiptsBurnFields = {
   subId: Bytes32;
 };
 
-export class ReceiptsBurnSubject extends SubjectBase<ReceiptsBurnFields> {
+export class ReceiptsBurnSubject extends SubjectBase<
+  ReceiptsBurnFields,
+  Receipt,
+  RawReceipt
+> {
   protected format = 'receipts.{tx_id}.{index}.burn.{contract_id}.{sub_id}';
+  entityParser() {
+    return new ReceiptParser();
+  }
 }
 
 type ReceiptsScriptResultFields = {
@@ -173,8 +266,15 @@ type ReceiptsScriptResultFields = {
   index: number;
 };
 
-export class ReceiptsScriptResultSubject extends SubjectBase<ReceiptsScriptResultFields> {
+export class ReceiptsScriptResultSubject extends SubjectBase<
+  ReceiptsScriptResultFields,
+  Receipt,
+  RawReceipt
+> {
   protected format = 'receipts.{tx_id}.{index}.script_result';
+  entityParser() {
+    return new ReceiptParser();
+  }
 }
 
 type ReceiptsMessageOutFields = {
@@ -184,7 +284,14 @@ type ReceiptsMessageOutFields = {
   recipient: Address;
 };
 
-export class ReceiptsMessageOutSubject extends SubjectBase<ReceiptsMessageOutFields> {
+export class ReceiptsMessageOutSubject extends SubjectBase<
+  ReceiptsMessageOutFields,
+  Receipt,
+  RawReceipt
+> {
   protected format =
     'receipts.{tx_id}.{index}.message_out.{sender}.{recipient}';
+  entityParser() {
+    return new ReceiptParser();
+  }
 }

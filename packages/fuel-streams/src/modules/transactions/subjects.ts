@@ -7,6 +7,8 @@
  * - TransactionsSubject
  */
 
+import { TransactionParser } from '../../parsers';
+import type { RawTransaction, Transaction } from '../../types';
 import type {
   BlockHeight,
   Bytes32,
@@ -24,9 +26,16 @@ type TransactionsFields = {
   kind: TransactionKind;
 };
 
-export class TransactionsSubject extends SubjectBase<TransactionsFields> {
+export class TransactionsSubject extends SubjectBase<
+  TransactionsFields,
+  Transaction,
+  RawTransaction
+> {
   protected format =
     'transactions.{block_height}.{index}.{tx_id}.{status}.{kind}';
+  entityParser() {
+    return new TransactionParser();
+  }
 }
 
 type TransactionsByIdFields = {
@@ -36,6 +45,13 @@ type TransactionsByIdFields = {
   idValue: Bytes32;
 };
 
-export class TransactionsByIdSubject extends SubjectBase<TransactionsByIdFields> {
+export class TransactionsByIdSubject extends SubjectBase<
+  TransactionsByIdFields,
+  Transaction,
+  RawTransaction
+> {
   protected format = 'by_id.transactions.{tx_id}.{index}.{id_kind}.{id_value}';
+  entityParser() {
+    return new TransactionParser();
+  }
 }

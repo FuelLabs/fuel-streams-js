@@ -6,6 +6,8 @@
  * - LogsSubject
  */
 
+import { LogParser } from '../../parsers';
+import type { Log, RawLog } from '../../types';
 import type { BlockHeight, Bytes32 } from '../../types';
 import { SubjectBase } from '../subject-base';
 
@@ -16,6 +18,9 @@ type LogsFields = {
   logId: Bytes32;
 };
 
-export class LogsSubject extends SubjectBase<LogsFields> {
+export class LogsSubject extends SubjectBase<LogsFields, Log, RawLog> {
   protected format = 'logs.{block_height}.{tx_id}.{receipt_index}.{log_id}';
+  entityParser() {
+    return new LogParser();
+  }
 }

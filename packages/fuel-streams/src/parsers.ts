@@ -1,6 +1,6 @@
 import { bn as toBN } from 'fuels';
 import { evolve } from 'ramda';
-import type { StreamParser } from './stream';
+import type { EntityParser } from './modules/subject-base';
 import {
   type Block,
   type Input,
@@ -39,7 +39,7 @@ import {
   type Utxo,
 } from './types';
 
-export class BlockParser implements StreamParser<Block, RawBlock> {
+export class BlockParser implements EntityParser<Block, RawBlock> {
   parse(data: RawBlock): Block {
     const transformations = {
       height: toBN,
@@ -104,7 +104,7 @@ export class InputMessageParser {
   }
 }
 
-export class InputParser implements StreamParser<Input, RawInput> {
+export class InputParser implements EntityParser<Input, RawInput> {
   private coinParser = new InputCoinParser();
   private contractParser = new InputContractParser();
   private messageParser = new InputMessageParser();
@@ -156,7 +156,7 @@ export class OutputContractCreatedParser {
   }
 }
 
-export class OutputParser implements StreamParser<Output, RawOutput> {
+export class OutputParser implements EntityParser<Output, RawOutput> {
   private coinParser = new OutputCoinParser();
   private contractParser = new OutputContractParser();
   private changeParser = new OutputChangeParser();
@@ -181,7 +181,6 @@ export class OutputParser implements StreamParser<Output, RawOutput> {
 
 export class LogWithoutDataParser {
   parse(data: RawLogWithoutData): Log {
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
     return data as any;
     // const transformations = {
     //   type: () => ReceiptType.Log,
@@ -205,7 +204,6 @@ export class LogWithoutDataParser {
 
 export class LogWithDataParser {
   parse(data: RawLogWithData): Log {
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
     return data as any;
     // const transformations = {
     //   type: () => ReceiptType.LogData,
@@ -225,7 +223,7 @@ export class LogWithDataParser {
   }
 }
 
-export class LogParser implements StreamParser<Log, RawLog> {
+export class LogParser implements EntityParser<Log, RawLog> {
   private withoutDataParser = new LogWithoutDataParser();
   private withDataParser = new LogWithDataParser();
 
@@ -239,9 +237,8 @@ export class LogParser implements StreamParser<Log, RawLog> {
   }
 }
 
-export class ReceiptParser implements StreamParser<Receipt, RawReceipt> {
+export class ReceiptParser implements EntityParser<Receipt, RawReceipt> {
   parse(data: RawReceipt): Receipt {
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
     return data as any;
     // const transformations = {
     //   type: (v: RawReceipt['type']) => ReceiptType[v],
@@ -268,7 +265,7 @@ export class ReceiptParser implements StreamParser<Receipt, RawReceipt> {
 }
 
 export class TransactionParser
-  implements StreamParser<Transaction, RawTransaction>
+  implements EntityParser<Transaction, RawTransaction>
 {
   private inputParser = new InputParser();
   private outputParser = new OutputParser();
@@ -314,7 +311,7 @@ export class TransactionParser
   }
 }
 
-export class UtxoParser implements StreamParser<Utxo, RawUtxo> {
+export class UtxoParser implements EntityParser<Utxo, RawUtxo> {
   parse(data: RawUtxo): Utxo {
     const transformations = { amount: toBN };
     return evolve(transformations, data) as Utxo;

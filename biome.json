@@ -21,7 +21,8 @@
         "noForEach": "off"
       },
       "suspicious": {
-        "noAsyncPromiseExecutor": "off"
+        "noAsyncPromiseExecutor": "off",
+        "noExplicitAny": "off"
       },
       "style": {
         "noNonNullAssertion": "off"

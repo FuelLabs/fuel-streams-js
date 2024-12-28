@@ -45,6 +45,7 @@ export const utxoTypeOptions = [
 export const subjectsDefinitions = {
   blocks: {
     name: 'Blocks',
+    entity: 'Block',
     subject: 'BlocksSubject',
     format: 'blocks.{producer}.{height}',
     wildcard: 'blocks.>',
@@ -59,6 +60,7 @@ export const subjectsDefinitions = {
   },
   inputs: {
     name: 'Inputs',
+    entity: 'Input',
     wildcard: 'inputs.>',
     variants: {
       byId: {
@@ -143,6 +145,7 @@ export const subjectsDefinitions = {
   },
   outputs: {
     name: 'Outputs',
+    entity: 'Output',
     wildcard: 'outputs.>',
     variants: {
       byId: {
@@ -264,6 +267,7 @@ export const subjectsDefinitions = {
   },
   receipts: {
     name: 'Receipts',
+    entity: 'Receipt',
     wildcard: 'receipts.>',
     variants: {
       byId: {
@@ -536,6 +540,7 @@ export const subjectsDefinitions = {
   },
   transactions: {
     name: 'Transactions',
+    entity: 'Transaction',
     wildcard: 'transactions.>',
     variants: {
       byId: {
@@ -574,6 +579,7 @@ export const subjectsDefinitions = {
   },
   logs: {
     name: 'Logs',
+    entity: 'Log',
     subject: 'LogsSubject',
     format: 'logs.{block_height}.{tx_id}.{receipt_index}.{log_id}',
     wildcard: 'logs.>',
@@ -594,6 +600,7 @@ export const subjectsDefinitions = {
   },
   utxos: {
     name: 'UTXOs',
+    entity: 'Utxo',
     subject: 'UtxosSubject',
     format: 'utxos.{utxo_type}.{hash}',
     wildcard: 'utxos.>',

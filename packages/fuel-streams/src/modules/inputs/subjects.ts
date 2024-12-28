@@ -10,6 +10,8 @@
  * - InputsMessageSubject
  */
 
+import { InputParser } from '../../parsers';
+import type { Input, RawInput } from '../../types';
 import type {
   Address,
   AssetId,
@@ -24,8 +26,11 @@ type InputsFields = {
   index: number;
 };
 
-export class InputsSubject extends SubjectBase<InputsFields> {
+export class InputsSubject extends SubjectBase<InputsFields, Input, RawInput> {
   protected format = 'inputs.{tx_id}.{index}.>';
+  entityParser() {
+    return new InputParser();
+  }
 }
 
 type InputsByIdFields = {
@@ -35,8 +40,15 @@ type InputsByIdFields = {
   idValue: Bytes32;
 };
 
-export class InputsByIdSubject extends SubjectBase<InputsByIdFields> {
+export class InputsByIdSubject extends SubjectBase<
+  InputsByIdFields,
+  Input,
+  RawInput
+> {
   protected format = 'by_id.inputs.{tx_id}.{index}.{id_kind}.{id_value}';
+  entityParser() {
+    return new InputParser();
+  }
 }
 
 type InputsCoinFields = {
@@ -46,8 +58,15 @@ type InputsCoinFields = {
   assetId: AssetId;
 };
 
-export class InputsCoinSubject extends SubjectBase<InputsCoinFields> {
+export class InputsCoinSubject extends SubjectBase<
+  InputsCoinFields,
+  Input,
+  RawInput
+> {
   protected format = 'inputs.{tx_id}.{index}.coin.{owner}.{asset_id}';
+  entityParser() {
+    return new InputParser();
+  }
 }
 
 type InputsContractFields = {
@@ -56,8 +75,15 @@ type InputsContractFields = {
   contractId: ContractId;
 };
 
-export class InputsContractSubject extends SubjectBase<InputsContractFields> {
+export class InputsContractSubject extends SubjectBase<
+  InputsContractFields,
+  Input,
+  RawInput
+> {
   protected format = 'inputs.{tx_id}.{index}.contract.{contract_id}';
+  entityParser() {
+    return new InputParser();
+  }
 }
 
 type InputsMessageFields = {
@@ -67,6 +93,13 @@ type InputsMessageFields = {
   recipient: Address;
 };
 
-export class InputsMessageSubject extends SubjectBase<InputsMessageFields> {
+export class InputsMessageSubject extends SubjectBase<
+  InputsMessageFields,
+  Input,
+  RawInput
+> {
   protected format = 'inputs.{tx_id}.{index}.message.{sender}.{recipient}';
+  entityParser() {
+    return new InputParser();
+  }
 }

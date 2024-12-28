@@ -10,7 +10,6 @@ export function printHeader(title: string) {
 }
 
 export function handleUnhandledError(streamType: string) {
-  // biome-ignore lint/suspicious/noExplicitAny: <explanation>
   return (error: any) => {
     console.error(
       chalk.red(`Unhandled error in ${streamType} stream main function:`),

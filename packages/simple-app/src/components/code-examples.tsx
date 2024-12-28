@@ -1,5 +1,5 @@
 import { useStreamData } from '@/lib/stream/use-stream-data';
-import type { Network } from '@fuels/streams';
+import type { FuelNetwork } from '@fuels/streams';
 import type { ModuleKeys } from '@fuels/streams/subjects-def';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import { vs } from 'react-syntax-highlighter/dist/esm/styles/hljs';
@@ -10,48 +10,46 @@ import { useTheme } from './theme-provider';
 import { CardContent } from './ui/card';
 
 function getFuelExample(
-  network: keyof typeof Network,
+  network: FuelNetwork,
   stream: string,
   subjectClass: string | null,
   selectedFields: Record<string, string>,
 ) {
-  const baseClass = stream.replace('Stream', 'Subject');
-  const subjectImport = subjectClass ?? baseClass;
-
+  const baseClass = stream.replace('Stream', '');
+  const subjectImport = subjectClass ?? `${baseClass}Subject`;
   const formattedFields = Object.entries(selectedFields)
     .map(([key, value]) => `  ${v.camelCase(key)}: '${value}'`)
     .join(',\n');
 
   const subjectInit = Object.values(selectedFields).some(Boolean)
-    ? `let subject = ${subjectImport}.build({\n${formattedFields}\n});`
-    : `let subject = ${subjectImport}.build();`;
+    ? `const subject = ${subjectImport}.build({\n${formattedFields}\n});`
+    : `const subject = ${subjectImport}.build();`;
 
   return `import {
   Client,
-  ${stream},
-  ${subjectImport}
+  ${subjectImport},
+  DeliverPolicy
+  FuelNetwork,
 } from '@fuels/streams';
 
 ${subjectInit}
 
 async function main() {
-  const client = await Client.connect({ network: '${network}' });
-  const stream = await ${stream}.init(client);
-  const subscription = await stream.subscribe(subject);
+  const client = await Client.new(FuelNetwork.${v.capitalize(network)});
+  const connection = await client.connect();
+  const stream = await connection.subscribe(subject, DeliverPolicy.New);
   
-  for await (const msg of subscription) {
-    console.log('Received message:', msg.json());
+  for await (const msg of stream) {
+    console.log('Subject:', msg.subject);
+    console.log('Payload:', msg.payload);
   }
-  
-  await stream.flushAwait();
 }
 
 main().catch(console.error);`;
 }
 
 function getExamples(
-  network: keyof typeof Network,
-  subject: string | null = 'blocks.>',
+  network: FuelNetwork,
   selectedModule: ModuleKeys = 'blocks',
   subjectClass: string | null = 'BlocksSubject',
   selectedFields: Record<string, string> = {},
@@ -60,64 +58,16 @@ function getExamples(
 
   return {
     fuel: getFuelExample(network, stream, subjectClass, selectedFields),
-    natsNode: `import { connect } from 'nats';
-
-async function main() {
-  const nc = await connect({
-    servers: 'nats://stream-testnet.fuel.network:4222'
-  });
-
-  const sub = nc.subscribe('${subject}');
-  console.log('Subscription created on', '${subject}');
-  
-  for await (const msg of sub) {
-    const data = msg.json();
-    console.log('Received:', data);
-  }
-}
-
-main().catch(console.error);`,
-    natsBrowser: `import { wsconnect } from 'nats';
-
-async function main() {
-  const nc = await connect({
-    servers: 'wss://stream-testnet.fuel.network:4222'
-  });
-
-  const sub = nc.subscribe('${subject}');
-  console.log('Subscription created on', '${subject}');
-  
-  for await (const msg of sub) {
-    const data = msg.json();
-    console.log('Received:', data);
-  }
-}
-
-main().catch(console.error);`,
-
-    natsCli: `# Install NATS CLI if you haven't already
-# brew install nats-io/nats-tools/nats
-# or download from https://github.com/nats-io/natscli/releases
-
-# Subscribe to the stream
-nats kv watch "fuel_${selectedModule}" "${subject}" \\
-  --server=nats://stream-testnet.fuel.network:4222
-
-# Both protocols nats:// or wss:// can be used here
-nats kv watch "fuel_${selectedModule}" "${subject}" \\
-  --server=wss://stream-testnet.fuel.network:8443`,
   };
 }
 
 export function CodeExamples() {
-  const { subject, selectedModule, selectedFields, subjectClass } =
-    useDynamicForm();
+  const { selectedModule, selectedFields, subjectClass } = useDynamicForm();
   const { isTheme } = useTheme();
   const { network } = useStreamData();
   const codeTheme = isTheme('dark') ? vs2015 : vs;
   const examples = getExamples(
     network,
-    subject,
     selectedModule ?? 'blocks',
     subjectClass,
     selectedFields ?? {},

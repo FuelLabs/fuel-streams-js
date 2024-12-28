@@ -167,7 +167,7 @@ function DataVisualization() {
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
-                    <div className="m-0 text-slate-400 whitespace-nowrap">
+                    {/* <div className="m-0 text-slate-400 whitespace-nowrap">
                       {new Date(item.timestamp).toLocaleString('en-US', {
                         day: 'numeric',
                         month: 'short',
@@ -175,7 +175,7 @@ function DataVisualization() {
                         minute: '2-digit',
                         second: '2-digit',
                       })}
-                    </div>
+                    </div> */}
                   </div>
                 </CardHeader>
                 <CardContent className="p-4 pt-0 overflow-x-auto">
@@ -186,7 +186,7 @@ function DataVisualization() {
                       isTheme('dark') ? 'summerfruit' : 'summerfruit:inverted'
                     }
                     displayDataTypes={false}
-                    src={item.rawPayload as object}
+                    src={item.payload as object}
                     style={{
                       padding: 0,
                       background: 'transparent',

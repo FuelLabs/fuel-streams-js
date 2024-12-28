@@ -6,6 +6,8 @@
  * - UtxosSubject
  */
 
+import { UtxoParser } from '../../parsers';
+import type { RawUtxo, Utxo } from '../../types';
 import type { MessageId, UtxoType } from '../../types';
 import { SubjectBase } from '../subject-base';
 
@@ -14,6 +16,9 @@ type UtxosFields = {
   hash: MessageId;
 };
 
-export class UtxosSubject extends SubjectBase<UtxosFields> {
+export class UtxosSubject extends SubjectBase<UtxosFields, Utxo, RawUtxo> {
   protected format = 'utxos.{utxo_type}.{hash}';
+  entityParser() {
+    return new UtxoParser();
+  }
 }

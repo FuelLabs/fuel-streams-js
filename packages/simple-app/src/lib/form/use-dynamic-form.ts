@@ -27,7 +27,6 @@ export const formMachine = setup({
     },
     events: {} as
       | { type: 'CHANGE.MODULE'; value: keyof SubjectsDefinition }
-      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
       | { type: 'CHANGE.VARIANT'; value: any }
       | { type: 'CHANGE.FIELD'; fieldName: string; value: string },
   },

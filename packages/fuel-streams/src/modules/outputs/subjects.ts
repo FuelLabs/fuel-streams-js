@@ -12,6 +12,8 @@
  * - OutputsContractCreatedSubject
  */
 
+import { OutputParser } from '../../parsers';
+import type { Output, RawOutput } from '../../types';
 import type {
   Address,
   AssetId,
@@ -26,8 +28,15 @@ type OutputsFields = {
   index: number;
 };
 
-export class OutputsSubject extends SubjectBase<OutputsFields> {
+export class OutputsSubject extends SubjectBase<
+  OutputsFields,
+  Output,
+  RawOutput
+> {
   protected format = 'outputs.*.{tx_id}.{index}.>';
+  entityParser() {
+    return new OutputParser();
+  }
 }
 
 type OutputsByIdFields = {
@@ -37,8 +46,15 @@ type OutputsByIdFields = {
   idValue: Bytes32;
 };
 
-export class OutputsByIdSubject extends SubjectBase<OutputsByIdFields> {
+export class OutputsByIdSubject extends SubjectBase<
+  OutputsByIdFields,
+  Output,
+  RawOutput
+> {
   protected format = 'by_id.outputs.{tx_id}.{index}.{id_kind}.{id_value}';
+  entityParser() {
+    return new OutputParser();
+  }
 }
 
 type OutputsCoinFields = {
@@ -48,8 +64,15 @@ type OutputsCoinFields = {
   assetId: AssetId;
 };
 
-export class OutputsCoinSubject extends SubjectBase<OutputsCoinFields> {
+export class OutputsCoinSubject extends SubjectBase<
+  OutputsCoinFields,
+  Output,
+  RawOutput
+> {
   protected format = 'outputs.coin.{tx_id}.{index}.{to}.{asset_id}';
+  entityParser() {
+    return new OutputParser();
+  }
 }
 
 type OutputsContractFields = {
@@ -58,8 +81,15 @@ type OutputsContractFields = {
   contractId: ContractId;
 };
 
-export class OutputsContractSubject extends SubjectBase<OutputsContractFields> {
+export class OutputsContractSubject extends SubjectBase<
+  OutputsContractFields,
+  Output,
+  RawOutput
+> {
   protected format = 'outputs.contract.{tx_id}.{index}.{contract_id}';
+  entityParser() {
+    return new OutputParser();
+  }
 }
 
 type OutputsChangeFields = {
@@ -69,8 +99,15 @@ type OutputsChangeFields = {
   assetId: AssetId;
 };
 
-export class OutputsChangeSubject extends SubjectBase<OutputsChangeFields> {
+export class OutputsChangeSubject extends SubjectBase<
+  OutputsChangeFields,
+  Output,
+  RawOutput
+> {
   protected format = 'outputs.change.{tx_id}.{index}.{to}.{asset_id}';
+  entityParser() {
+    return new OutputParser();
+  }
 }
 
 type OutputsVariableFields = {
@@ -80,8 +117,15 @@ type OutputsVariableFields = {
   assetId: AssetId;
 };
 
-export class OutputsVariableSubject extends SubjectBase<OutputsVariableFields> {
+export class OutputsVariableSubject extends SubjectBase<
+  OutputsVariableFields,
+  Output,
+  RawOutput
+> {
   protected format = 'outputs.variable.{tx_id}.{index}.{to}.{asset_id}';
+  entityParser() {
+    return new OutputParser();
+  }
 }
 
 type OutputsContractCreatedFields = {
@@ -90,6 +134,13 @@ type OutputsContractCreatedFields = {
   contractId: ContractId;
 };
 
-export class OutputsContractCreatedSubject extends SubjectBase<OutputsContractCreatedFields> {
+export class OutputsContractCreatedSubject extends SubjectBase<
+  OutputsContractCreatedFields,
+  Output,
+  RawOutput
+> {
   protected format = 'outputs.contract_created.{tx_id}.{index}.{contract_id}';
+  entityParser() {
+    return new OutputParser();
+  }
 }

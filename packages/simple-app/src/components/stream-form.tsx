@@ -38,7 +38,7 @@ export function StreamForm() {
 
   function handleSubmit() {
     if (!selectedModule || !subject) return;
-    start({ subject, selectedModule });
+    start({ subject });
   }
 
   return (

@@ -50,11 +50,14 @@ export function Header() {
             <SelectValue placeholder="Select Network" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="mainnet" aria-label="Ignition Mainnet">
+            {/* <SelectItem value="mainnet" aria-label="Ignition Mainnet">
               Ignition Mainnet
             </SelectItem>
             <SelectItem value="testnet" aria-label="Fuel Testnet">
               Fuel Testnet
+            </SelectItem> */}
+            <SelectItem value="staging" aria-label="Fuel Staging">
+              Fuel Staging
             </SelectItem>
           </SelectContent>
         </Select>

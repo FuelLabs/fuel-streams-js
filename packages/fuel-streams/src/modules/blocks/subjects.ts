@@ -6,6 +6,8 @@
  * - BlocksSubject
  */
 
+import { BlockParser } from '../../parsers';
+import type { Block, RawBlock } from '../../types';
 import type { Address, BlockHeight } from '../../types';
 import { SubjectBase } from '../subject-base';
 
@@ -14,6 +16,9 @@ type BlocksFields = {
   height: BlockHeight;
 };
 
-export class BlocksSubject extends SubjectBase<BlocksFields> {
+export class BlocksSubject extends SubjectBase<BlocksFields, Block, RawBlock> {
   protected format = 'blocks.{producer}.{height}';
+  entityParser() {
+    return new BlockParser();
+  }
 }

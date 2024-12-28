@@ -41,9 +41,32 @@ function generateSubjectBase() {
 
 import v from 'voca';
 
-export abstract class SubjectBase<TFields extends Record<string, unknown>> {
+export type GenericRecord = Record<string, any>;
+
+export interface EntityParser<
+  T extends GenericRecord,
+  R extends GenericRecord,
+> {
+  parse(data: R): T;
+}
+
+export abstract class SubjectBase<
+  TFields extends GenericRecord,
+  T extends GenericRecord,
+  R extends GenericRecord,
+> {
   constructor(protected fields: Partial<TFields> = {}) {}
   protected abstract format: string;
+
+  abstract entityParser(): EntityParser<T, R>;
+
+  // This is a hack to make the compiler happy
+  _entity(): T {
+    return {} as T
+  }
+  _rawEntity(): R {
+    return {} as R;
+  }
 
   parse(): string {
     const fields = Object.entries(this.fields).reduce<Record<string, string>>(
@@ -65,42 +88,18 @@ export abstract class SubjectBase<TFields extends Record<string, unknown>> {
     return this;
   }
 
-  static build<T extends SubjectBase<Record<string, unknown>>>(
-    this: new () => T,
-    fields: Partial<Parameters<T['build']>[0]> = {}
-  ): T {
+  static build<
+    T extends SubjectBase<GenericRecord, GenericRecord, GenericRecord>,
+  >(this: new () => T, fields: Partial<Parameters<T["build"]>[0]> = {}): T {
     // biome-ignore lint/complexity/noThisInStatic: <explanation>
     return new this().build(fields);
   }
 
-  static wildcard<T extends SubjectBase<Record<string, unknown>>>(
-    this: new () => T
-  ): string {
+  static wildcard<
+    T extends SubjectBase<GenericRecord, GenericRecord, GenericRecord>,
+  >(this: new () => T): string {
     // biome-ignore lint/complexity/noThisInStatic: <explanation>
     return new this().parse();
-  }
-}`;
-}
-
-function generateStream(moduleName: string) {
-  const pascalModuleName = v.capitalize(moduleName);
-  const streamName = `${pascalModuleName}Stream`;
-  const payloadType = pascalModuleName.slice(0, pascalModuleName.length - 1);
-
-  return `import type { Client } from '../../nats-client';
-import { Stream } from '../../stream';
-import { StreamNames, type ${payloadType}, type Raw${payloadType} } from '../../types';
-import { ${payloadType}Parser } from '../../parsers';
-
-// biome-ignore lint/complexity/noStaticOnlyClass: <explanation>
-export class ${streamName} {
-  static async init(client: Client) {
-    const parser = new ${payloadType}Parser();
-    return Stream.get<${payloadType}, Raw${payloadType}>(
-      client,
-      StreamNames.${pascalModuleName},
-      parser,
-    );
   }
 }`;
 }
@@ -118,7 +117,6 @@ function mapRustTypeToTS(rustType: string): string {
   return typeMap[rustType] || rustType;
 }
 
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 function generateInterface(name: string, initFields: Record<string, any>) {
   const fields = Object.entries(initFields)
     .map(([key, value]) => {
@@ -132,22 +130,57 @@ ${fields}
 }`;
 }
 
-function generateSubjectClass(name: string, format: string, isGeneric = false) {
+function generateSubjectImports(moduleConfig: any, entity: string): string {
+  const usedTypes = new Set<string>();
+
+  if ('variants' in moduleConfig) {
+    Object.values(moduleConfig.variants).forEach((variant: any) => {
+      getUsedTypes(variant.fields).forEach((type) => usedTypes.add(type));
+    });
+  } else {
+    getUsedTypes(moduleConfig.fields).forEach((type) => usedTypes.add(type));
+  }
+
+  let imports = `import { SubjectBase } from '../subject-base';\n`;
+  imports += `import { type ${entity}, type Raw${entity} } from '../../types';\n`;
+  imports += `import { ${entity}Parser } from '../../parsers';\n`;
+
+  // Add imports only for types that are used
+  if (usedTypes.size > 0) {
+    imports += `import type { ${Array.from(usedTypes)
+      .sort()
+      .join(', ')} } from '../../types';\n`;
+  }
+
+  return imports;
+}
+
+function generateSubjectClass(
+  name: string,
+  format: string,
+  isGeneric: boolean,
+  entity: string,
+) {
   const className = `${name}Subject`;
   const interfaceName = `${name}Fields`;
 
   if (isGeneric) {
-    return `export class ${className} extends SubjectBase<${interfaceName}> {
+    return `export class ${className} extends SubjectBase<${interfaceName}, ${entity}, Raw${entity}> {
   protected format = '${format}';
+  entityParser() {
+    return new ${entity}Parser();
+  }
 }`;
   }
 
-  return `export class ${className} extends SubjectBase<${interfaceName}> {
+  return `export class ${className} extends SubjectBase<${interfaceName}, ${entity}, Raw${entity}> {
   protected format = '${format}';
+  entityParser() {
+    return new ${entity}Parser();
+  }
 }`;
 }
 
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 function getUsedTypes(fields: Record<string, any>): Set<string> {
   const usedTypes = new Set<string>();
 
@@ -174,12 +207,12 @@ function getUsedTypes(fields: Record<string, any>): Set<string> {
   return usedTypes;
 }
 
-// biome-ignore lint/suspicious/noExplicitAny: <explanation>
 async function generateModuleSubjects(_moduleName: string, moduleConfig: any) {
   // Generate list of subjects in this file
   const subjectNames: string[] = [];
+  const entity = moduleConfig.entity;
+
   if ('variants' in moduleConfig) {
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
     Object.values(moduleConfig.variants).forEach((variant: any) => {
       const baseName = v.replaceAll(variant.subject, 'Subject', '');
       subjectNames.push(`${baseName}Subject`);
@@ -198,26 +231,8 @@ async function generateModuleSubjects(_moduleName: string, moduleConfig: any) {
  ${subjectNames.map((name) => ` * - ${name}`).join('\n')}
  */\n\n`;
 
-  content += `import { SubjectBase } from '../subject-base';\n`;
-
-  // Collect all used types
-  const usedTypes = new Set<string>();
-
-  if ('variants' in moduleConfig) {
-    // biome-ignore lint/suspicious/noExplicitAny: <explanation>
-    Object.values(moduleConfig.variants).forEach((variant: any) => {
-      getUsedTypes(variant.fields).forEach((type) => usedTypes.add(type));
-    });
-  } else {
-    getUsedTypes(moduleConfig.fields).forEach((type) => usedTypes.add(type));
-  }
-
-  // Add imports only for types that are used
-  if (usedTypes.size > 0) {
-    content += `import type { ${Array.from(usedTypes)
-      .sort()
-      .join(', ')} } from '../../types';\n\n`;
-  }
+  // Add imports using the new function
+  content += `${generateSubjectImports(moduleConfig, entity)}\n`;
 
   if ('variants' in moduleConfig) {
     // First generate the base interface and generic subject if there's a generic variant
@@ -230,19 +245,24 @@ async function generateModuleSubjects(_moduleName: string, moduleConfig: any) {
         baseName,
         genericVariant.format,
         true, // Mark as generic
+        entity,
       );
       content += '\n\n';
     }
 
     // Then generate all other variants
     Object.entries(moduleConfig.variants).forEach(
-      // biome-ignore lint/suspicious/noExplicitAny: <explanation>
       ([key, variant]: [string, any]) => {
         if (key === 'generic') return; // Skip generic as it's already handled
         const baseName = v.replaceAll(variant.subject, 'Subject', '');
         content += generateInterface(baseName, variant.fields);
         content += '\n\n';
-        content += generateSubjectClass(baseName, variant.format);
+        content += generateSubjectClass(
+          baseName,
+          variant.format,
+          false,
+          entity,
+        );
         content += '\n\n';
       },
     );
@@ -250,7 +270,12 @@ async function generateModuleSubjects(_moduleName: string, moduleConfig: any) {
     const baseName = v.replaceAll(moduleConfig.subject, 'Subject', '');
     content += generateInterface(baseName, moduleConfig.fields);
     content += '\n\n';
-    content += generateSubjectClass(baseName, moduleConfig.format);
+    content += generateSubjectClass(
+      baseName,
+      moduleConfig.format,
+      false,
+      entity,
+    );
   }
 
   return content;
@@ -293,12 +318,6 @@ async function generateAllSubjects() {
         const subjectsPath = path.join(moduleDir, 'subjects.ts');
         fs.writeFileSync(subjectsPath, subjectsContent);
         console.log(`Generated: ${subjectsPath}`);
-
-        // Generate stream.ts
-        const streamContent = generateStream(moduleName);
-        const streamPath = path.join(moduleDir, 'stream.ts');
-        fs.writeFileSync(streamPath, streamContent);
-        console.log(`Generated: ${streamPath}`);
       }),
     );
 
