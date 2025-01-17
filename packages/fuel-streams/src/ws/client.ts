@@ -13,22 +13,19 @@ import {
   UtxoParser,
 } from '../parsers';
 import { ClientError } from './error';
-import { getWebUrl, getWsUrl } from './networks';
-import { WebSocket, fetch } from './platform';
+import { getWsUrl } from './networks';
+import { WebSocket } from './platform';
 import type {
   ClientMessage,
   DeliverPolicy,
   FuelNetwork,
-  LoginRequest,
-  LoginResponse,
   ResponseMessage,
   ServerMessage,
 } from './types';
 
 export interface ConnectionOpts {
   network: FuelNetwork;
-  username: string;
-  password: string;
+  apiKey: string | null;
 }
 
 interface SubscriptionIterator<T extends GenericRecord>
@@ -52,14 +49,34 @@ export class Connection {
             : event.data.toString();
 
         const msg = JSON.parse(data) as ServerMessage;
+        if ('error' in msg) {
+          // Handle specific server error types
+          switch (msg.error) {
+            case 'unauthorized':
+              throw ClientError.UnauthorizedError();
+            case 'invalid_api_key':
+              throw ClientError.InvalidApiKey();
+            default:
+              throw new ClientError(msg.error);
+          }
+        }
+
         if ('response' in msg) {
           this.messageHandlers.forEach((handler) => handler(msg.response));
-        } else if ('error' in msg) {
-          throw new ClientError(msg.error as string);
         }
       } catch (err) {
-        console.error('Failed to handle message:', err);
+        if (err instanceof ClientError) {
+          throw err;
+        }
+        if (err instanceof SyntaxError) {
+          throw ClientError.JsonParseError(err);
+        }
+        throw ClientError.ApiError(err as Error);
       }
+    };
+
+    this.ws.onerror = (error) => {
+      throw ClientError.WebSocketError(error as unknown as Error);
     };
   }
 
@@ -110,20 +127,27 @@ export class Connection {
     subject: S,
     deliverPolicy: DeliverPolicy,
   ): Promise<SubscriptionIterator<Entity>> {
-    const parsedSubject = subject.parse();
-    const parser = subject.entityParser() as EntityParser<Entity, RawEntity>;
-    const message: ClientMessage = {
-      subscribe: {
-        wildcard: parsedSubject,
-        deliverPolicy: deliverPolicy,
-      },
-    };
+    try {
+      const parsedSubject = subject.parse();
+      const parser = subject.entityParser() as EntityParser<Entity, RawEntity>;
+      const message: ClientMessage = {
+        subscribe: {
+          wildcard: parsedSubject,
+          deliverPolicy: deliverPolicy,
+        },
+      };
 
-    await this.sendMessage(message);
-    return this.createSubscriptionIterator<S, Entity, RawEntity>(
-      parsedSubject,
-      parser,
-    );
+      await this.sendMessage(message);
+      return this.createSubscriptionIterator<S, Entity, RawEntity>(
+        parsedSubject,
+        parser,
+      );
+    } catch (err) {
+      if (err instanceof ClientError) {
+        throw err;
+      }
+      throw ClientError.SubscriptionError(subject.toString());
+    }
   }
 
   async subscribeWithString<
@@ -133,16 +157,23 @@ export class Connection {
     subject: string,
     deliverPolicy: DeliverPolicy,
   ): Promise<SubscriptionIterator<T>> {
-    const message: ClientMessage = {
-      subscribe: {
-        wildcard: subject,
-        deliverPolicy: deliverPolicy,
-      },
-    };
+    try {
+      const message: ClientMessage = {
+        subscribe: {
+          wildcard: subject,
+          deliverPolicy: deliverPolicy,
+        },
+      };
 
-    await this.sendMessage(message);
-    const parser = this.findParser(subject);
-    return this.createSubscriptionIterator<any, T, RawT>(subject, parser);
+      await this.sendMessage(message);
+      const parser = this.findParser(subject);
+      return this.createSubscriptionIterator<any, T, RawT>(subject, parser);
+    } catch (err) {
+      if (err instanceof ClientError) {
+        throw err;
+      }
+      throw ClientError.SubscriptionError(subject);
+    }
   }
 
   private findParser(subject: string): EntityParser<any, any> {
@@ -168,7 +199,9 @@ export class Connection {
 
   private async sendMessage(message: ClientMessage): Promise<void> {
     if (this.ws.readyState !== this.ws.OPEN) {
-      throw new ClientError('WebSocket is not connected');
+      throw ClientError.WebSocketError(
+        new Error('WebSocket connection is not open'),
+      );
     }
 
     return new Promise((resolve, reject) => {
@@ -189,90 +222,69 @@ export class Connection {
 
 export class Client {
   private opts: ConnectionOpts;
-  private jwtToken?: string;
-  private static instance: Client | null = null;
 
   private constructor(opts: ConnectionOpts) {
+    if (!opts.apiKey) {
+      throw ClientError.MissingApiKey();
+    }
     this.opts = opts;
   }
 
-  static async getInstance(network: FuelNetwork) {
-    if (!Client.instance) {
-      Client.instance = new Client({
-        network,
-        username: 'admin',
-        password: 'admin',
-      });
+  static async new(network: FuelNetwork, apiKey: string): Promise<Client> {
+    if (!apiKey) {
+      throw ClientError.MissingApiKey();
     }
-    return Client.instance;
-  }
-
-  static async new(network: FuelNetwork): Promise<Client> {
-    return Client.getInstance(network);
-  }
-
-  private async fetchJwt(): Promise<string> {
-    const response = await fetch(
-      new URL('/api/v1/jwt', getWebUrl(this.opts.network)).toString(),
-      {
-        method: 'POST',
-        headers: {
-          Accept: 'application/json',
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username: this.opts.username,
-          password: this.opts.password,
-        } as LoginRequest),
-      },
-    );
-
-    if (!response.ok) {
-      throw ClientError.ApiError(
-        new Error(`HTTP error! status: ${response.status}`),
-      );
-    }
-
-    const data = (await response.json()) as LoginResponse;
-    return data.jwtToken;
-  }
-
-  async connect(): Promise<Connection> {
-    if (!this.jwtToken) {
-      this.jwtToken = await this.fetchJwt();
-    }
-
-    const wsUrl = new URL(
-      `/api/v1/ws?token=${this.jwtToken}`,
-      getWsUrl(this.opts.network),
-    );
-
-    return new Promise((resolve, reject) => {
-      const ws = new WebSocket(wsUrl.toString());
-
-      const cleanup = () => {
-        ws.onopen = null;
-        ws.onerror = null;
-      };
-
-      ws.onopen = () => {
-        cleanup();
-        resolve(new Connection(ws));
-      };
-
-      ws.onerror = (event: Event) => {
-        cleanup();
-        // Convert Event to Error with proper type casting
-        const error = new Error(
-          (event as ErrorEvent).message || 'WebSocket connection failed',
-        );
-        reject(ClientError.WebSocketError(error));
-      };
+    return new Client({
+      network,
+      apiKey,
     });
   }
 
-  async refreshJwtAndConnect(): Promise<Connection> {
-    this.jwtToken = await this.fetchJwt();
-    return this.connect();
+  async connect(): Promise<Connection> {
+    if (!this.opts.apiKey) {
+      throw ClientError.MissingApiKey();
+    }
+
+    try {
+      const wsUrl = new URL(
+        `/api/v1/ws?api_key=${this.opts.apiKey}`,
+        getWsUrl(this.opts.network),
+      );
+
+      return new Promise((resolve, reject) => {
+        const ws = new WebSocket(wsUrl.toString());
+        const timeoutId = setTimeout(() => {
+          cleanup();
+          reject(ClientError.ConnectionTimeout());
+        }, 10000); // 10 second timeout
+
+        const cleanup = () => {
+          clearTimeout(timeoutId);
+          ws.onopen = null;
+          ws.onerror = null;
+        };
+
+        ws.onopen = () => {
+          cleanup();
+          resolve(new Connection(ws));
+        };
+
+        ws.onerror = (event: Event) => {
+          cleanup();
+          const error = new Error(
+            (event as ErrorEvent).message || 'WebSocket connection failed',
+          );
+          reject(ClientError.WebSocketError(error));
+        };
+      });
+    } catch (err) {
+      if (err instanceof ClientError) {
+        throw err;
+      }
+      if (err instanceof TypeError) {
+        throw ClientError.UrlParseError(err);
+      }
+      throw ClientError.NetworkError(this.opts.network);
+    }
   }
 }

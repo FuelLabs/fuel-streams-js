@@ -14,6 +14,7 @@ import { useStreamData } from '@/lib/stream/use-stream-data';
 import { DeliverPolicy } from '@fuels/streams';
 import { Play, Square } from 'lucide-react';
 import v from 'voca';
+import { ApiKeyPopover } from './api-key-popover';
 
 function formatLabel(name: string): string {
   return v.titleCase(v.replaceAll(name, '_', ' '));
@@ -33,8 +34,16 @@ export function StreamForm() {
     subject,
   } = useDynamicForm();
 
-  const { start, stop, isSubscribing, changeDeliveryPolicy, deliverPolicy } =
-    useStreamData();
+  const {
+    start,
+    stop,
+    isSubscribing,
+    changeDeliveryPolicy,
+    deliverPolicy,
+    isConnected,
+    apiKey,
+    setApiKey,
+  } = useStreamData();
 
   function handleSubmit() {
     if (!selectedModule || !subject) return;
@@ -43,21 +52,28 @@ export function StreamForm() {
 
   return (
     <div className="space-y-4" aria-label="Stream Configuration Form">
-      <div className="flex items-center gap-4">
-        <Switch
-          className="mt-1/5"
-          id="historical-data"
-          checked={deliverPolicy === DeliverPolicy.All}
-          onCheckedChange={(checked) =>
-            changeDeliveryPolicy(
-              checked ? DeliverPolicy.All : DeliverPolicy.New,
-            )
-          }
-          aria-label="Toggle historical data"
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <Switch
+            className="mt-1/5"
+            id="historical-data"
+            checked={deliverPolicy === DeliverPolicy.All}
+            onCheckedChange={(checked) =>
+              changeDeliveryPolicy(
+                checked ? DeliverPolicy.All : DeliverPolicy.New,
+              )
+            }
+            aria-label="Toggle historical data"
+          />
+          <label htmlFor="historical-data" className="text-sm font-medium">
+            Enable historical data
+          </label>
+        </div>
+        <ApiKeyPopover
+          isConnected={isConnected}
+          apiKey={apiKey}
+          onSubmit={setApiKey}
         />
-        <label htmlFor="historical-data" className="text-sm font-medium">
-          Enable historical data
-        </label>
       </div>
 
       <div className={variantOptions.length > 0 ? 'flex gap-4' : ''}>

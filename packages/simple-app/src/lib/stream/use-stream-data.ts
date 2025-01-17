@@ -1,4 +1,4 @@
-import { DeliverPolicy, FuelNetwork } from '@fuels/streams';
+import { ClientError, DeliverPolicy, FuelNetwork } from '@fuels/streams';
 // import { createBrowserInspector } from '@statelyai/inspect';
 import { Client, type Connection } from '@fuels/streams';
 import type { ModuleKeys } from '@fuels/streams/subjects-def';
@@ -11,8 +11,10 @@ import {
   fromPromise,
   setup,
 } from 'xstate';
+import { LocalStorage } from './local-storage';
 
 // const { inspect } = createBrowserInspector();
+const localStorage = new LocalStorage('@fuel-streams/api-key');
 
 type StreamEvent =
   | { type: 'START'; subject: string; selectedModule: ModuleKeys }
@@ -21,28 +23,33 @@ type StreamEvent =
   | { type: 'DATA'; data: { subject: string; payload: any } }
   | { type: 'CHANGE_NETWORK'; network: FuelNetwork }
   | { type: 'CHANGE_TAB'; tab: 'data' | 'code' }
-  | { type: 'CHANGE_DELIVERY_POLICY'; policy: DeliverPolicy };
+  | { type: 'CHANGE_DELIVERY_POLICY'; policy: DeliverPolicy }
+  | { type: 'SET_API_KEY'; apiKey: string };
 
 type StreamActorInput = {
   subject: string;
   deliverPolicy: DeliverPolicy;
   network: FuelNetwork;
+  apiKey: string | null;
 };
 
 type ClientActorInput = {
   network: FuelNetwork;
+  apiKey: string | null;
 };
 
 const createClientActor = fromPromise<Connection, ClientActorInput>(
-  async ({ input: { network } }) => {
-    const client = await Client.new(network);
+  async ({ input: { network, apiKey } }) => {
+    if (!apiKey) throw new Error('API key is required');
+    const client = await Client.new(network, apiKey);
     return client.connect();
   },
 );
 
 const switchNetworkActor = fromPromise<Connection, ClientActorInput>(
-  async ({ input: { network } }) => {
-    const client = await Client.new(network);
+  async ({ input: { network, apiKey } }) => {
+    if (!apiKey) throw ClientError.MissingApiKey();
+    const client = await Client.new(network, apiKey);
     return client.connect();
   },
 );
@@ -52,8 +59,9 @@ const subscriptionActor = fromCallback<StreamEvent, StreamActorInput>(
     let cleanup: (() => void) | undefined;
 
     (async () => {
-      const { subject, deliverPolicy, network } = input;
-      const client = await Client.getInstance(network);
+      const { subject, deliverPolicy, network, apiKey } = input;
+      if (!apiKey) throw ClientError.MissingApiKey();
+      const client = await Client.new(network, apiKey);
       const connection = await client.connect();
       const subscription = await connection.subscribeWithString(
         subject,
@@ -80,6 +88,7 @@ export const streamMachine = setup({
       network: FuelNetwork;
       tab: 'data' | 'code';
       deliverPolicy: DeliverPolicy;
+      apiKey: string | null;
     },
   },
   actors: {
@@ -131,17 +140,49 @@ export const streamMachine = setup({
       subject: () => null,
       selectedModule: () => null,
       data: () => [],
+      apiKey: () => {
+        localStorage.removeApiKey();
+        return null;
+      },
     }),
     notifyNetworkChange: ({ context }) => {
       toast.success(`Successfully connected to ${context.network}`);
     },
-    notifyNetworkError: () => {
-      toast.error('Failed to connect to network');
+    setApiKey: assign({
+      apiKey: ({ event }) => {
+        if (event.type !== 'SET_API_KEY') return null;
+        localStorage.setApiKey(event.apiKey);
+        return event.apiKey;
+      },
+    }),
+    notifyConnectionError: ({ event }) => {
+      if (!event.error && event.type !== 'SET_API_KEY') return;
+      if (event.error instanceof ClientError) {
+        toast.error(event.error.message);
+      } else {
+        toast.error('Failed to connect to server');
+      }
+    },
+    notifyNetworkError: ({ event }) => {
+      if (!event.error && event.type !== 'CHANGE_NETWORK') return;
+      if (event.error instanceof ClientError) {
+        toast.error(event.error.message);
+      } else {
+        toast.error('Failed to connect to network');
+      }
+    },
+    notifySubscriptionError: ({ event }) => {
+      if (!event.error && event.type !== 'SUBSCRIBE') return;
+      if (event.error instanceof ClientError) {
+        toast.error(event.error.message);
+      } else {
+        toast.error('Failed to subscribe to stream');
+      }
     },
   },
 }).createMachine({
   id: 'streamMachine',
-  initial: 'connecting',
+  initial: 'checkingApiKey',
   context: () => ({
     subject: null,
     selectedModule: null,
@@ -149,20 +190,43 @@ export const streamMachine = setup({
     network: FuelNetwork.Staging,
     tab: 'data',
     deliverPolicy: DeliverPolicy.New,
+    apiKey: localStorage.getApiKey(),
   }),
   states: {
+    checkingApiKey: {
+      tags: ['connecting'],
+      always: [
+        {
+          guard: ({ context }) => {
+            console.log({ context });
+            const apiKey = localStorage.getApiKey();
+            return Boolean(apiKey || context.apiKey);
+          },
+          actions: assign({
+            apiKey: () => localStorage.getApiKey(),
+          }),
+          target: 'connecting',
+        },
+        {
+          target: 'idle',
+        },
+      ],
+    },
     connecting: {
+      tags: ['connecting'],
       invoke: {
         id: 'connect',
         src: 'createClientActor',
         input: ({ context }) => ({
           network: context.network,
+          apiKey: context.apiKey,
         }),
         onDone: {
-          target: 'idle',
+          target: 'ready',
         },
         onError: {
           target: 'idle',
+          actions: ['notifyConnectionError'],
         },
       },
     },
@@ -171,6 +235,9 @@ export const streamMachine = setup({
         subject: () => null,
         selectedModule: () => null,
       }),
+    },
+    ready: {
+      tags: ['connected'],
       on: {
         START: {
           actions: ['setSubjectAndModule'],
@@ -189,15 +256,17 @@ export const streamMachine = setup({
       },
     },
     switchingNetwork: {
+      tags: ['connecting'],
       entry: ['clearState'],
       invoke: {
         id: 'switchNetwork',
         src: 'switchNetworkActor',
         input: ({ context }) => ({
           network: context.network,
+          apiKey: context.apiKey,
         }),
         onDone: {
-          target: 'idle',
+          target: 'ready',
           actions: ['notifyNetworkChange'],
         },
         onError: {
@@ -207,6 +276,7 @@ export const streamMachine = setup({
       },
     },
     subscribing: {
+      tags: ['connected'],
       invoke: {
         id: 'subscribe',
         src: 'subscriptionActor',
@@ -214,14 +284,19 @@ export const streamMachine = setup({
           subject: context.subject as string,
           deliverPolicy: context.deliverPolicy,
           network: context.network,
+          apiKey: context.apiKey,
         }),
+        onError: {
+          target: 'ready',
+          actions: ['notifySubscriptionError'],
+        },
       },
       on: {
         DATA: {
           actions: ['newDataFromSubscription'],
         },
         STOP: {
-          target: 'idle',
+          target: 'ready',
         },
         CHANGE_NETWORK: {
           target: 'switchingNetwork',
@@ -231,6 +306,10 @@ export const streamMachine = setup({
     },
   },
   on: {
+    SET_API_KEY: {
+      actions: ['clearState', 'setApiKey'],
+      target: '.checkingApiKey',
+    },
     CLEAR: {
       actions: ['clearData'],
     },
@@ -241,9 +320,8 @@ type State = StateFrom<typeof streamMachine>;
 
 const selectors = {
   isSubscribing: (state: State) => state.matches('subscribing'),
-  isConnecting: (state: State) => {
-    return state.matches('connecting') || state.matches('switchingNetwork');
-  },
+  isConnecting: (state: State) => state.hasTag('connecting'),
+  isConnected: (state: State) => state.hasTag('connected'),
   data: (state: State) => state.context.data,
   network: (state: State) => state.context.network,
   tab: (state: State) => state.context.tab,
@@ -256,10 +334,12 @@ export function useStreamData() {
   const actor = StreamDataContext.useActorRef();
   const isSubscribing = StreamDataContext.useSelector(selectors.isSubscribing);
   const isConnecting = StreamDataContext.useSelector(selectors.isConnecting);
+  const isConnected = StreamDataContext.useSelector(selectors.isConnected);
   const data = StreamDataContext.useSelector(selectors.data);
   const network = StreamDataContext.useSelector(selectors.network);
   const tab = StreamDataContext.useSelector(selectors.tab);
   const deliverPolicy = StreamDataContext.useSelector(selectors.deliverPolicy);
+  const apiKey = StreamDataContext.useSelector((state) => state.context.apiKey);
 
   function start(data: Pick<StreamActorInput, 'subject'>) {
     actor.send({ type: 'START', ...data });
@@ -287,6 +367,10 @@ export function useStreamData() {
     actor.send({ type: 'CHANGE_DELIVERY_POLICY', policy });
   }
 
+  function setApiKey(apiKey: string) {
+    actor.send({ type: 'SET_API_KEY', apiKey });
+  }
+
   return {
     start,
     stop,
@@ -300,5 +384,8 @@ export function useStreamData() {
     deliverPolicy,
     isConnecting,
     isSubscribing,
+    isConnected,
+    apiKey,
+    setApiKey,
   };
 }

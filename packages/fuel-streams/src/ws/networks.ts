@@ -14,19 +14,6 @@ export function getNetworkFromEnv(): FuelNetwork {
   }
 }
 
-export function getWebUrl(network: FuelNetwork): URL {
-  switch (network) {
-    case FuelNetwork.Local:
-      return new URL('http://localhost:9003');
-    case FuelNetwork.Staging:
-      return new URL('https://stream-staging.fuel.network');
-    case FuelNetwork.Testnet:
-      return new URL('https://stream-testnet.fuel.network');
-    case FuelNetwork.Mainnet:
-      return new URL('https://stream.fuel.network');
-  }
-}
-
 export function getWsUrl(network: FuelNetwork): URL {
   switch (network) {
     case FuelNetwork.Local:
