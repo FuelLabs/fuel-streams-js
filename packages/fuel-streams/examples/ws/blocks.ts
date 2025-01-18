@@ -7,8 +7,8 @@ async function main() {
   const stream = await connection.subscribe(subject, DeliverPolicy.new());
 
   for await (const message of stream) {
-    console.log('Subject:', message.subject);
-    console.log('Payload:', message.payload);
+    console.log('Key:', message.key);
+    console.log('Data:', message.data);
   }
 }
 
