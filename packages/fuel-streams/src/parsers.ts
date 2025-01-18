@@ -8,7 +8,6 @@ import {
   type InputContract,
   type InputMessage,
   InputType,
-  type Log,
   type Output,
   type OutputChange,
   type OutputCoin,
@@ -25,9 +24,6 @@ import {
   type RawInputCoin,
   type RawInputContract,
   type RawInputMessage,
-  type RawLog,
-  type RawLogWithData,
-  type RawLogWithoutData,
   type RawOutput,
   type RawReceipt,
   type RawTransaction,
@@ -175,64 +171,6 @@ export class OutputParser implements EntityParser<Output, RawOutput> {
         return this.variableParser.parse(data);
       case 'ContractCreated':
         return this.contractCreatedParser.parse(data);
-    }
-  }
-}
-
-export class LogWithoutDataParser {
-  parse(data: RawLogWithoutData): Log {
-    return data as any;
-    // const transformations = {
-    //   type: () => ReceiptType.Log,
-    //   ra: toBN,
-    //   rb: toBN,
-    //   rc: toBN,
-    //   rd: toBN,
-    //   pc: toBN,
-    //   is: toBN,
-    // };
-
-    // return evolve(transformations, {
-    //   ...data,
-    //   val0: toBN(data.ra),
-    //   val1: toBN(data.rb),
-    //   val2: toBN(data.rc),
-    //   val3: toBN(data.rd),
-    // }) as Log;
-  }
-}
-
-export class LogWithDataParser {
-  parse(data: RawLogWithData): Log {
-    return data as any;
-    // const transformations = {
-    //   type: () => ReceiptType.LogData,
-    //   ra: toBN,
-    //   rb: toBN,
-    //   ptr: toBN,
-    //   len: toBN,
-    //   pc: toBN,
-    //   is: toBN,
-    // };
-
-    // return evolve(transformations, {
-    //   ...data,
-    //   val0: toBN(data.ra),
-    //   val1: toBN(data.rb),
-    // }) as Log;
-  }
-}
-
-export class LogParser implements EntityParser<Log, RawLog> {
-  private withoutDataParser = new LogWithoutDataParser();
-  private withDataParser = new LogWithDataParser();
-
-  parse(data: RawLog): Log {
-    switch (data.type) {
-      case 'WithoutData':
-        return this.withoutDataParser.parse(data);
-      case 'WithData':
-        return this.withDataParser.parse(data);
     }
   }
 }

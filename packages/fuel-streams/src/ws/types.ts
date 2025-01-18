@@ -7,23 +7,14 @@ export enum FuelNetwork {
   Mainnet = 'mainnet',
 }
 
-export interface LoginRequest {
-  username: string;
-  password: string;
-}
-
-export interface LoginResponse {
-  jwtToken: string;
-}
-
 export interface SubscriptionPayload {
-  wildcard: string;
   deliverPolicy: DeliverPolicy;
+  subject: string;
+  params: Record<string, any>;
 }
 
 export enum DeliverPolicy {
-  All = 'all',
-  Last = 'last',
+  All = 'from_block:0',
   New = 'new',
 }
 

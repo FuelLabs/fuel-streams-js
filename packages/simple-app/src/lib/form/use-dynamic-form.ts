@@ -1,3 +1,4 @@
+import type { SubscriptionPayload } from '@fuels/streams';
 import {
   type FormField,
   type ModuleKeys,
@@ -24,6 +25,7 @@ export const formMachine = setup({
       moduleOptions: SelectOption[];
       variantOptions: SelectOption[];
       subjectClass: string | null;
+      subscriptionPayload: SubscriptionPayload | null;
     },
     events: {} as
       | { type: 'CHANGE.MODULE'; value: keyof SubjectsDefinition }
@@ -41,11 +43,8 @@ export const formMachine = setup({
       },
       subjectClass: ({ event }) => {
         const mod = fieldsManager.getModule(event.value as ModuleKeys);
-        if (!('variants' in mod)) return mod.subject ?? null;
-        return (
-          mod.variants[event.value as keyof typeof mod.variants]?.subject ??
-          null
-        );
+        if (!mod.variants) return mod.subject ?? null;
+        return mod.subject ?? null;
       },
     }),
     updateVariantFields: assign({
@@ -60,11 +59,9 @@ export const formMachine = setup({
       subjectClass: ({ context, event }) => {
         if (!context.selectedModule) return null;
         const mod = fieldsManager.getModule(context.selectedModule);
-        if (!('variants' in mod)) return mod.subject ?? null;
-        return (
-          mod.variants[event.value as keyof typeof mod.variants]?.subject ??
-          null
-        );
+        if (!mod.variants) return mod.subject ?? null;
+        const variant = mod.variants[event.value];
+        return variant?.subject ?? mod.subject ?? null;
       },
     }),
     updateField: assign({
@@ -93,6 +90,16 @@ export const formMachine = setup({
         });
       },
     }),
+    updateSubscriptionPayload: assign({
+      subscriptionPayload: ({ context }) => {
+        if (!context.selectedModule) return null;
+        return subjectBuilder.buildPayload({
+          selectedModule: context.selectedModule,
+          selectedVariant: context.selectedVariant,
+          selectedFields: context.selectedFields ?? {},
+        });
+      },
+    }),
   },
 }).createMachine({
   id: 'dynamicForm',
@@ -106,6 +113,7 @@ export const formMachine = setup({
     moduleOptions: fieldsManager.getModuleOptions(),
     variantOptions: [],
     subjectClass: null,
+    subscriptionPayload: null,
   },
   states: {
     idle: {
@@ -119,6 +127,7 @@ export const formMachine = setup({
             }),
             'updateModuleFields',
             'updateSubject',
+            'updateSubscriptionPayload',
           ],
         },
         'CHANGE.VARIANT': {
@@ -129,10 +138,15 @@ export const formMachine = setup({
             }),
             'updateVariantFields',
             'updateSubject',
+            'updateSubscriptionPayload',
           ],
         },
         'CHANGE.FIELD': {
-          actions: ['updateField', 'updateSubject'],
+          actions: [
+            'updateField',
+            'updateSubject',
+            'updateSubscriptionPayload',
+          ],
         },
       },
     },
@@ -151,29 +165,26 @@ const selectors = {
   subject: (state: State) => state.context.subject,
   subjectClass: (state: State) => state.context.subjectClass,
   variantOptions: (state: State) => state.context.variantOptions,
+  subscriptionPayload: (state: State) => state.context.subscriptionPayload,
 };
 
-export const DynamicFormContext = createActorContext(formMachine);
+export const FormContext = createActorContext(formMachine);
 
 export function useDynamicForm() {
-  const actor = DynamicFormContext.useActorRef();
-  const selectedModule = DynamicFormContext.useSelector(
-    selectors.selectedModule,
+  const actor = FormContext.useActorRef();
+  const selectedModule = FormContext.useSelector(selectors.selectedModule);
+  const selectedVariant = FormContext.useSelector(selectors.selectedVariant);
+  const formData = FormContext.useSelector(selectors.formData);
+  const currentFields = FormContext.useSelector(selectors.currentFields);
+  const moduleOptions = FormContext.useSelector(selectors.moduleOptions);
+  const variantOptions = FormContext.useSelector(selectors.variantOptions);
+  const subject = FormContext.useSelector(selectors.subject);
+  const subjectClass = FormContext.useSelector(selectors.subjectClass);
+  const selectedFields = FormContext.useSelector(selectors.selectedFields);
+  const subscriptionPayload = FormContext.useSelector(
+    selectors.subscriptionPayload,
   );
-  const selectedVariant = DynamicFormContext.useSelector(
-    selectors.selectedVariant,
-  );
-  const formData = DynamicFormContext.useSelector(selectors.formData);
-  const currentFields = DynamicFormContext.useSelector(selectors.currentFields);
-  const moduleOptions = DynamicFormContext.useSelector(selectors.moduleOptions);
-  const variantOptions = DynamicFormContext.useSelector(
-    selectors.variantOptions,
-  );
-  const subject = DynamicFormContext.useSelector(selectors.subject);
-  const subjectClass = DynamicFormContext.useSelector(selectors.subjectClass);
-  const selectedFields = DynamicFormContext.useSelector(
-    selectors.selectedFields,
-  );
+
   const handleModuleChange = (value: keyof SubjectsDefinition) => {
     actor.send({ type: 'CHANGE.MODULE', value });
   };
@@ -199,5 +210,6 @@ export function useDynamicForm() {
     subject,
     subjectClass,
     variantOptions,
+    subscriptionPayload,
   };
 }

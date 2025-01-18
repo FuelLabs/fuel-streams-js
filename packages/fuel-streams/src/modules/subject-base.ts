@@ -4,6 +4,7 @@
  */
 
 import v from 'voca';
+import type { DeliverPolicy, SubscriptionPayload } from '../ws/types';
 
 export type GenericRecord = Record<string, any>;
 
@@ -14,15 +15,22 @@ export interface EntityParser<
   parse(data: R): T;
 }
 
+export type SubjectMetadata<
+  T extends GenericRecord,
+  R extends GenericRecord,
+> = {
+  id: string;
+  format: string;
+  parser: EntityParser<T, R>;
+};
+
 export abstract class SubjectBase<
   TFields extends GenericRecord,
   T extends GenericRecord,
   R extends GenericRecord,
 > {
-  constructor(protected fields: Partial<TFields> = {}) {}
-  protected abstract format: string;
-
-  abstract entityParser(): EntityParser<T, R>;
+  constructor(protected _fields: Partial<TFields> = {}) {}
+  protected abstract metadata: SubjectMetadata<T, R>;
 
   // This is a hack to make the compiler happy
   _entity(): T {
@@ -30,6 +38,42 @@ export abstract class SubjectBase<
   }
   _rawEntity(): R {
     return {} as R;
+  }
+
+  get fields(): Partial<TFields> {
+    return this._fields;
+  }
+
+  get id(): string {
+    return this.metadata.id;
+  }
+
+  get format(): string {
+    return this.metadata.format;
+  }
+
+  get parser(): EntityParser<T, R> {
+    return this.metadata.parser;
+  }
+
+  paramsFromFields(): Record<string, string> {
+    return Object.entries(this.fields).reduce<Record<string, string>>(
+      (acc, [key, value]) => {
+        if (value && value !== '*') {
+          acc[key] = value;
+        }
+        return acc;
+      },
+      {},
+    );
+  }
+
+  subscriptionPayload(deliverPolicy: DeliverPolicy): SubscriptionPayload {
+    return {
+      subject: this.id,
+      params: this.paramsFromFields(),
+      deliverPolicy,
+    };
   }
 
   parse(): string {
@@ -48,7 +92,7 @@ export abstract class SubjectBase<
   }
 
   build(fields: Partial<TFields>): this {
-    this.fields = { ...this.fields, ...fields };
+    this._fields = { ...this._fields, ...fields };
     return this;
   }
 

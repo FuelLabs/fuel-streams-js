@@ -17,8 +17,9 @@ type BlocksFields = {
 };
 
 export class BlocksSubject extends SubjectBase<BlocksFields, Block, RawBlock> {
-  protected format = 'blocks.{producer}.{height}';
-  entityParser() {
-    return new BlockParser();
-  }
+  metadata = {
+    id: 'blocks',
+    format: 'blocks.{producer}.{height}',
+    parser: new BlockParser(),
+  };
 }

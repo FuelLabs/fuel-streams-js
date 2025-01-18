@@ -1,14 +1,15 @@
+import { DeliverPolicy } from '@fuels/streams';
 import type {
   Fields,
   FormField,
   ModuleKeys,
+  Schema,
   SubjectsDefinition,
-  VariantModule,
 } from '@fuels/streams/subjects-def';
 
 export function fieldsToArray(fields: Fields): FormField[] {
-  return Object.entries(fields).map(([name, field]) => ({
-    name,
+  return Object.entries(fields).map(([key, field]) => ({
+    id: key,
     type: field.type,
     options: field.options,
   }));
@@ -17,39 +18,34 @@ export function fieldsToArray(fields: Fields): FormField[] {
 export class FormFieldsManager {
   constructor(private formStructure: SubjectsDefinition) {}
 
-  hasVariants<K extends ModuleKeys>(
-    mod: SubjectsDefinition[K],
-  ): mod is SubjectsDefinition[K] & VariantModule {
-    return 'variants' in mod;
+  hasVariants(mod: Schema): boolean {
+    return Boolean(mod.variants);
   }
 
-  getModule<K extends ModuleKeys>(selectedModule: K) {
-    return this.formStructure[selectedModule] as SubjectsDefinition[K];
+  getModule<K extends ModuleKeys>(selectedModule: K): Schema {
+    return this.formStructure[selectedModule];
   }
 
-  getModuleFields<
-    K extends ModuleKeys,
-    M extends SubjectsDefinition[K] = SubjectsDefinition[K],
-  >(
+  getModuleFields<K extends ModuleKeys>(
     selectedModule: K,
-    selectedVariant?: M extends VariantModule ? keyof M['variants'] : never,
+    selectedVariant?: string,
   ): FormField[] {
     if (!selectedModule) return [];
     const mod = this.getModule(selectedModule);
 
     if (!this.hasVariants(mod)) {
-      return 'fields' in mod ? fieldsToArray(mod.fields as Fields) : [];
+      return fieldsToArray(mod.fields);
     }
 
-    if (!selectedVariant) return [];
-    const variant = mod.variants[selectedVariant as keyof typeof mod.variants];
+    if (!selectedVariant || !mod.variants) return [];
+    const variant = mod.variants[selectedVariant];
     return variant ? fieldsToArray(variant.fields) : [];
   }
 
   getModuleOptions(): { value: string; label: string }[] {
     return Object.entries(this.formStructure).map(([key, value]) => ({
       value: key,
-      label: value.name,
+      label: value.id,
     }));
   }
 
@@ -57,11 +53,11 @@ export class FormFieldsManager {
     selectedModule: ModuleKeys,
   ): { value: string; label: string }[] {
     const mod = this.getModule(selectedModule);
-    if (!this.hasVariants(mod)) return [];
+    if (!mod.variants) return [];
 
     return Object.entries(mod.variants).map(([key, value]) => ({
       value: key,
-      label: value.name,
+      label: value.id,
     }));
   }
 }
@@ -69,31 +65,72 @@ export class FormFieldsManager {
 export class SubjectBuilder {
   constructor(private formStructure: SubjectsDefinition) {}
 
-  buildSubject(params: {
-    selectedModule: string;
+  buildPayload(params: {
+    selectedModule: ModuleKeys;
     selectedVariant: string | null;
     selectedFields: Record<string, string>;
-    currentFields: { name: string; type: string }[];
+  }) {
+    const { selectedModule, selectedVariant, selectedFields } = params;
+    if (!selectedModule)
+      return { subject: '', params: {}, deliverPolicy: DeliverPolicy.New };
+
+    const manager = new FormFieldsManager(this.formStructure);
+    const mod = manager.getModule(selectedModule);
+
+    // Get the base subject ID
+    let subjectId = mod.id;
+
+    // If we have variants and a variant is selected, use the variant's ID
+    if (mod.variants && selectedVariant && selectedVariant in mod.variants) {
+      const variant = mod.variants[selectedVariant];
+      subjectId = variant.id;
+    }
+
+    // Filter out empty or wildcard values from params
+    const filteredParams: Record<string, string> = {};
+    Object.entries(selectedFields).forEach(([key, value]) => {
+      if (value && value !== '*') {
+        filteredParams[key] = value;
+      }
+    });
+
+    return {
+      subject: subjectId,
+      params: filteredParams,
+      deliverPolicy: DeliverPolicy.New,
+    };
+  }
+
+  buildSubject(params: {
+    selectedModule: ModuleKeys;
+    selectedVariant: string | null;
+    selectedFields: Record<string, string>;
+    currentFields: FormField[];
   }) {
     const { selectedModule, selectedVariant, selectedFields } = params;
     if (!selectedModule) return '';
 
     const manager = new FormFieldsManager(this.formStructure);
-    const mod = manager.getModule(selectedModule as ModuleKeys);
+    const mod = manager.getModule(selectedModule);
     const hasVariant = manager.hasVariants(mod);
     const noFieldsSelected = !Object.values(selectedFields ?? {}).some(Boolean);
     let format = '';
 
     // For modules that don't have variants
-    if (!hasVariant && 'wildcard' in mod && 'format' in mod) {
+    if (!hasVariant) {
       if (noFieldsSelected) return mod.wildcard;
       format = mod.format;
     }
 
     // For modules with variants
-    if (hasVariant) {
-      if (!selectedVariant) return mod.wildcard;
+    if (
+      hasVariant &&
+      selectedVariant &&
+      mod.variants &&
+      selectedVariant in mod.variants
+    ) {
       const variant = mod.variants[selectedVariant];
+      if (!variant) return mod.wildcard;
       if (noFieldsSelected) return variant.wildcard;
       format = variant.format;
     }

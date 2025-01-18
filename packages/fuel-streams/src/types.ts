@@ -14,8 +14,6 @@ import type {
   InputCoin as FuelsInputCoin,
   InputContract as FuelsInputContract,
   InputMessage as FuelsInputMessage,
-  ReceiptLog as FuelsLog,
-  ReceiptLogData as FuelsLogData,
   Output as FuelsOutput,
   OutputChange as FuelsOutputChange,
   OutputCoin as FuelsOutputCoin,
@@ -36,6 +34,8 @@ export type AssetId = FuelAssetId;
 export type ContractId = ContractIdLike;
 export type BlockHeight = number;
 export type MessageId = string;
+export type TxId = string;
+export type HexData = string;
 
 export type UtxoId = {
   txId: string;
@@ -56,7 +56,6 @@ export enum StreamNames {
   Outputs = 'outputs',
   Receipts = 'receipts',
   Transactions = 'transactions',
-  Logs = 'logs',
   Utxos = 'utxos',
 }
 
@@ -297,36 +296,6 @@ export enum UtxoType {
   Coin = 'Coin',
   Message = 'Message',
 }
-
-// ----------------------------------------------------------------------------
-// Log Types
-// ----------------------------------------------------------------------------
-export type RawLogWithoutData = {
-  type: 'WithoutData';
-  id: string;
-  ra: number;
-  rb: number;
-  rc: number;
-  rd: number;
-  pc: number;
-  is: number;
-};
-
-export type RawLogWithData = {
-  type: 'WithData';
-  id: string;
-  ra: number;
-  rb: number;
-  ptr: number;
-  len: number;
-  digest: string;
-  pc: number;
-  is: number;
-  data?: string;
-};
-
-export type RawLog = RawLogWithoutData | RawLogWithData;
-export type Log = FuelsLog | FuelsLogData;
 
 // ----------------------------------------------------------------------------
 // Transaction Types

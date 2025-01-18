@@ -12,12 +12,34 @@ import { Switch } from '@/components/ui/switch';
 import { useDynamicForm } from '@/lib/form';
 import { useStreamData } from '@/lib/stream/use-stream-data';
 import { DeliverPolicy } from '@fuels/streams';
+import {
+  transactionKindOptions,
+  transactionStatusOptions,
+  utxoTypeOptions,
+} from '@fuels/streams/subjects-def';
 import { Play, Square } from 'lucide-react';
 import v from 'voca';
 import { ApiKeyPopover } from './api-key-popover';
 
-function formatLabel(name: string): string {
-  return v.titleCase(v.replaceAll(name, '_', ' '));
+function formatLabel(id: string): string {
+  return v.titleCase(v.replaceAll(id, '_', ' '));
+}
+
+function humanize(label: string): string {
+  return v.titleCase(v.replaceAll(label, '_', ' '));
+}
+
+function getFieldOptions(type: string) {
+  switch (type) {
+    case 'TransactionKind':
+      return transactionKindOptions;
+    case 'TransactionStatus':
+      return transactionStatusOptions;
+    case 'UtxoType':
+      return utxoTypeOptions;
+    default:
+      return undefined;
+  }
 }
 
 export function StreamForm() {
@@ -32,6 +54,7 @@ export function StreamForm() {
     handleVariantChange,
     handleFieldChange,
     subject,
+    subscriptionPayload,
   } = useDynamicForm();
 
   const {
@@ -46,8 +69,8 @@ export function StreamForm() {
   } = useStreamData();
 
   function handleSubmit() {
-    if (!selectedModule || !subject) return;
-    start({ subject });
+    if (!selectedModule || !subscriptionPayload || !subject) return;
+    start({ subject, subscriptionPayload });
   }
 
   return (
@@ -95,7 +118,7 @@ export function StreamForm() {
                   value={value}
                   aria-label={`Module: ${label}`}
                 >
-                  {label}
+                  {v.capitalize(label)}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -123,75 +146,80 @@ export function StreamForm() {
                 <SelectValue placeholder="Select a variant" />
               </SelectTrigger>
               <SelectContent>
-                {variantOptions
-                  .filter(({ label }) => !label.includes('Generic'))
-                  .map(({ value, label }) => (
-                    <SelectItem
-                      key={value}
-                      value={value}
-                      aria-label={`Variant: ${label}`}
-                    >
-                      {label}
-                    </SelectItem>
-                  ))}
+                {variantOptions.map(({ value, label }) => (
+                  <SelectItem
+                    key={value}
+                    value={value}
+                    aria-label={`Variant: ${label}`}
+                  >
+                    {humanize(label)}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
         )}
       </div>
 
-      {currentFields.map((field) => (
-        <div key={field.name}>
-          <label
-            htmlFor={field.name}
-            className="block text-sm font-medium mb-1"
-          >
-            {formatLabel(field.name)}{' '}
-            <code className="text-gray-500">({field.type})</code>
-          </label>
-          {field.options ? (
-            <Select
-              value={formData?.[field.name] || ''}
-              onValueChange={(value) => handleFieldChange(field.name, value)}
+      {currentFields.map((field) => {
+        const predefinedOptions = getFieldOptions(field.type);
+        const hasOptions = field.options || predefinedOptions;
+
+        return (
+          <div key={field.id}>
+            <label
+              htmlFor={field.id}
+              className="block text-sm font-medium mb-1"
             >
-              {formData?.[field.name] && (
-                <SelectClear
-                  onClick={() => handleFieldChange(field.name, '')}
-                  aria-label={`Clear ${formatLabel(field.name)} selection`}
-                />
-              )}
-              <SelectTrigger
-                id={field.name}
-                aria-label={`Select ${formatLabel(field.name)}`}
+              {formatLabel(field.id)}{' '}
+              <code className="text-gray-500">({field.type})</code>
+            </label>
+            {hasOptions ? (
+              <Select
+                value={formData?.[field.id] || ''}
+                onValueChange={(value) => handleFieldChange(field.id, value)}
               >
-                <SelectValue
-                  placeholder={`Select ${formatLabel(field.name)}`}
-                />
-              </SelectTrigger>
-              <SelectContent>
-                {field.options.map(({ value, label }) => (
-                  <SelectItem
-                    key={value}
-                    value={value}
-                    aria-label={`${formatLabel(field.name)}: ${label}`}
-                  >
-                    {label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          ) : (
-            <Input
-              id={field.name}
-              type="text"
-              placeholder={field.type}
-              onChange={(e) => handleFieldChange(field.name, e.target.value)}
-              value={formData?.[field.name] || ''}
-              aria-label={formatLabel(field.name)}
-            />
-          )}
-        </div>
-      ))}
+                {formData?.[field.id] && (
+                  <SelectClear
+                    onClick={() => handleFieldChange(field.id, '')}
+                    aria-label={`Clear ${formatLabel(field.id)} selection`}
+                  />
+                )}
+                <SelectTrigger
+                  id={field.id}
+                  aria-label={`Select ${formatLabel(field.id)}`}
+                >
+                  <SelectValue
+                    placeholder={`Select ${formatLabel(field.id)}`}
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {(predefinedOptions || field.options)?.map(
+                    ({ value, label }) => (
+                      <SelectItem
+                        key={value}
+                        value={value}
+                        aria-label={`${formatLabel(field.id)}: ${label}`}
+                      >
+                        {label}
+                      </SelectItem>
+                    ),
+                  )}
+                </SelectContent>
+              </Select>
+            ) : (
+              <Input
+                id={field.id}
+                type="text"
+                placeholder={field.type}
+                onChange={(e) => handleFieldChange(field.id, e.target.value)}
+                value={formData?.[field.id] || ''}
+                aria-label={formatLabel(field.id)}
+              />
+            )}
+          </div>
+        );
+      })}
 
       <Button
         type="button"

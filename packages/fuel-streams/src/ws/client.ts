@@ -6,7 +6,6 @@ import type {
 import {
   BlockParser,
   InputParser,
-  LogParser,
   OutputParser,
   ReceiptParser,
   TransactionParser,
@@ -21,6 +20,7 @@ import type {
   FuelNetwork,
   ResponseMessage,
   ServerMessage,
+  SubscriptionPayload,
 } from './types';
 
 export interface ConnectionOpts {
@@ -50,7 +50,6 @@ export class Connection {
 
         const msg = JSON.parse(data) as ServerMessage;
         if ('error' in msg) {
-          // Handle specific server error types
           switch (msg.error) {
             case 'unauthorized':
               throw ClientError.UnauthorizedError();
@@ -128,18 +127,15 @@ export class Connection {
     deliverPolicy: DeliverPolicy,
   ): Promise<SubscriptionIterator<Entity>> {
     try {
-      const parsedSubject = subject.parse();
-      const parser = subject.entityParser() as EntityParser<Entity, RawEntity>;
+      const parser = subject.parser as EntityParser<Entity, RawEntity>;
+      const payload = subject.subscriptionPayload(deliverPolicy);
       const message: ClientMessage = {
-        subscribe: {
-          wildcard: parsedSubject,
-          deliverPolicy: deliverPolicy,
-        },
+        subscribe: payload,
       };
 
       await this.sendMessage(message);
       return this.createSubscriptionIterator<S, Entity, RawEntity>(
-        parsedSubject,
+        message.subscribe.subject,
         parser,
       );
     } catch (err) {
@@ -150,29 +146,32 @@ export class Connection {
     }
   }
 
-  async subscribeWithString<
+  async subscribeWithPayload<
     T extends GenericRecord,
     RawT extends GenericRecord,
   >(
-    subject: string,
+    payload: SubscriptionPayload,
     deliverPolicy: DeliverPolicy,
   ): Promise<SubscriptionIterator<T>> {
     try {
       const message: ClientMessage = {
         subscribe: {
-          wildcard: subject,
+          ...payload,
           deliverPolicy: deliverPolicy,
         },
       };
 
       await this.sendMessage(message);
-      const parser = this.findParser(subject);
-      return this.createSubscriptionIterator<any, T, RawT>(subject, parser);
+      const parser = this.findParser(payload.subject);
+      return this.createSubscriptionIterator<any, T, RawT>(
+        payload.subject,
+        parser,
+      );
     } catch (err) {
       if (err instanceof ClientError) {
         throw err;
       }
-      throw ClientError.SubscriptionError(subject);
+      throw ClientError.SubscriptionError(payload.subject);
     }
   }
 
@@ -184,7 +183,6 @@ export class Connection {
       outputs: OutputParser,
       receipts: ReceiptParser,
       utxos: UtxoParser,
-      logs: LogParser,
     };
 
     const matchingKey = Object.keys(parserMap).find((key) =>

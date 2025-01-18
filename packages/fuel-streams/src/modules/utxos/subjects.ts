@@ -8,17 +8,23 @@
 
 import { UtxoParser } from '../../parsers';
 import type { RawUtxo, Utxo } from '../../types';
-import type { MessageId, UtxoType } from '../../types';
+import type { BlockHeight, HexData, TxId, UtxoType } from '../../types';
 import { SubjectBase } from '../subject-base';
 
 type UtxosFields = {
+  utxoId: HexData;
+  inputIndex: number;
+  txId: TxId;
+  txIndex: number;
   utxoType: UtxoType;
-  hash: MessageId;
+  blockHeight: BlockHeight;
 };
 
 export class UtxosSubject extends SubjectBase<UtxosFields, Utxo, RawUtxo> {
-  protected format = 'utxos.{utxo_type}.{hash}';
-  entityParser() {
-    return new UtxoParser();
-  }
+  metadata = {
+    id: 'utxos',
+    format:
+      'utxos.{block_height}.{tx_id}.{tx_index}.{input_index}.{utxo_type}.{utxo_id}',
+    parser: new UtxoParser(),
+  };
 }
