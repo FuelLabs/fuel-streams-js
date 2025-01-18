@@ -1,3 +1,4 @@
+import { DeliverPolicy } from '@fuels/streams';
 import { subjectsDefinitions } from '@fuels/streams/subjects-def';
 import { describe, expect, it } from 'vitest';
 import { SubjectBuilder, fieldsToArray } from '../form/form-helpers';
@@ -12,6 +13,7 @@ describe('SubjectBuilder', () => {
     expectedPayload: {
       subject: string;
       params: Record<string, any>;
+      deliverPolicy: DeliverPolicy;
     };
   };
 
@@ -27,6 +29,7 @@ describe('SubjectBuilder', () => {
     fields,
     expectedSubject,
     expectedPayload,
+    deliverPolicy,
   }: {
     module: string;
     variant: string;
@@ -35,7 +38,9 @@ describe('SubjectBuilder', () => {
     expectedPayload: {
       subject: string;
       params: Record<string, any>;
+      deliverPolicy: DeliverPolicy;
     };
+    deliverPolicy: DeliverPolicy;
   }) {
     const mod = subjectsDefinitions[module as keyof typeof subjectsDefinitions];
     const variantData =
@@ -54,6 +59,7 @@ describe('SubjectBuilder', () => {
       selectedModule: module,
       selectedVariant: variant,
       selectedFields: fields,
+      deliverPolicy,
     });
 
     return (
@@ -81,6 +87,7 @@ describe('SubjectBuilder', () => {
           expectedPayload: {
             subject: 'blocks',
             params: {},
+            deliverPolicy: DeliverPolicy.new(),
           },
         },
         {
@@ -92,6 +99,7 @@ describe('SubjectBuilder', () => {
               producer: '0x123',
               height: '100',
             },
+            deliverPolicy: DeliverPolicy.new(),
           },
         },
       ],
@@ -105,6 +113,7 @@ describe('SubjectBuilder', () => {
           expectedPayload: {
             subject: 'transactions',
             params: {},
+            deliverPolicy: DeliverPolicy.new(),
           },
         },
         {
@@ -125,6 +134,7 @@ describe('SubjectBuilder', () => {
               tx_status: 'success',
               kind: 'script',
             },
+            deliverPolicy: DeliverPolicy.new(),
           },
         },
       ],
@@ -144,6 +154,7 @@ describe('SubjectBuilder', () => {
                 fields,
                 expectedSubject,
                 expectedPayload,
+                deliverPolicy: DeliverPolicy.new(),
               }),
             ).toBe(true);
           });
@@ -169,6 +180,7 @@ describe('SubjectBuilder', () => {
                 expectedPayload: {
                   subject: `${moduleName}_${variantName}`,
                   params: {},
+                  deliverPolicy: DeliverPolicy.new(),
                 },
               },
               {
@@ -192,6 +204,7 @@ describe('SubjectBuilder', () => {
                     },
                     {} as Record<string, string>,
                   ),
+                  deliverPolicy: DeliverPolicy.new(),
                 },
               },
             ],
@@ -219,6 +232,7 @@ describe('SubjectBuilder', () => {
                     fields,
                     expectedSubject,
                     expectedPayload,
+                    deliverPolicy: DeliverPolicy.new(),
                   }),
                 ).toBe(true);
               });
@@ -246,10 +260,12 @@ describe('SubjectBuilder', () => {
           selectedModule: '',
           selectedVariant: '',
           selectedFields: {},
+          deliverPolicy: DeliverPolicy.new(),
         }),
       ).toEqual({
         subject: '',
         params: {},
+        deliverPolicy: DeliverPolicy.new(),
       });
     });
 
@@ -265,9 +281,27 @@ describe('SubjectBuilder', () => {
             params: {
               height: '100',
             },
+            deliverPolicy: DeliverPolicy.new(),
           },
+          deliverPolicy: DeliverPolicy.new(),
         }),
       ).toBe(true);
+    });
+  });
+
+  // Add new test for deliverPolicy
+  it('respects custom deliverPolicy when provided', () => {
+    expect(
+      builder.buildPayload({
+        selectedModule: 'blocks',
+        selectedVariant: '',
+        selectedFields: {},
+        deliverPolicy: DeliverPolicy.fromBlock(100),
+      }),
+    ).toEqual({
+      subject: 'blocks',
+      params: {},
+      deliverPolicy: DeliverPolicy.fromBlock(100),
     });
   });
 });

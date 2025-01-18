@@ -1,4 +1,5 @@
 import type { GenericRecord } from '../modules/subject-base';
+import type { DeliverPolicy } from './deliver-policy';
 
 export enum FuelNetwork {
   Local = 'local',
@@ -13,27 +14,41 @@ export interface SubscriptionPayload {
   params: Record<string, any>;
 }
 
-export enum DeliverPolicy {
-  All = 'from_block:0',
-  New = 'new',
-}
+export type ClientMessageSubscribe = {
+  subscribe: {
+    deliverPolicy: string;
+    subject: string;
+    params: Record<string, any>;
+  };
+};
 
-export type ClientMessage =
-  | {
-      subscribe: SubscriptionPayload;
-    }
-  | {
-      unsubscribe: SubscriptionPayload;
-    };
+export type ClientMessageUnsubscribe = {
+  unsubscribe: {
+    deliverPolicy: string;
+    subject: string;
+    params: Record<string, any>;
+  };
+};
 
-export type ResponseMessage<T extends GenericRecord> = {
-  subject: string;
-  payload: T;
+export type ClientMessage = ClientMessageSubscribe | ClientMessageUnsubscribe;
+
+export type ServerResponse<R extends GenericRecord> = {
+  key: string;
+  data: R;
+};
+
+export type ClientResponse<
+  T extends GenericRecord,
+  RawT extends GenericRecord,
+> = {
+  key: string;
+  data: T;
+  rawData: RawT;
 };
 
 export type ServerMessage =
   | {
-      response: ResponseMessage<any>;
+      response: ServerResponse<any>;
     }
   | {
       error: string;

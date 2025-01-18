@@ -11,15 +11,16 @@ import {
   TransactionParser,
   UtxoParser,
 } from '../parsers';
+import type { DeliverPolicy } from './deliver-policy';
 import { ClientError } from './error';
 import { getWsUrl } from './networks';
 import { WebSocket } from './platform';
 import type {
   ClientMessage,
-  DeliverPolicy,
+  ClientResponse,
   FuelNetwork,
-  ResponseMessage,
   ServerMessage,
+  ServerResponse,
   SubscriptionPayload,
 } from './types';
 
@@ -28,18 +29,20 @@ export interface ConnectionOpts {
   apiKey: string | null;
 }
 
-interface SubscriptionIterator<T extends GenericRecord>
-  extends AsyncIterableIterator<ResponseMessage<T>> {
-  onMessage: (handler: (data: ResponseMessage<T>) => void) => () => void;
+interface SubscriptionIterator<T extends GenericRecord, R extends GenericRecord>
+  extends AsyncIterableIterator<ClientResponse<T, R>> {
+  onMessage: (handler: (data: ClientResponse<T, R>) => void) => () => void;
 }
 
 export class Connection {
   private ws: WebSocket;
   private messageHandlers: Map<string, (data: any) => void>;
+  private disconnectHandlers: Set<() => void>;
 
   constructor(ws: WebSocket) {
     this.ws = ws;
     this.messageHandlers = new Map();
+    this.disconnectHandlers = new Set();
 
     this.ws.onmessage = async (event) => {
       try {
@@ -77,22 +80,34 @@ export class Connection {
     this.ws.onerror = (error) => {
       throw ClientError.WebSocketError(error as unknown as Error);
     };
+
+    this.ws.onclose = () => {
+      this.disconnectHandlers.forEach((handler) => handler());
+    };
   }
 
   private createSubscriptionIterator<
     S extends SubjectBase<GenericRecord, GenericRecord, GenericRecord>,
     T extends ReturnType<S['_entity']>,
-    RawT extends ReturnType<S['_rawEntity']>,
-  >(subject: string, parser: EntityParser<T, RawT>): SubscriptionIterator<T> {
+    R extends ReturnType<S['_rawEntity']>,
+  >(subject: string, parser: EntityParser<T, R>): SubscriptionIterator<T, R> {
     return {
       next: () => {
-        return new Promise((resolve) => {
-          const handler = (data: any) => {
-            const payload = parser.parse(data.payload);
-            resolve({ value: { subject: data.subject, payload }, done: false });
-          };
-          this.messageHandlers.set(subject, handler);
-        });
+        return new Promise<IteratorResult<ClientResponse<T, R>, any>>(
+          (resolve) => {
+            const handler = (data: ServerResponse<R>) => {
+              resolve({
+                done: false,
+                value: {
+                  key: data.key,
+                  data: parser.parse(data.data),
+                  rawData: data.data,
+                },
+              });
+            };
+            this.messageHandlers.set(subject, handler);
+          },
+        );
       },
       return: () => {
         this.messageHandlers.delete(subject);
@@ -106,11 +121,14 @@ export class Connection {
         return this;
       },
       onMessage: (handler) => {
-        function pred(data: ResponseMessage<RawT>) {
-          const payload = parser.parse(data.payload);
-          handler({ subject: data.subject, payload });
-        }
-        this.messageHandlers.set(subject, pred);
+        const messageHandler = (data: ServerResponse<R>) => {
+          handler({
+            key: data.key,
+            data: parser.parse(data.data),
+            rawData: data.data,
+          });
+        };
+        this.messageHandlers.set(subject, messageHandler);
         return () => {
           this.messageHandlers.delete(subject);
         };
@@ -125,14 +143,10 @@ export class Connection {
   >(
     subject: S,
     deliverPolicy: DeliverPolicy,
-  ): Promise<SubscriptionIterator<Entity>> {
+  ): Promise<SubscriptionIterator<Entity, RawEntity>> {
     try {
       const parser = subject.parser as EntityParser<Entity, RawEntity>;
-      const payload = subject.subscriptionPayload(deliverPolicy);
-      const message: ClientMessage = {
-        subscribe: payload,
-      };
-
+      const message = subject.subscriptionPayloadJson(deliverPolicy);
       await this.sendMessage(message);
       return this.createSubscriptionIterator<S, Entity, RawEntity>(
         message.subscribe.subject,
@@ -149,18 +163,14 @@ export class Connection {
   async subscribeWithPayload<
     T extends GenericRecord,
     RawT extends GenericRecord,
-  >(
-    payload: SubscriptionPayload,
-    deliverPolicy: DeliverPolicy,
-  ): Promise<SubscriptionIterator<T>> {
+  >(payload: SubscriptionPayload): Promise<SubscriptionIterator<T, RawT>> {
     try {
       const message: ClientMessage = {
         subscribe: {
           ...payload,
-          deliverPolicy: deliverPolicy,
+          deliverPolicy: payload.deliverPolicy.toString(),
         },
       };
-
       await this.sendMessage(message);
       const parser = this.findParser(payload.subject);
       return this.createSubscriptionIterator<any, T, RawT>(
@@ -177,12 +187,12 @@ export class Connection {
 
   private findParser(subject: string): EntityParser<any, any> {
     const parserMap: Record<string, new () => EntityParser<any, any>> = {
-      blocks: BlockParser,
-      transactions: TransactionParser,
-      inputs: InputParser,
-      outputs: OutputParser,
-      receipts: ReceiptParser,
-      utxos: UtxoParser,
+      block: BlockParser,
+      transaction: TransactionParser,
+      input: InputParser,
+      output: OutputParser,
+      receipt: ReceiptParser,
+      utxo: UtxoParser,
     };
 
     const matchingKey = Object.keys(parserMap).find((key) =>
@@ -212,33 +222,48 @@ export class Connection {
     });
   }
 
+  onDisconnect(handler: () => void): () => void {
+    this.disconnectHandlers.add(handler);
+    return () => {
+      this.disconnectHandlers.delete(handler);
+    };
+  }
+
+  isConnected(): boolean {
+    return this.ws.readyState === this.ws.OPEN;
+  }
+
   close() {
     this.messageHandlers.clear();
+    this.disconnectHandlers.clear();
     this.ws.close();
   }
 }
 
 export class Client {
   private opts: ConnectionOpts;
+  private connection: Connection | null;
 
   private constructor(opts: ConnectionOpts) {
     if (!opts.apiKey) {
       throw ClientError.MissingApiKey();
     }
     this.opts = opts;
+    this.connection = null;
   }
 
-  static async new(network: FuelNetwork, apiKey: string): Promise<Client> {
+  static async connect(
+    network: FuelNetwork,
+    apiKey: string,
+  ): Promise<Connection> {
     if (!apiKey) {
       throw ClientError.MissingApiKey();
     }
-    return new Client({
-      network,
-      apiKey,
-    });
+    const client = new Client({ network, apiKey });
+    return client.connectInternal();
   }
 
-  async connect(): Promise<Connection> {
+  private async connectInternal(): Promise<Connection> {
     if (!this.opts.apiKey) {
       throw ClientError.MissingApiKey();
     }
@@ -264,7 +289,8 @@ export class Client {
 
         ws.onopen = () => {
           cleanup();
-          resolve(new Connection(ws));
+          this.connection = new Connection(ws);
+          resolve(this.connection);
         };
 
         ws.onerror = (event: Event) => {
@@ -284,5 +310,21 @@ export class Client {
       }
       throw ClientError.NetworkError(this.opts.network);
     }
+  }
+
+  isConnected(): boolean {
+    return !!this.connection?.isConnected();
+  }
+
+  onDisconnect(handler: () => void): () => void {
+    if (!this.connection) {
+      throw ClientError.WebSocketError(new Error('No active connection'));
+    }
+    return this.connection.onDisconnect(handler);
+  }
+
+  close() {
+    this.connection?.close();
+    this.connection = null;
   }
 }

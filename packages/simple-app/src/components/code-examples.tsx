@@ -1,5 +1,5 @@
 import { useStreamData } from '@/lib/stream/use-stream-data';
-import type { FuelNetwork } from '@fuels/streams';
+import { DeliverPolicy, type FuelNetwork } from '@fuels/streams';
 import type { ModuleKeys } from '@fuels/streams/subjects-def';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import { vs } from 'react-syntax-highlighter/dist/esm/styles/hljs';
@@ -14,6 +14,7 @@ function getFuelExample(
   stream: string,
   subjectClass: string | null,
   selectedFields: Record<string, string>,
+  deliverPolicy: DeliverPolicy,
 ) {
   const baseClass = stream.replace('Stream', '');
   const subjectImport = subjectClass ?? `${baseClass}Subject`;
@@ -28,7 +29,7 @@ function getFuelExample(
   return `import {
   Client,
   ${subjectImport},
-  DeliverPolicy
+  DeliverPolicy,
   FuelNetwork,
 } from '@fuels/streams';
 
@@ -37,7 +38,7 @@ ${subjectInit}
 async function main() {
   const client = await Client.new(FuelNetwork.${v.capitalize(network)});
   const connection = await client.connect();
-  const stream = await connection.subscribe(subject, DeliverPolicy.New);
+  const stream = await connection.subscribe(subject, ${deliverPolicy.stringStatic()});
   
   for await (const msg of stream) {
     console.log('Subject:', msg.subject);
@@ -53,16 +54,24 @@ function getExamples(
   selectedModule: ModuleKeys = 'blocks',
   subjectClass: string | null = 'BlocksSubject',
   selectedFields: Record<string, string> = {},
+  deliverPolicy: DeliverPolicy = DeliverPolicy.new(),
 ) {
   const stream = v.capitalize(`${selectedModule}Stream`);
 
   return {
-    fuel: getFuelExample(network, stream, subjectClass, selectedFields),
+    fuel: getFuelExample(
+      network,
+      stream,
+      subjectClass,
+      selectedFields,
+      deliverPolicy,
+    ),
   };
 }
 
 export function CodeExamples() {
-  const { selectedModule, selectedFields, subjectClass } = useDynamicForm();
+  const { selectedModule, selectedFields, subjectClass, deliverPolicy } =
+    useDynamicForm();
   const { isTheme } = useTheme();
   const { network } = useStreamData();
   const codeTheme = isTheme('dark') ? vs2015 : vs;
@@ -71,6 +80,7 @@ export function CodeExamples() {
     selectedModule ?? 'blocks',
     subjectClass,
     selectedFields ?? {},
+    deliverPolicy,
   );
 
   return (

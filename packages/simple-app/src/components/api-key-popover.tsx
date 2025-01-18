@@ -5,14 +5,12 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
+import { useStreamData } from '@/lib/stream/use-stream-data';
 import type * as PopoverPrimitive from '@radix-ui/react-popover';
 import { cva } from 'class-variance-authority';
 import { useState } from 'react';
 
 type ApiKeyPopoverProps = {
-  isConnected: boolean;
-  apiKey: string | null;
-  onSubmit: (apiKey: string) => void;
   className?: string;
 } & Omit<PopoverPrimitive.PopoverProps, 'children'>;
 
@@ -33,18 +31,16 @@ const statusDot = cva('w-2 h-2 rounded-full', {
 });
 
 export function ApiKeyPopover({
-  isConnected,
-  apiKey,
-  onSubmit,
   className,
   ...popoverProps
 }: ApiKeyPopoverProps) {
+  const { isConnected, apiKey, setApiKey } = useStreamData();
   const [value, setValue] = useState(apiKey || '');
   const [open, setOpen] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(value);
+    setApiKey(value);
     setOpen(false);
   };
 

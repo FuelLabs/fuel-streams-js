@@ -1,6 +1,6 @@
 import {
   ClientError,
-  DeliverPolicy,
+  type ClientResponse,
   FuelNetwork,
   type SubscriptionPayload,
 } from '@fuels/streams';
@@ -12,6 +12,7 @@ import {
   assign,
   fromCallback,
   fromPromise,
+  sendTo,
   setup,
 } from 'xstate';
 import { LocalStorage } from './local-storage';
@@ -19,19 +20,22 @@ import { LocalStorage } from './local-storage';
 const localStorage = new LocalStorage('@fuel-streams/api-key');
 
 type StreamEvent =
-  | { type: 'START'; subject: string; subscriptionPayload: SubscriptionPayload }
-  | { type: 'STOP' }
+  | {
+      type: 'START';
+      subject: string;
+      subscriptionPayload: SubscriptionPayload;
+    }
+  | { type: 'STOP_CONNECTION' }
   | { type: 'CLEAR' }
-  | { type: 'DATA'; data: { subject: string; payload: any } }
+  | { type: 'DATA'; data: ClientResponse<any, any> }
   | { type: 'CHANGE_NETWORK'; network: FuelNetwork }
   | { type: 'CHANGE_TAB'; tab: 'data' | 'code' }
-  | { type: 'CHANGE_DELIVERY_POLICY'; policy: DeliverPolicy }
-  | { type: 'SET_API_KEY'; apiKey: string };
+  | { type: 'SET_API_KEY'; apiKey: string }
+  | { type: 'DISCONNECT' };
 
 type StreamActorInput = {
   subject: string;
   subscriptionPayload: SubscriptionPayload;
-  deliverPolicy: DeliverPolicy;
   network: FuelNetwork;
   apiKey: string | null;
 };
@@ -43,41 +47,44 @@ type ClientActorInput = {
 
 const createClientActor = fromPromise<Connection, ClientActorInput>(
   async ({ input: { network, apiKey } }) => {
-    if (!apiKey) throw new Error('API key is required');
-    const client = await Client.new(network, apiKey);
-    return client.connect();
+    if (!apiKey) throw ClientError.MissingApiKey();
+    return Client.connect(network, apiKey);
   },
 );
 
 const switchNetworkActor = fromPromise<Connection, ClientActorInput>(
   async ({ input: { network, apiKey } }) => {
     if (!apiKey) throw ClientError.MissingApiKey();
-    const client = await Client.new(network, apiKey);
-    return client.connect();
+    return Client.connect(network, apiKey);
   },
 );
 
 const subscriptionActor = fromCallback<StreamEvent, StreamActorInput>(
-  ({ sendBack, input }) => {
+  ({ sendBack, input, receive }) => {
     let cleanup: (() => void) | undefined;
+    let connection: Connection | undefined;
 
     (async () => {
-      const { subscriptionPayload, deliverPolicy, network, apiKey } = input;
+      const { subscriptionPayload: payload, network, apiKey } = input;
       if (!apiKey) throw ClientError.MissingApiKey();
-      const client = await Client.new(network, apiKey);
-      const connection = await client.connect();
-      const subscription = await connection.subscribeWithPayload(
-        subscriptionPayload,
-        deliverPolicy,
-      );
-
+      connection = await Client.connect(network, apiKey);
+      const subscription = await connection.subscribeWithPayload(payload);
       cleanup = subscription.onMessage((data) => {
         sendBack({ type: 'DATA', data });
       });
     })();
 
+    receive((event) => {
+      if (event.type === 'STOP_CONNECTION') {
+        cleanup?.();
+        connection?.close();
+        sendBack({ type: 'DISCONNECT' });
+      }
+    });
+
     return () => {
       cleanup?.();
+      connection?.close();
     };
   },
 );
@@ -87,10 +94,9 @@ export const streamMachine = setup({
     context: {} as {
       subject: string | null;
       subscriptionPayload: SubscriptionPayload | null;
-      data: Array<any>;
+      data: Array<ClientResponse<any, any>>;
       network: FuelNetwork;
       tab: 'data' | 'code';
-      deliverPolicy: DeliverPolicy;
       apiKey: string | null;
     },
   },
@@ -131,12 +137,6 @@ export const streamMachine = setup({
         return event.tab;
       },
     }),
-    setDeliveryPolicy: assign({
-      deliverPolicy: ({ event }) => {
-        if (event.type !== 'CHANGE_DELIVERY_POLICY') return DeliverPolicy.New;
-        return event.policy;
-      },
-    }),
     clearState: assign({
       subject: () => null,
       subscriptionPayload: () => null,
@@ -173,7 +173,7 @@ export const streamMachine = setup({
       }
     },
     notifySubscriptionError: ({ event }) => {
-      if (!event.error && event.type !== 'SUBSCRIBE') return;
+      if (!event.error) return;
       if (event.error instanceof ClientError) {
         toast.error(event.error.message);
       } else {
@@ -188,9 +188,8 @@ export const streamMachine = setup({
     subject: null,
     subscriptionPayload: null,
     data: [],
-    network: FuelNetwork.Staging,
     tab: 'data',
-    deliverPolicy: DeliverPolicy.New,
+    network: FuelNetwork.Staging,
     apiKey: localStorage.getApiKey(),
   }),
   states: {
@@ -250,9 +249,6 @@ export const streamMachine = setup({
         CHANGE_TAB: {
           actions: ['setTab'],
         },
-        CHANGE_DELIVERY_POLICY: {
-          actions: ['setDeliveryPolicy'],
-        },
       },
     },
     switchingNetwork: {
@@ -280,14 +276,17 @@ export const streamMachine = setup({
       invoke: {
         id: 'subscribe',
         src: 'subscriptionActor',
-        input: ({ context }) => ({
-          subject: context.subject as string,
-          subscriptionPayload:
-            context.subscriptionPayload as SubscriptionPayload,
-          deliverPolicy: context.deliverPolicy,
-          network: context.network,
-          apiKey: context.apiKey,
-        }),
+        input: ({ context }) => {
+          if (!context.subject || !context.subscriptionPayload) {
+            throw new Error('Missing required subscription parameters');
+          }
+          return {
+            subject: context.subject,
+            subscriptionPayload: context.subscriptionPayload,
+            network: context.network,
+            apiKey: context.apiKey,
+          };
+        },
         onError: {
           target: 'ready',
           actions: ['notifySubscriptionError'],
@@ -297,7 +296,10 @@ export const streamMachine = setup({
         DATA: {
           actions: ['newDataFromSubscription'],
         },
-        STOP: {
+        STOP_CONNECTION: {
+          actions: sendTo('subscribe', { type: 'STOP_CONNECTION' }),
+        },
+        DISCONNECT: {
           target: 'ready',
         },
         CHANGE_NETWORK: {
@@ -327,7 +329,6 @@ const selectors = {
   data: (state: State) => state.context.data,
   network: (state: State) => state.context.network,
   tab: (state: State) => state.context.tab,
-  deliverPolicy: (state: State) => state.context.deliverPolicy,
 };
 
 export const StreamDataContext = createActorContext(streamMachine);
@@ -340,17 +341,14 @@ export function useStreamData() {
   const data = StreamDataContext.useSelector(selectors.data);
   const network = StreamDataContext.useSelector(selectors.network);
   const tab = StreamDataContext.useSelector(selectors.tab);
-  const deliverPolicy = StreamDataContext.useSelector(selectors.deliverPolicy);
   const apiKey = StreamDataContext.useSelector((state) => state.context.apiKey);
 
-  function start(
-    params: Pick<StreamActorInput, 'subject' | 'subscriptionPayload'>,
-  ) {
-    actor.send({ type: 'START', ...params });
+  function start(subject: string, subscriptionPayload: SubscriptionPayload) {
+    actor.send({ type: 'START', subject, subscriptionPayload });
   }
 
   function stop() {
-    actor.send({ type: 'STOP' });
+    actor.send({ type: 'STOP_CONNECTION' });
   }
 
   function clear() {
@@ -367,10 +365,6 @@ export function useStreamData() {
     actor.send({ type: 'CHANGE_TAB', tab });
   }
 
-  function changeDeliveryPolicy(policy: DeliverPolicy) {
-    actor.send({ type: 'CHANGE_DELIVERY_POLICY', policy });
-  }
-
   function setApiKey(apiKey: string) {
     actor.send({ type: 'SET_API_KEY', apiKey });
   }
@@ -381,11 +375,9 @@ export function useStreamData() {
     clear,
     changeNetwork,
     changeTab,
-    changeDeliveryPolicy,
     data,
     network,
     tab,
-    deliverPolicy,
     isConnecting,
     isSubscribing,
     isConnected,

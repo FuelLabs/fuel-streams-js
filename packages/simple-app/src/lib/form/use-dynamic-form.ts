@@ -1,4 +1,5 @@
 import type { SubscriptionPayload } from '@fuels/streams';
+import { DeliverPolicy, DeliverPolicyType } from '@fuels/streams';
 import {
   type FormField,
   type ModuleKeys,
@@ -26,11 +27,16 @@ export const formMachine = setup({
       variantOptions: SelectOption[];
       subjectClass: string | null;
       subscriptionPayload: SubscriptionPayload | null;
+      deliverPolicy: DeliverPolicy;
+      deliverPolicyType: DeliverPolicyType;
+      blockNumber: string;
     },
     events: {} as
       | { type: 'CHANGE.MODULE'; value: keyof SubjectsDefinition }
       | { type: 'CHANGE.VARIANT'; value: any }
-      | { type: 'CHANGE.FIELD'; fieldName: string; value: string },
+      | { type: 'CHANGE.FIELD'; fieldName: string; value: string }
+      | { type: 'CHANGE.DELIVER_POLICY_TYPE'; value: DeliverPolicyType }
+      | { type: 'CHANGE.BLOCK_NUMBER'; value: string },
   },
   actions: {
     updateModuleFields: assign({
@@ -97,7 +103,17 @@ export const formMachine = setup({
           selectedModule: context.selectedModule,
           selectedVariant: context.selectedVariant,
           selectedFields: context.selectedFields ?? {},
+          deliverPolicy: context.deliverPolicy,
         });
+      },
+    }),
+    updateDeliverPolicy: assign({
+      deliverPolicy: ({ context }) => {
+        if (context.deliverPolicyType === DeliverPolicyType.New) {
+          return DeliverPolicy.new();
+        }
+        const blockNum = Number.parseInt(context.blockNumber || '0', 10);
+        return DeliverPolicy.fromBlock(blockNum);
       },
     }),
   },
@@ -114,6 +130,9 @@ export const formMachine = setup({
     variantOptions: [],
     subjectClass: null,
     subscriptionPayload: null,
+    deliverPolicy: DeliverPolicy.new(),
+    deliverPolicyType: DeliverPolicyType.New,
+    blockNumber: '',
   },
   states: {
     idle: {
@@ -148,6 +167,24 @@ export const formMachine = setup({
             'updateSubscriptionPayload',
           ],
         },
+        'CHANGE.DELIVER_POLICY_TYPE': {
+          actions: [
+            assign({
+              deliverPolicyType: ({ event }) => event.value,
+            }),
+            'updateDeliverPolicy',
+            'updateSubscriptionPayload',
+          ],
+        },
+        'CHANGE.BLOCK_NUMBER': {
+          actions: [
+            assign({
+              blockNumber: ({ event }) => event.value,
+            }),
+            'updateDeliverPolicy',
+            'updateSubscriptionPayload',
+          ],
+        },
       },
     },
   },
@@ -166,6 +203,7 @@ const selectors = {
   subjectClass: (state: State) => state.context.subjectClass,
   variantOptions: (state: State) => state.context.variantOptions,
   subscriptionPayload: (state: State) => state.context.subscriptionPayload,
+  deliverPolicy: (state: State) => state.context.deliverPolicy,
 };
 
 export const FormContext = createActorContext(formMachine);
@@ -184,6 +222,13 @@ export function useDynamicForm() {
   const subscriptionPayload = FormContext.useSelector(
     selectors.subscriptionPayload,
   );
+  const deliverPolicy = FormContext.useSelector(selectors.deliverPolicy);
+  const deliverPolicyType = FormContext.useSelector(
+    (state) => state.context.deliverPolicyType,
+  );
+  const blockNumber = FormContext.useSelector(
+    (state) => state.context.blockNumber,
+  );
 
   const handleModuleChange = (value: keyof SubjectsDefinition) => {
     actor.send({ type: 'CHANGE.MODULE', value });
@@ -195,6 +240,14 @@ export function useDynamicForm() {
 
   const handleFieldChange = (fieldName: string, value: string) => {
     actor.send({ type: 'CHANGE.FIELD', fieldName, value });
+  };
+
+  const handleDeliverPolicyTypeChange = (value: DeliverPolicyType) => {
+    actor.send({ type: 'CHANGE.DELIVER_POLICY_TYPE', value });
+  };
+
+  const handleBlockNumberChange = (value: string) => {
+    actor.send({ type: 'CHANGE.BLOCK_NUMBER', value });
   };
 
   return {
@@ -211,5 +264,10 @@ export function useDynamicForm() {
     subjectClass,
     variantOptions,
     subscriptionPayload,
+    deliverPolicy,
+    deliverPolicyType,
+    blockNumber,
+    handleDeliverPolicyTypeChange,
+    handleBlockNumberChange,
   };
 }

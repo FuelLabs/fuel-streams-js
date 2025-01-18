@@ -1,3 +1,4 @@
+import { DeliverPolicy, DeliverPolicyType } from '@fuels/streams';
 import type { ModuleKeys } from '@fuels/streams/subjects-def';
 import { describe, expect, it } from 'vitest';
 import { createActor } from 'xstate';
@@ -17,6 +18,9 @@ describe('Dynamic Form Machine', () => {
       currentFields: [],
       subjectClass: null,
       subscriptionPayload: null,
+      deliverPolicy: expect.any(DeliverPolicy),
+      deliverPolicyType: DeliverPolicyType.New,
+      blockNumber: '',
     });
     expect(snapshot.context.moduleOptions).toBeDefined();
     expect(snapshot.context.variantOptions).toEqual([]);
@@ -36,7 +40,25 @@ describe('Dynamic Form Machine', () => {
     expect(snapshot.context.subscriptionPayload).toEqual({
       subject: 'blocks',
       params: {},
+      deliverPolicy: DeliverPolicy.new(),
     });
+  });
+
+  it('should update deliver policy when type changes', () => {
+    const actor = createActor(formMachine).start();
+
+    actor.send({
+      type: 'CHANGE.DELIVER_POLICY_TYPE',
+      value: DeliverPolicyType.FromBlock,
+    });
+    actor.send({ type: 'CHANGE.BLOCK_NUMBER', value: '123' });
+    const snapshot = actor.getSnapshot();
+
+    expect(snapshot.context.deliverPolicyType).toBe(
+      DeliverPolicyType.FromBlock,
+    );
+    expect(snapshot.context.blockNumber).toBe('123');
+    expect(snapshot.context.deliverPolicy.toString()).toBe('from_block:123');
   });
 
   it('should update context when variant changes', () => {
@@ -52,6 +74,7 @@ describe('Dynamic Form Machine', () => {
     expect(snapshot.context.subscriptionPayload).toEqual({
       subject: 'inputs_coin',
       params: {},
+      deliverPolicy: DeliverPolicy.new(),
     });
   });
 
@@ -68,6 +91,7 @@ describe('Dynamic Form Machine', () => {
     expect(snapshot.context.subscriptionPayload).toEqual({
       subject: 'blocks',
       params: { blockId: '123' },
+      deliverPolicy: DeliverPolicy.new(),
     });
   });
 
@@ -93,6 +117,7 @@ describe('Dynamic Form Machine', () => {
         blockId: '123',
         height: '456',
       },
+      deliverPolicy: DeliverPolicy.new(),
     });
   });
 
@@ -109,6 +134,7 @@ describe('Dynamic Form Machine', () => {
     expect(snapshot.context.subscriptionPayload).toEqual({
       subject: 'transactions',
       params: {},
+      deliverPolicy: DeliverPolicy.new(),
     });
   });
 
@@ -126,6 +152,46 @@ describe('Dynamic Form Machine', () => {
     expect(snapshot.context.subscriptionPayload).toEqual({
       subject: 'inputs_message',
       params: {},
+      deliverPolicy: DeliverPolicy.new(),
+    });
+  });
+
+  it('should maintain deliver policy when changing module', () => {
+    const actor = createActor(formMachine).start();
+
+    actor.send({
+      type: 'CHANGE.DELIVER_POLICY_TYPE',
+      value: DeliverPolicyType.FromBlock,
+    });
+    actor.send({ type: 'CHANGE.BLOCK_NUMBER', value: '123' });
+    actor.send({ type: 'CHANGE.MODULE', value: 'transactions' as ModuleKeys });
+
+    const snapshot = actor.getSnapshot();
+    expect(snapshot.context.deliverPolicy.toString()).toBe('from_block:123');
+    expect(snapshot.context.subscriptionPayload).toEqual({
+      subject: 'transactions',
+      params: {},
+      deliverPolicy: DeliverPolicy.fromBlock(123),
+    });
+  });
+
+  it('should maintain deliver policy when changing variant', () => {
+    const actor = createActor(formMachine).start();
+
+    actor.send({ type: 'CHANGE.MODULE', value: 'inputs' as ModuleKeys });
+    actor.send({
+      type: 'CHANGE.DELIVER_POLICY_TYPE',
+      value: DeliverPolicyType.FromBlock,
+    });
+    actor.send({ type: 'CHANGE.BLOCK_NUMBER', value: '123' });
+    actor.send({ type: 'CHANGE.VARIANT', value: 'message' });
+
+    const snapshot = actor.getSnapshot();
+    expect(snapshot.context.deliverPolicy.toString()).toBe('from_block:123');
+    expect(snapshot.context.subscriptionPayload).toEqual({
+      subject: 'inputs_message',
+      params: {},
+      deliverPolicy: DeliverPolicy.fromBlock(123),
     });
   });
 });

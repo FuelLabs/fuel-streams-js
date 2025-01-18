@@ -9,16 +9,17 @@ import {
 } from '../../src';
 
 async function main() {
-  const client = await Client.new(FuelNetwork.Staging);
-  const connection = await client.connect();
+  const connection = await Client.connect(FuelNetwork.Staging, 'your-api-key');
 
   // You can filter using subject fields before subscribing
   const subject = TransactionsSubject.build({
     kind: TransactionKind.Script,
-    status: TransactionStatus.Success,
+    txStatus: TransactionStatus.Success,
   });
 
-  const stream = await connection.subscribe(subject, DeliverPolicy.New);
+  // Subscribe to transactions from block 1000000
+  const deliverPolicy = DeliverPolicy.fromBlock(1000000);
+  const stream = await connection.subscribe(subject, deliverPolicy);
   for await (const message of stream) {
     console.log('Subject:', message.subject);
     console.log('Payload:', message.payload);
