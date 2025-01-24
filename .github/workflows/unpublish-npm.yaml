@@ -11,7 +11,7 @@ on:
         type: string
         description: Version(s) to delete (comma-separated for multiple versions e.g. "0.1.0,0.2.0")
         required: false
-        default: ''
+        default: ""
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -29,10 +29,10 @@ jobs:
           pnpm-version: 9.5.0
       - uses: FuelLabs/github-actions/setups/npm@master
         with:
-          npm-token: ${{ secrets.NPM_TOKEN }}
+          npm-token: ${{ secrets.NPM_TOKEN_STREAMS }}
       - run: pnpm install
       - run: pnpm tsx ./scripts/unpublish.ts
         env:
           DELETE_PACKAGES: ${{ github.event.inputs.delete_packages}}
           VERSION_TO_DELETE: ${{ github.event.inputs.version }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN_STREAMS }}
