@@ -1,5 +1,11 @@
 # @fuels/streams
 
+## 0.5.0
+
+### Minor Changes
+
+- [`2363884`](https://github.com/FuelLabs/fuel-streams-js/commit/2363884c8066b2a3c43dcaf8f6c2e25e9e536f27) Thanks [@pedronauck](https://github.com/pedronauck)! - fix: adjust client to work with mainnet and new structure
+
 ## 0.4.0
 
 ### Minor Changes
