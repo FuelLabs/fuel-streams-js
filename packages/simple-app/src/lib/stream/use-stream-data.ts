@@ -189,7 +189,7 @@ export const streamMachine = setup({
     subscriptionPayload: null,
     data: [],
     tab: 'data',
-    network: FuelNetwork.Staging,
+    network: FuelNetwork.Mainnet,
     apiKey: localStorage.getApiKey(),
   }),
   states: {
