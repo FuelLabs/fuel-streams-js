@@ -15,19 +15,18 @@ if (typeof window !== 'undefined') {
   wsImpl = window.WebSocket;
 } else {
   // Node.js environment
+  // Using require instead of import for synchronous loading
   try {
-    // Use dynamic import instead of require
-    import('ws')
-      .then((WebSocket) => {
-        // @ts-ignore
-        wsImpl = WebSocket.default;
-      })
-      .catch(() => {
-        throw new Error('Please install ws package for Node.js environment');
-      });
-  } catch (_e) {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const WebSocket = require('ws');
+    wsImpl = WebSocket;
+  } catch (_error: any) {
     throw new Error('Please install ws package for Node.js environment');
   }
+}
+
+if (!wsImpl) {
+  throw new Error('No WebSocket implementation found');
 }
 
 export { wsImpl as WebSocket };

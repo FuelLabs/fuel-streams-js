@@ -9,7 +9,7 @@ import {
 } from '../../src';
 
 async function main() {
-  const connection = await Client.connect(FuelNetwork.Staging, 'your-api-key');
+  const connection = await Client.connect(FuelNetwork.Mainnet, 'your-api-key');
 
   // You can filter using subject fields before subscribing
   const subject = TransactionsSubject.build({
