@@ -1,5 +1,11 @@
 # @fuels/streams
 
+## 0.5.1
+
+### Patch Changes
+
+- [`f77da27`](https://github.com/FuelLabs/fuel-streams-js/commit/f77da278bbbf6dccba2f9d7908b6b7bd1ef51dde) Thanks [@pedronauck](https://github.com/pedronauck)! - Fix: websocket cross-platform implementation
+
 ## 0.5.0
 
 ### Minor Changes
