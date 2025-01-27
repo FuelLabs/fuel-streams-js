@@ -4,7 +4,7 @@ import type { DeliverPolicy } from './deliver-policy';
 export enum FuelNetwork {
   Local = 'local',
   Staging = 'staging',
-  Testnet = 'testnet',
+  // Testnet = 'testnet',
   Mainnet = 'mainnet',
 }
 

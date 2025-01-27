@@ -17,7 +17,7 @@
 //   describe('getProviderUrl', () => {
 //     it('should return mainnet URL when network is mainnet', () => {
 //       const opts = new ClientOpts(Network.mainnet);
-//       expect(opts.getProviderUrl()).toBe('wss://stream.fuel.network:8443');
+//       expect(opts.getProviderUrl()).toBe('wss://stream-mainnet.fuel.network:8443');
 //     });
 
 //     it('should return testnet URL when network is testnet', () => {
@@ -62,7 +62,7 @@
 //       const connectOpts = opts.connectOpts();
 
 //       expect(connectOpts).toEqual({
-//         servers: 'wss://stream.fuel.network:8443',
+//         servers: 'wss://stream-mainnet.fuel.network:8443',
 //         timeout: 5000,
 //         authenticator: expect.any(Function),
 //         maxReconnectAttempts: -1,
