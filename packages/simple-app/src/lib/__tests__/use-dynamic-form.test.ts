@@ -13,7 +13,7 @@ describe('Dynamic Form Machine', () => {
     expect(snapshot.context).toMatchObject({
       selectedVariant: null,
       selectedFields: null,
-      subject: null,
+      subject: '',
       formData: null,
       currentFields: [],
       subjectClass: null,
