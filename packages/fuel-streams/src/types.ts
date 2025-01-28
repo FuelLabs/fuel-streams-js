@@ -29,9 +29,9 @@ import type {
 // Base Types
 // ----------------------------------------------------------------------------
 export type Bytes32 = BytesLike;
-export type Address = AddressLike;
-export type AssetId = FuelAssetId;
-export type ContractId = ContractIdLike;
+export type Address = string;
+export type AssetId = string;
+export type ContractId = string;
 export type BlockHeight = number;
 export type MessageId = string;
 export type TxId = string;
