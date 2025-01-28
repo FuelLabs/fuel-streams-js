@@ -31,11 +31,11 @@ export function StreamForm() {
         <ApiKeyPopover />
       </div>
 
-      <div className={variantOptions.length > 0 ? 'flex gap-4' : ''}>
-        <div className={variantOptions.length > 0 ? 'w-1/2' : 'w-full'}>
+      <div className={variantOptions.length > 1 ? 'flex gap-4' : ''}>
+        <div className={variantOptions.length > 1 ? 'w-1/2' : 'w-full'}>
           <InputModule />
         </div>
-        {variantOptions.length > 0 && (
+        {variantOptions.length > 1 && (
           <div className="w-1/2">
             <InputVariant />
           </div>

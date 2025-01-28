@@ -7,6 +7,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import { useDynamicForm } from '@/lib/form';
 import {
   type FormField,
@@ -15,6 +21,7 @@ import {
   transactionStatusOptions,
   utxoTypeOptions,
 } from '@fuels/streams/subjects-def';
+import { CircleHelp } from 'lucide-react';
 import v from 'voca';
 
 function formatLabel(id: string): string {
@@ -42,13 +49,30 @@ export function InputField({ field }: InputFieldProps) {
   const { formData, handleFieldChange } = useDynamicForm();
   const predefinedOptions = getFieldOptions(field.type);
   const hasOptions = field.options || predefinedOptions;
+  const formattedLabel = formatLabel(field.id);
 
   return (
     <div>
-      <label htmlFor={field.id} className="block text-sm font-medium mb-1">
-        {formatLabel(field.id)}{' '}
-        <code className="text-gray-500">({field.type})</code>
-      </label>
+      <div className="flex items-center gap-2 mb-2">
+        <label htmlFor={field.id} className="text-sm font-medium">
+          {formattedLabel}{' '}
+          {field.type !== formattedLabel.replace(' ', '') && (
+            <span className="text-gray-500">({field.type})</span>
+          )}
+        </label>
+        {field.description && (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <CircleHelp className="h-4 w-4 text-gray-500" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{field.description}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )}
+      </div>
       {hasOptions ? (
         <Select
           value={formData?.[field.id] || ''}

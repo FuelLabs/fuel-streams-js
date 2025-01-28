@@ -121,6 +121,7 @@ export const formMachine = setup({
   id: 'dynamicForm',
   initial: 'idle',
   context: {
+    selectedModule: undefined,
     selectedVariant: null,
     selectedFields: null,
     subject: null,
@@ -136,6 +137,7 @@ export const formMachine = setup({
   },
   states: {
     idle: {
+      entry: ['updateSubject'],
       on: {
         'CHANGE.MODULE': {
           actions: [
@@ -143,6 +145,7 @@ export const formMachine = setup({
               selectedModule: ({ event }) => event.value as ModuleKeys,
               selectedVariant: () => null,
               formData: () => ({}),
+              selectedFields: () => ({}),
             }),
             'updateModuleFields',
             'updateSubject',

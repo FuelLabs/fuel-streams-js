@@ -4,11 +4,8 @@
  */
 
 import type {
-  AddressLike,
   BN,
   BytesLike,
-  ContractIdLike,
-  AssetId as FuelAssetId,
   Block as FuelsBlock,
   Input as FuelsInput,
   InputCoin as FuelsInputCoin,
@@ -120,36 +117,44 @@ export type Block = FuelsBlock & {
 // ----------------------------------------------------------------------------
 // Output Types
 // ----------------------------------------------------------------------------
+export enum OutputType {
+  Coin = 'Coin',
+  Contract = 'Contract',
+  Change = 'Change',
+  Variable = 'Variable',
+  ContractCreated = 'ContractCreated',
+}
+
 export type RawCoinOutput = {
-  type: 'Coin';
+  type: OutputType.Coin;
   amount: number;
   assetId: string;
   to: string;
 };
 
 export type RawContractOutput = {
-  type: 'Contract';
+  type: OutputType.Contract;
   balanceRoot: string;
   stateRoot: string;
   inputIndex: number;
 };
 
 export type RawChangeOutput = {
-  type: 'Change';
+  type: OutputType.Change;
   amount: number;
   assetId: string;
   to: string;
 };
 
 export type RawVariableOutput = {
-  type: 'Variable';
+  type: OutputType.Variable;
   amount: number;
   assetId: string;
   to: string;
 };
 
 export type RawContractCreated = {
-  type: 'ContractCreated';
+  type: OutputType.ContractCreated;
   contractId: string;
   stateRoot: string;
 };
@@ -167,13 +172,18 @@ export type OutputChange = FuelsOutputChange;
 export type OutputVariable = FuelsOutputVariable;
 export type OutputContractCreated = FuelsOutputContractCreated;
 export type Output = FuelsOutput;
-export { OutputType } from 'fuels';
 
 // ----------------------------------------------------------------------------
 // Input Types
 // ----------------------------------------------------------------------------
+export enum InputType {
+  Coin = 'Coin',
+  Contract = 'Contract',
+  Message = 'Message',
+}
+
 export type RawInputCoin = {
-  type: 'Coin';
+  type: InputType.Coin;
   amount: number;
   assetId: string;
   owner: string;
@@ -188,7 +198,7 @@ export type RawInputCoin = {
 };
 
 export type RawInputContract = {
-  type: 'Contract';
+  type: InputType.Contract;
   balanceRoot: string;
   stateRoot: string;
   txPointer: TxPointer;
@@ -197,7 +207,7 @@ export type RawInputContract = {
 };
 
 export type RawInputMessage = {
-  type: 'Message';
+  type: InputType.Message;
   amount: number;
   data?: string;
   nonce: string;
@@ -216,57 +226,170 @@ export type InputCoin = FuelsInputCoin;
 export type InputContract = FuelsInputContract;
 export type InputMessage = FuelsInputMessage;
 export type Input = FuelsInput;
-export { InputType } from 'fuels';
 
 // ----------------------------------------------------------------------------
 // Receipt Types
 // ----------------------------------------------------------------------------
-export type RawReceipt = {
-  type:
-    | 'Call'
-    | 'Return'
-    | 'ReturnData'
-    | 'Panic'
-    | 'Revert'
-    | 'Log'
-    | 'LogData'
-    | 'Transfer'
-    | 'TransferOut'
-    | 'ScriptResult'
-    | 'MessageOut'
-    | 'Mint'
-    | 'Burn';
-  amount?: number;
-  assetId?: string;
-  contractId?: string;
-  data?: string;
-  digest?: string;
-  gas?: number;
-  gasUsed?: number;
-  id?: string;
-  is?: number;
-  len?: number;
-  nonce?: string;
-  param1?: number;
-  param2?: number;
-  pc?: number;
-  ptr?: number;
-  ra?: number;
-  rb?: number;
-  rc?: number;
-  rd?: number;
-  reason?: number;
-  recipient?: string;
-  result?: number;
-  sender?: string;
-  subId?: string;
-  to?: string;
-  toAddress?: string;
-  val?: number;
+export enum ReceiptType {
+  Call = 'Call',
+  Return = 'Return',
+  ReturnData = 'ReturnData',
+  Panic = 'Panic',
+  Revert = 'Revert',
+  Log = 'Log',
+  LogData = 'LogData',
+  Transfer = 'Transfer',
+  TransferOut = 'TransferOut',
+  ScriptResult = 'ScriptResult',
+  MessageOut = 'MessageOut',
+  Mint = 'Mint',
+  Burn = 'Burn',
+}
+
+export type RawCallReceipt = {
+  type: ReceiptType.Call;
+  id: string;
+  to: string;
+  amount: number;
+  assetId: string;
+  gas: number;
+  param1: number;
+  param2: number;
+  pc: number;
+  is: number;
 };
 
+export type RawReturnReceipt = {
+  type: ReceiptType.Return;
+  id: string;
+  val: number;
+  pc: number;
+  is: number;
+};
+
+export type RawReturnDataReceipt = {
+  type: ReceiptType.ReturnData;
+  id: string;
+  ptr: number;
+  len: number;
+  digest: string;
+  pc: number;
+  is: number;
+  data?: string;
+};
+
+export type RawPanicReceipt = {
+  type: ReceiptType.Panic;
+  id: string;
+  reason: number;
+  pc: number;
+  is: number;
+  contractId?: string;
+};
+
+export type RawRevertReceipt = {
+  type: ReceiptType.Revert;
+  id: string;
+  ra: number;
+  pc: number;
+  is: number;
+};
+
+export type RawLogReceipt = {
+  type: ReceiptType.Log;
+  id: string;
+  ra: number;
+  rb: number;
+  rc: number;
+  rd: number;
+  pc: number;
+  is: number;
+};
+
+export type RawLogDataReceipt = {
+  type: ReceiptType.LogData;
+  id: string;
+  ra: number;
+  rb: number;
+  ptr: number;
+  len: number;
+  digest: string;
+  pc: number;
+  is: number;
+  data?: string;
+};
+
+export type RawTransferReceipt = {
+  type: ReceiptType.Transfer;
+  id: string;
+  to: string;
+  amount: number;
+  assetId: string;
+  pc: number;
+  is: number;
+};
+
+export type RawTransferOutReceipt = {
+  type: ReceiptType.TransferOut;
+  id: string;
+  to: string;
+  amount: number;
+  assetId: string;
+  pc: number;
+  is: number;
+};
+
+export type RawScriptResultReceipt = {
+  type: ReceiptType.ScriptResult;
+  result: number;
+  gasUsed: number;
+};
+
+export type RawMessageOutReceipt = {
+  type: ReceiptType.MessageOut;
+  sender: string;
+  recipient: string;
+  amount: number;
+  nonce: string;
+  len: number;
+  digest: string;
+  data?: string;
+};
+
+export type RawMintReceipt = {
+  type: ReceiptType.Mint;
+  subId: string;
+  contractId: string;
+  val: number;
+  pc: number;
+  is: number;
+};
+
+export type RawBurnReceipt = {
+  type: ReceiptType.Burn;
+  subId: string;
+  contractId: string;
+  val: number;
+  pc: number;
+  is: number;
+};
+
+export type RawReceipt =
+  | RawCallReceipt
+  | RawReturnReceipt
+  | RawReturnDataReceipt
+  | RawPanicReceipt
+  | RawRevertReceipt
+  | RawLogReceipt
+  | RawLogDataReceipt
+  | RawTransferReceipt
+  | RawTransferOutReceipt
+  | RawScriptResultReceipt
+  | RawMessageOutReceipt
+  | RawMintReceipt
+  | RawBurnReceipt;
+
 export type Receipt = FuelsReceipt;
-export { ReceiptType } from 'fuels';
 
 // ----------------------------------------------------------------------------
 // UTXO Types

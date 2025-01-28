@@ -7,13 +7,12 @@
  */
 
 import { BlockParser } from '../../parsers';
-import type { Block, RawBlock } from '../../types';
-import type { Address, BlockHeight } from '../../types';
+import type { Address, Block, BlockHeight, RawBlock } from '../../types';
 import { SubjectBase } from '../subject-base';
 
 type BlocksFields = {
-  producer: Address;
   height: BlockHeight;
+  producer: Address;
 };
 
 export class BlocksSubject extends SubjectBase<BlocksFields, Block, RawBlock> {

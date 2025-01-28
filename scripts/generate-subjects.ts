@@ -176,6 +176,11 @@ ${fields}
 function generateSubjectImports(moduleConfig: any, entity: string): string {
   const usedTypes = new Set<string>();
 
+  // Add base types for the entity
+  usedTypes.add(entity);
+  usedTypes.add(`Raw${entity}`);
+
+  // Add types from fields
   if ('variants' in moduleConfig) {
     Object.values(moduleConfig.variants).forEach((variant: any) => {
       getUsedTypes(variant.fields).forEach((type) => usedTypes.add(type));
@@ -184,16 +189,22 @@ function generateSubjectImports(moduleConfig: any, entity: string): string {
     getUsedTypes(moduleConfig.fields).forEach((type) => usedTypes.add(type));
   }
 
-  let imports = `import { SubjectBase } from "../subject-base";\n`;
-  imports += `import type { ${entity}, Raw${entity} } from "../../types";\n`;
-  imports += `import { ${entity}Parser } from "../../parsers";\n`;
-
-  // Add imports only for types that are used
-  if (usedTypes.size > 0) {
-    imports += `import type { ${Array.from(usedTypes)
-      .sort()
-      .join(', ')} } from "../../types";\n`;
+  // Add type enum based on entity type
+  switch (entity) {
+    case 'Input':
+      usedTypes.add('InputType');
+      break;
+    case 'Output':
+      usedTypes.add('OutputType');
+      break;
+    case 'Receipt':
+      usedTypes.add('ReceiptType');
+      break;
   }
+
+  let imports = `import { SubjectBase } from "../subject-base";\n`;
+  imports += `import { ${entity}Parser } from "../../parsers";\n`;
+  imports += `import type { ${Array.from(usedTypes).sort().join(', ')} } from "../../types";\n`;
 
   return imports;
 }
@@ -260,14 +271,14 @@ async function generateModuleSubjects(_moduleName: string, moduleConfig: any) {
   const subjectNames: string[] = [];
   const entity = moduleConfig.entity;
 
+  // Always add the main subject first
+  subjectNames.push(moduleConfig.subject);
+
+  // Add variant subjects if they exist
   if ('variants' in moduleConfig) {
     Object.values(moduleConfig.variants).forEach((variant: any) => {
-      const baseName = v.replaceAll(variant.subject, 'Subject', '');
-      subjectNames.push(`${baseName}Subject`);
+      subjectNames.push(variant.subject);
     });
-  } else {
-    const baseName = v.replaceAll(moduleConfig.subject, 'Subject', '');
-    subjectNames.push(`${baseName}Subject`);
   }
 
   // Generate header comment
@@ -283,31 +294,27 @@ async function generateModuleSubjects(_moduleName: string, moduleConfig: any) {
   content += `${generateSubjectImports(moduleConfig, entity)}\n`;
 
   if ('variants' in moduleConfig) {
-    // First generate the base interface and generic subject if there"s a generic variant
-    if (moduleConfig.variants.generic) {
-      const genericVariant = moduleConfig.variants.generic;
-      const baseName = v.replaceAll(genericVariant.subject, 'Subject', '');
-      content += generateInterface(baseName, genericVariant.fields);
-      content += '\n\n';
-      content += generateSubjectClass(
-        baseName,
-        genericVariant.format,
-        true,
-        entity,
-        genericVariant.id,
-      );
-      content += '\n\n';
-    }
+    // Generate main subject
+    const baseName = v.replaceAll(moduleConfig.subject, 'Subject', '');
+    content += generateInterface(baseName, moduleConfig.fields);
+    content += '\n\n';
+    content += generateSubjectClass(
+      baseName,
+      moduleConfig.format,
+      false,
+      entity,
+      moduleConfig.id,
+    );
+    content += '\n\n';
 
-    // Then generate all other variants
+    // Generate variants
     Object.entries(moduleConfig.variants).forEach(
-      ([key, variant]: [string, any]) => {
-        if (key === 'generic') return; // Skip generic as it"s already handled
-        const baseName = v.replaceAll(variant.subject, 'Subject', '');
-        content += generateInterface(baseName, variant.fields);
+      ([_, variant]: [string, any]) => {
+        const variantBaseName = v.replaceAll(variant.subject, 'Subject', '');
+        content += generateInterface(variantBaseName, variant.fields);
         content += '\n\n';
         content += generateSubjectClass(
-          baseName,
+          variantBaseName,
           variant.format,
           false,
           entity,

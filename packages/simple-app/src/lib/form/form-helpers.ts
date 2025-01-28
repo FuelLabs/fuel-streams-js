@@ -12,6 +12,7 @@ export function fieldsToArray(fields: Fields): FormField[] {
     id: key,
     type: field.type,
     options: field.options,
+    description: field.description,
   }));
 }
 
@@ -33,13 +34,26 @@ export class FormFieldsManager {
     if (!selectedModule) return [];
     const mod = this.getModule(selectedModule);
 
-    if (!this.hasVariants(mod)) {
-      return fieldsToArray(mod.fields);
+    // Fields that should be hidden when using variants
+    const hiddenFields = ['input_type', 'output_type', 'receipt_type'];
+
+    // If no variant is selected, return the main module fields
+    if (!selectedVariant) {
+      const fields = fieldsToArray(mod.fields);
+      // Filter out type fields if module has variants
+      return mod.variants
+        ? fields.filter((field) => !hiddenFields.includes(field.id))
+        : fields;
     }
 
-    if (!selectedVariant || !mod.variants) return [];
-    const variant = mod.variants[selectedVariant];
-    return variant ? fieldsToArray(variant.fields) : [];
+    // If variant is selected and variants exist, return the variant fields
+    if (selectedVariant && mod.variants) {
+      const variant = mod.variants[selectedVariant];
+      const fields = variant ? fieldsToArray(variant.fields) : [];
+      return fields.filter((field) => !hiddenFields.includes(field.id));
+    }
+
+    return [];
   }
 
   getModuleOptions(): { value: string; label: string }[] {
@@ -55,6 +69,7 @@ export class FormFieldsManager {
     const mod = this.getModule(selectedModule);
     if (!mod.variants) return [];
 
+    // Return only variant options
     return Object.entries(mod.variants).map(([key, value]) => ({
       value: key,
       label: value.id,
@@ -90,10 +105,12 @@ export class SubjectBuilder {
     // Get the base subject ID
     let subjectId = mod.id;
 
-    // If we have variants and a variant is selected, use the variant's ID
-    if (mod.variants && selectedVariant && selectedVariant in mod.variants) {
+    // If variant is selected, use the variant's ID
+    if (selectedVariant && mod.variants) {
       const variant = mod.variants[selectedVariant];
-      subjectId = variant.id;
+      if (variant) {
+        subjectId = variant.id;
+      }
     }
 
     // Filter out empty or wildcard values from params
@@ -116,7 +133,7 @@ export class SubjectBuilder {
     selectedVariant: string | null;
     selectedFields: Record<string, string>;
     currentFields: FormField[];
-  }) {
+  }): string {
     const { selectedModule, selectedVariant, selectedFields } = params;
     if (!selectedModule) return '';
 
@@ -124,30 +141,32 @@ export class SubjectBuilder {
     const mod = manager.getModule(selectedModule);
     const hasVariant = manager.hasVariants(mod);
     const noFieldsSelected = !Object.values(selectedFields ?? {}).some(Boolean);
-    let format = '';
 
-    // For modules that don't have variants
-    if (!hasVariant) {
-      if (noFieldsSelected) return mod.wildcard;
-      format = mod.format;
+    // For modules that don't have variants or when no variant is selected
+    if (!hasVariant || !selectedVariant) {
+      return noFieldsSelected
+        ? mod.wildcard
+        : this.replaceFields(mod.format, selectedFields);
     }
 
     // For modules with variants
-    if (
-      hasVariant &&
-      selectedVariant &&
-      mod.variants &&
-      selectedVariant in mod.variants
-    ) {
+    if (hasVariant && mod.variants && selectedVariant in mod.variants) {
       const variant = mod.variants[selectedVariant];
-      if (!variant) return mod.wildcard;
-      if (noFieldsSelected) return variant.wildcard;
-      format = variant.format;
+      return noFieldsSelected
+        ? variant.wildcard
+        : this.replaceFields(variant.format, selectedFields);
     }
 
+    return mod.wildcard;
+  }
+
+  private replaceFields(
+    format: string,
+    selectedFields: Record<string, string>,
+  ): string {
     return format.replace(/\{(\w+)\}/g, (_, field) => {
       const value = selectedFields[field];
-      return value ? value : '*';
+      return value && value !== '' ? value : '*';
     });
   }
 }

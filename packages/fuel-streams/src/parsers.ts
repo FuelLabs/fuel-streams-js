@@ -177,28 +177,23 @@ export class OutputParser implements EntityParser<Output, RawOutput> {
 
 export class ReceiptParser implements EntityParser<Receipt, RawReceipt> {
   parse(data: RawReceipt): Receipt {
-    return data as any;
-    // const transformations = {
-    //   type: (v: RawReceipt['type']) => ReceiptType[v],
-    //   amount: toBN,
-    //   gas: toBN,
-    //   gasUsed: toBN,
-    //   is: toBN,
-    //   len: toBN,
-    //   param1: toBN,
-    //   param2: toBN,
-    //   pc: toBN,
-    //   ptr: toBN,
-    //   ra: toBN,
-    //   rb: toBN,
-    //   rc: toBN,
-    //   rd: toBN,
-    //   reason: toBN,
-    //   result: toBN,
-    //   val: toBN,
-    // };
-
-    // return evolve({}, data) as Receipt;
+    const commonTransformations = {
+      amount: toBN,
+      gas: toBN,
+      gasUsed: toBN,
+      is: toBN,
+      len: toBN,
+      param1: toBN,
+      param2: toBN,
+      pc: toBN,
+      ptr: toBN,
+      ra: toBN,
+      rb: toBN,
+      rc: toBN,
+      rd: toBN,
+      val: toBN,
+    };
+    return evolve(commonTransformations, data) as unknown as Receipt;
   }
 }
 

@@ -4,8 +4,8 @@
  */
 
 export * from './blocks/subjects';
-export * from './transactions/subjects';
-export * from './utxos/subjects';
 export * from './inputs/subjects';
-export * from './receipts/subjects';
+export * from './utxos/subjects';
 export * from './outputs/subjects';
+export * from './transactions/subjects';
+export * from './receipts/subjects';

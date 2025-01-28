@@ -7,17 +7,23 @@
  */
 
 import { UtxoParser } from '../../parsers';
-import type { RawUtxo, Utxo } from '../../types';
-import type { BlockHeight, HexData, TxId, UtxoType } from '../../types';
+import type {
+  BlockHeight,
+  HexData,
+  RawUtxo,
+  TxId,
+  Utxo,
+  UtxoType,
+} from '../../types';
 import { SubjectBase } from '../subject-base';
 
 type UtxosFields = {
-  utxoId: HexData;
-  inputIndex: number;
-  txId: TxId;
-  txIndex: number;
-  utxoType: UtxoType;
   blockHeight: BlockHeight;
+  txId: TxId;
+  inputIndex: number;
+  utxoId: HexData;
+  utxoType: UtxoType;
+  txIndex: number;
 };
 
 export class UtxosSubject extends SubjectBase<UtxosFields, Utxo, RawUtxo> {

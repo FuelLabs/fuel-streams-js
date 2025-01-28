@@ -7,9 +7,10 @@
  */
 
 import { TransactionParser } from '../../parsers';
-import type { RawTransaction, Transaction } from '../../types';
 import type {
   BlockHeight,
+  RawTransaction,
+  Transaction,
   TransactionKind,
   TransactionStatus,
   TxId,
@@ -20,8 +21,8 @@ type TransactionsFields = {
   blockHeight: BlockHeight;
   txIndex: number;
   txStatus: TransactionStatus;
-  kind: TransactionKind;
   txId: TxId;
+  kind: TransactionKind;
 };
 
 export class TransactionsSubject extends SubjectBase<
