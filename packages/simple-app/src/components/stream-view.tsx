@@ -158,7 +158,7 @@ function DataVisualization() {
                     <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger>
-                          <div className="truncate max-w-[500px]">
+                          <div className="truncate max-w-[300px]">
                             {item.key}
                           </div>
                         </TooltipTrigger>
