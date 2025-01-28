@@ -67,7 +67,7 @@ export class InputCoinParser {
       outputIndex: utxoId.outputIndex,
       predicateDataLength: toBN(rest.predicateData?.length),
       predicateLength: toBN(rest.predicate?.length),
-    }) as InputCoin;
+    }) as unknown as InputCoin;
   }
 }
 
@@ -80,7 +80,7 @@ export class InputContractParser {
       txID: utxoId.txId,
       outputIndex: utxoId.outputIndex,
       contractID: rest.contractId,
-    }) as InputContract;
+    }) as unknown as InputContract;
   }
 }
 
@@ -96,7 +96,7 @@ export class InputMessageParser {
       ...data,
       predicateDataLength: toBN(data.predicateData.length),
       predicateLength: toBN(data.predicate.length),
-    }) as InputMessage;
+    }) as unknown as InputMessage;
   }
 }
 
@@ -114,41 +114,42 @@ export class InputParser implements EntityParser<Input, RawInput> {
       case 'Message':
         return this.messageParser.parse(data);
     }
+    throw new Error('Invalid input type');
   }
 }
 
 export class OutputCoinParser {
   parse(data: RawCoinOutput): OutputCoin {
     const transformations = { type: () => OutputType.Coin, amount: toBN };
-    return evolve(transformations, data) as OutputCoin;
+    return evolve(transformations, data) as unknown as OutputCoin;
   }
 }
 
 export class OutputContractParser {
   parse(data: RawContractOutput): OutputContract {
     const transformations = { type: () => OutputType.Contract };
-    return evolve(transformations, data) as OutputContract;
+    return evolve(transformations, data) as unknown as OutputContract;
   }
 }
 
 export class OutputChangeParser {
   parse(data: RawChangeOutput): OutputChange {
     const transformations = { type: () => OutputType.Change, amount: toBN };
-    return evolve(transformations, data) as OutputChange;
+    return evolve(transformations, data) as unknown as OutputChange;
   }
 }
 
 export class OutputVariableParser {
   parse(data: RawVariableOutput): OutputVariable {
     const transformations = { type: () => OutputType.Variable, amount: toBN };
-    return evolve(transformations, data) as OutputVariable;
+    return evolve(transformations, data) as unknown as OutputVariable;
   }
 }
 
 export class OutputContractCreatedParser {
   parse(data: RawContractCreated): OutputContractCreated {
     const transformations = { type: () => OutputType.ContractCreated };
-    return evolve(transformations, data) as OutputContractCreated;
+    return evolve(transformations, data) as unknown as OutputContractCreated;
   }
 }
 
@@ -172,6 +173,7 @@ export class OutputParser implements EntityParser<Output, RawOutput> {
       case 'ContractCreated':
         return this.contractCreatedParser.parse(data);
     }
+    throw new Error('Invalid output type');
   }
 }
 
