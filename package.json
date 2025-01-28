@@ -22,7 +22,8 @@
     "test:coverage": "turbo test:coverage",
     "test:ci": "turbo run test:coverage -- --coverage.enabled --coverage.reporter=json-summary --coverage.reporter=json",
     "ts:check": "turbo run ts:check",
-    "deps:update": "updates -gu && pnpm -r exec updates -gu"
+    "deps:update": "updates -gu && pnpm -r exec updates -gu",
+    "filters:list": "tsx ./scripts/filters-list.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
