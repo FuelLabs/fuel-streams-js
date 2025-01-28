@@ -88,8 +88,18 @@ export function StreamView({ className }: StreamViewProps) {
           className="flex justify-between items-center px-6 py-2 border-b"
           aria-label="Current Subject Query"
         >
-          <code className="text-sm text-muted-foreground">
-            Subject Query: {subject}
+          <code className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+            <span className="text-foreground">Subject Query:</span>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <div className="truncate max-w-[400px]">{subject}</div>
+                </TooltipTrigger>
+                <TooltipContent side="top" align="start">
+                  {subject}
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </code>
           <Button
             size="sm"
