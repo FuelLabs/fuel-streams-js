@@ -13,7 +13,7 @@
     "changeset:next": "tsx ./scripts/changeset-next",
     "format": "biome format --write .",
     "generate:subjects": "tsx ./scripts/generate-subjects.ts -o ./packages/fuel-streams/src/modules",
-    "lint:check": "biome check --apply-unsafe .",
+    "lint:check": "biome check --unsafe --write .",
     "lint:ci": "biome lint --max-diagnostics=1000 --diagnostic-level=error .",
     "packages:version": "node ./scripts/version.js",
     "prepare": "husky",
