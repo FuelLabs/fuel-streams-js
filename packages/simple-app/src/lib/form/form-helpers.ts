@@ -1,11 +1,62 @@
 import { DeliverPolicy, type SubscriptionPayload } from '@fuels/streams';
-import type {
-  Fields,
-  FormField,
-  ModuleKeys,
-  Schema,
-  SubjectsDefinition,
+import {
+  type Fields,
+  type FormField,
+  type ModuleKeys,
+  type Schema,
+  type SelectOption,
+  type SubjectsDefinition,
+  transactionKindOptions,
+  transactionStatusOptions,
+  utxoTypeOptions,
 } from '@fuels/streams/subjects-def';
+
+const TYPE_MAP: Record<string, string> = {
+  BlockHeight: 'number',
+  u32: 'number',
+  u64: 'number',
+  Address: 'text',
+  TxId: 'text',
+  ContractId: 'text',
+  AssetId: 'text',
+  Bytes32: 'text',
+  HexData: 'text',
+};
+
+const TS_TYPE_MAP: Record<string, string> = {
+  BlockHeight: 'Number',
+  u32: 'Number',
+  u64: 'Number',
+  Address: 'String',
+  TxId: 'String',
+  ContractId: 'String',
+  AssetId: 'String',
+  Bytes32: 'String',
+  HexData: 'String',
+};
+
+export function getFieldOptions(
+  type: string,
+): readonly SelectOption[] | undefined {
+  switch (type) {
+    case 'TransactionKind':
+      return transactionKindOptions;
+    case 'TransactionStatus':
+      return transactionStatusOptions;
+    case 'UtxoType':
+      return utxoTypeOptions;
+    default:
+      return undefined;
+  }
+}
+
+export function getFieldType(type: string): string {
+  return TYPE_MAP[type] || 'text';
+}
+
+export function getTsType(type: string): string {
+  return TS_TYPE_MAP[type] || 'String';
+}
 
 export function fieldsToArray(fields: Fields): FormField[] {
   return Object.entries(fields).map(([key, field]) => ({

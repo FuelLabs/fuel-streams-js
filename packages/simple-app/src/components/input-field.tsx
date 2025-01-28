@@ -14,51 +14,20 @@ import {
   TooltipTrigger,
 } from '@/components/ui/tooltip';
 import { useDynamicForm } from '@/lib/form';
-import {
-  type FormField,
-  type SelectOption,
-  transactionKindOptions,
-  transactionStatusOptions,
-  utxoTypeOptions,
-} from '@fuels/streams/subjects-def';
+import { useInputField } from '@/lib/form/use-input-field';
+import type { FormField, SelectOption } from '@fuels/streams/subjects-def';
 import { CircleHelp } from 'lucide-react';
-import v from 'voca';
 
-function formatLabel(id: string): string {
-  return v.titleCase(v.replaceAll(id, '_', ' '));
-}
-
-function getFieldOptions(type: string): readonly SelectOption[] | undefined {
-  switch (type) {
-    case 'TransactionKind':
-      return transactionKindOptions;
-    case 'TransactionStatus':
-      return transactionStatusOptions;
-    case 'UtxoType':
-      return utxoTypeOptions;
-    default:
-      return undefined;
-  }
-}
-
-interface InputFieldProps {
-  field: FormField;
-}
-
-export function InputField({ field }: InputFieldProps) {
+export function InputField({ field }: { field: FormField }) {
   const { formData, handleFieldChange } = useDynamicForm();
-  const predefinedOptions = getFieldOptions(field.type);
-  const hasOptions = field.options || predefinedOptions;
-  const formattedLabel = formatLabel(field.id);
-
+  const { predefinedOptions, hasOptions, formattedLabel, inputType, tsType } =
+    useInputField(field);
   return (
     <div>
       <div className="flex items-center gap-2 mb-2">
         <label htmlFor={field.id} className="text-sm font-medium">
           {formattedLabel}{' '}
-          {field.type !== formattedLabel.replace(' ', '') && (
-            <span className="text-gray-500">({field.type})</span>
-          )}
+          <span className="ml-1 text-gray-500">({tsType})</span>
         </label>
         {field.description && (
           <TooltipProvider>
@@ -81,14 +50,11 @@ export function InputField({ field }: InputFieldProps) {
           {formData?.[field.id] && (
             <SelectClear
               onClick={() => handleFieldChange(field.id, '')}
-              aria-label={`Clear ${formatLabel(field.id)} selection`}
+              aria-label={`Clear ${formattedLabel} selection`}
             />
           )}
-          <SelectTrigger
-            id={field.id}
-            aria-label={`Select ${formatLabel(field.id)}`}
-          >
-            <SelectValue placeholder={`Select ${formatLabel(field.id)}`} />
+          <SelectTrigger id={field.id} aria-label={`Select ${formattedLabel}`}>
+            <SelectValue placeholder={`Select ${formattedLabel}`} />
           </SelectTrigger>
           <SelectContent>
             {(predefinedOptions || field.options)?.map(
@@ -96,7 +62,7 @@ export function InputField({ field }: InputFieldProps) {
                 <SelectItem
                   key={value}
                   value={value}
-                  aria-label={`${formatLabel(field.id)}: ${label}`}
+                  aria-label={`${formattedLabel}: ${label}`}
                 >
                   {label}
                 </SelectItem>
@@ -107,11 +73,11 @@ export function InputField({ field }: InputFieldProps) {
       ) : (
         <Input
           id={field.id}
-          type="text"
+          type={inputType}
           placeholder={field.type}
           onChange={(e) => handleFieldChange(field.id, e.target.value)}
           value={formData?.[field.id] || ''}
-          aria-label={formatLabel(field.id)}
+          aria-label={formattedLabel}
         />
       )}
     </div>
