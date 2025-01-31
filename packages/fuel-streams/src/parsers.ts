@@ -61,6 +61,8 @@ export class InputCoinParser {
       type: () => InputType.Coin,
       amount: safeToBN,
       predicateGasUsed: safeToBN,
+      predicateDataLength: safeToBN,
+      predicateLength: safeToBN,
     };
 
     return evolve(transformations, {
@@ -76,12 +78,17 @@ export class InputCoinParser {
 export class InputContractParser {
   parse(data: RawInputContract): InputContract {
     const { utxoId, ...rest } = data;
-    const transformations = { type: () => InputType.Contract };
+    const transformations = {
+      type: () => InputType.Contract,
+    };
+
     return evolve(transformations, {
       ...rest,
       txID: utxoId.txId,
       outputIndex: utxoId.outputIndex,
       contractID: rest.contractId,
+      balanceRoot: rest.balanceRoot,
+      stateRoot: rest.stateRoot,
     }) as unknown as InputContract;
   }
 }
@@ -92,12 +99,12 @@ export class InputMessageParser {
       type: () => InputType.Message,
       amount: safeToBN,
       predicateGasUsed: safeToBN,
+      predicateDataLength: safeToBN,
+      predicateLength: safeToBN,
     };
 
     return evolve(transformations, {
       ...data,
-      predicateDataLength: safeToBN(data.predicateData.length),
-      predicateLength: safeToBN(data.predicate.length),
     }) as unknown as InputMessage;
   }
 }
@@ -122,21 +129,30 @@ export class InputParser implements EntityParser<Input, RawInput> {
 
 export class OutputCoinParser {
   parse(data: RawCoinOutput): OutputCoin {
-    const transformations = { type: () => OutputType.Coin, amount: safeToBN };
+    const transformations = {
+      type: () => OutputType.Coin,
+      amount: safeToBN,
+    };
     return evolve(transformations, data) as unknown as OutputCoin;
   }
 }
 
 export class OutputContractParser {
   parse(data: RawContractOutput): OutputContract {
-    const transformations = { type: () => OutputType.Contract };
+    const transformations = {
+      type: () => OutputType.Contract,
+      inputIndex: Number,
+    };
     return evolve(transformations, data) as unknown as OutputContract;
   }
 }
 
 export class OutputChangeParser {
   parse(data: RawChangeOutput): OutputChange {
-    const transformations = { type: () => OutputType.Change, amount: safeToBN };
+    const transformations = {
+      type: () => OutputType.Change,
+      amount: safeToBN,
+    };
     return evolve(transformations, data) as unknown as OutputChange;
   }
 }
@@ -153,7 +169,9 @@ export class OutputVariableParser {
 
 export class OutputContractCreatedParser {
   parse(data: RawContractCreated): OutputContractCreated {
-    const transformations = { type: () => OutputType.ContractCreated };
+    const transformations = {
+      type: () => OutputType.ContractCreated,
+    };
     return evolve(transformations, data) as unknown as OutputContractCreated;
   }
 }
@@ -184,110 +202,109 @@ export class OutputParser implements EntityParser<Output, RawOutput> {
 
 export class ReceiptParser implements EntityParser<Receipt, RawReceipt> {
   parse(data: RawReceipt): Receipt {
-    // Apply transformations based on receipt type
-    switch (data.type) {
-      case 'Call':
-        return evolve(
-          {
-            amount: safeToBN,
-            gas: safeToBN,
-            param1: safeToBN,
-            param2: safeToBN,
-            pc: safeToBN,
-            is: safeToBN,
-          },
-          data,
-        ) as unknown as Receipt;
-
-      case 'Return':
-      case 'Revert':
-        return evolve(
-          {
-            val: safeToBN,
-            pc: safeToBN,
-            is: safeToBN,
-          },
-          data,
-        ) as unknown as Receipt;
-
-      case 'ReturnData':
-      case 'LogData':
-        return evolve(
-          {
-            ptr: safeToBN,
-            len: safeToBN,
-            pc: safeToBN,
-            is: safeToBN,
-          },
-          data,
-        ) as unknown as Receipt;
-
-      case 'Panic':
-        return evolve(
-          {
-            reason: safeToBN,
-            pc: safeToBN,
-            is: safeToBN,
-          },
-          data,
-        ) as unknown as Receipt;
-
-      case 'Log':
-        return evolve(
-          {
-            ra: safeToBN,
-            rb: safeToBN,
-            rc: safeToBN,
-            rd: safeToBN,
-            pc: safeToBN,
-            is: safeToBN,
-          },
-          data,
-        ) as unknown as Receipt;
-
-      case 'Transfer':
-      case 'TransferOut':
-        return evolve(
-          {
-            amount: safeToBN,
-            pc: safeToBN,
-            is: safeToBN,
-          },
-          data,
-        ) as unknown as Receipt;
-
-      case 'ScriptResult':
-        return evolve(
-          {
-            result: safeToBN,
-            gasUsed: safeToBN,
-          },
-          data,
-        ) as unknown as Receipt;
-
-      case 'MessageOut':
-        return evolve(
-          {
-            amount: safeToBN,
-            len: safeToBN,
-          },
-          data,
-        ) as unknown as Receipt;
-
-      case 'Mint':
-      case 'Burn':
-        return evolve(
-          {
-            val: safeToBN,
-            pc: safeToBN,
-            is: safeToBN,
-          },
-          data,
-        ) as unknown as Receipt;
-
-      default:
-        throw new Error(`Unknown receipt type: ${(data as any).type}`);
+    if (data.type === 'Call') {
+      return evolve(
+        {
+          amount: safeToBN,
+          gas: safeToBN,
+          param1: safeToBN,
+          param2: safeToBN,
+          pc: safeToBN,
+          is: safeToBN,
+        },
+        data,
+      ) as unknown as Receipt;
     }
+
+    if (data.type === 'Return' || data.type === 'Revert') {
+      return evolve(
+        {
+          val: safeToBN,
+          pc: safeToBN,
+          is: safeToBN,
+        },
+        data,
+      ) as unknown as Receipt;
+    }
+
+    if (data.type === 'ReturnData' || data.type === 'LogData') {
+      return evolve(
+        {
+          ptr: safeToBN,
+          len: safeToBN,
+          pc: safeToBN,
+          is: safeToBN,
+        },
+        data,
+      ) as unknown as Receipt;
+    }
+
+    if (data.type === 'Panic') {
+      return evolve(
+        {
+          pc: safeToBN,
+          is: safeToBN,
+        },
+        data,
+      ) as unknown as Receipt;
+    }
+
+    if (data.type === 'Log') {
+      return evolve(
+        {
+          ra: safeToBN,
+          rb: safeToBN,
+          rc: safeToBN,
+          rd: safeToBN,
+          pc: safeToBN,
+          is: safeToBN,
+        },
+        data,
+      ) as unknown as Receipt;
+    }
+
+    if (data.type === 'Transfer' || data.type === 'TransferOut') {
+      return evolve(
+        {
+          amount: safeToBN,
+          pc: safeToBN,
+          is: safeToBN,
+        },
+        data,
+      ) as unknown as Receipt;
+    }
+
+    if (data.type === 'ScriptResult') {
+      return evolve(
+        {
+          gasUsed: safeToBN,
+        },
+        data,
+      ) as unknown as Receipt;
+    }
+
+    if (data.type === 'MessageOut') {
+      return evolve(
+        {
+          amount: safeToBN,
+          len: safeToBN,
+        },
+        data,
+      ) as unknown as Receipt;
+    }
+
+    if (data.type === 'Mint' || data.type === 'Burn') {
+      return evolve(
+        {
+          val: safeToBN,
+          pc: safeToBN,
+          is: safeToBN,
+        },
+        data,
+      ) as unknown as Receipt;
+    }
+
+    throw new Error(`Unknown receipt type: ${(data as any).type}`);
   }
 }
 
@@ -316,25 +333,28 @@ export class TransactionParser
 
   parse(data: RawTransaction): Transaction {
     const transformations = {
-      mintAmount: safeToBN,
-      mintGasPrice: safeToBN,
-      scriptGasLimit: safeToBN,
-      amount: safeToBN,
-      gas: safeToBN,
-      gasUsed: safeToBN,
-      policies: {
-        maxFee: safeToBN,
-        witnessLimit: safeToBN,
-        maturity: safeToBN,
-        maxSize: safeToBN,
-      },
       witnesses: this.toWitnesses,
       inputs: this.parseInputs.bind(this),
       outputs: this.parseOutputs.bind(this),
       receipts: this.parseReceipts.bind(this),
+      bytecodeWitnessIndex: safeToBN,
+      maturity: safeToBN,
+      mintAmount: safeToBN,
+      mintGasPrice: safeToBN,
+      scriptGasLimit: safeToBN,
+      subsectionIndex: safeToBN,
+      subsectionsNumber: safeToBN,
+      upgradePurpose: safeToBN,
     };
 
-    return evolve(transformations, data) as Transaction;
+    try {
+      const result = evolve(transformations, data) as Transaction;
+      console.log('Successfully parsed transaction');
+      return result;
+    } catch (error) {
+      console.error('Transaction parsing failed:', error);
+      throw error;
+    }
   }
 }
 
