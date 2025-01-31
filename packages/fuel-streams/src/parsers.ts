@@ -35,13 +35,15 @@ import {
   type Utxo,
 } from './types';
 
+const safeToBN = (value: any) => (value != null ? toBN(value) : value);
+
 export class BlockParser implements EntityParser<Block, RawBlock> {
   parse(data: RawBlock): Block {
     const transformations = {
-      height: toBN,
+      height: safeToBN,
       header: {
-        daHeight: toBN,
-        height: toBN,
+        daHeight: safeToBN,
+        height: safeToBN,
         stateTransitionBytecodeVersion: String,
         transactionsCount: String,
         messageReceiptCount: String,
@@ -57,16 +59,16 @@ export class InputCoinParser {
     const { utxoId, ...rest } = data;
     const transformations = {
       type: () => InputType.Coin,
-      amount: toBN,
-      predicateGasUsed: toBN,
+      amount: safeToBN,
+      predicateGasUsed: safeToBN,
     };
 
     return evolve(transformations, {
       ...rest,
       txID: utxoId.txId,
       outputIndex: utxoId.outputIndex,
-      predicateDataLength: toBN(rest.predicateData?.length),
-      predicateLength: toBN(rest.predicate?.length),
+      predicateDataLength: safeToBN(rest.predicateData?.length),
+      predicateLength: safeToBN(rest.predicate?.length),
     }) as unknown as InputCoin;
   }
 }
@@ -88,14 +90,14 @@ export class InputMessageParser {
   parse(data: RawInputMessage): InputMessage {
     const transformations = {
       type: () => InputType.Message,
-      amount: toBN,
-      predicateGasUsed: toBN,
+      amount: safeToBN,
+      predicateGasUsed: safeToBN,
     };
 
     return evolve(transformations, {
       ...data,
-      predicateDataLength: toBN(data.predicateData.length),
-      predicateLength: toBN(data.predicate.length),
+      predicateDataLength: safeToBN(data.predicateData.length),
+      predicateLength: safeToBN(data.predicate.length),
     }) as unknown as InputMessage;
   }
 }
@@ -120,7 +122,7 @@ export class InputParser implements EntityParser<Input, RawInput> {
 
 export class OutputCoinParser {
   parse(data: RawCoinOutput): OutputCoin {
-    const transformations = { type: () => OutputType.Coin, amount: toBN };
+    const transformations = { type: () => OutputType.Coin, amount: safeToBN };
     return evolve(transformations, data) as unknown as OutputCoin;
   }
 }
@@ -134,14 +136,17 @@ export class OutputContractParser {
 
 export class OutputChangeParser {
   parse(data: RawChangeOutput): OutputChange {
-    const transformations = { type: () => OutputType.Change, amount: toBN };
+    const transformations = { type: () => OutputType.Change, amount: safeToBN };
     return evolve(transformations, data) as unknown as OutputChange;
   }
 }
 
 export class OutputVariableParser {
   parse(data: RawVariableOutput): OutputVariable {
-    const transformations = { type: () => OutputType.Variable, amount: toBN };
+    const transformations = {
+      type: () => OutputType.Variable,
+      amount: safeToBN,
+    };
     return evolve(transformations, data) as unknown as OutputVariable;
   }
 }
@@ -179,23 +184,110 @@ export class OutputParser implements EntityParser<Output, RawOutput> {
 
 export class ReceiptParser implements EntityParser<Receipt, RawReceipt> {
   parse(data: RawReceipt): Receipt {
-    const commonTransformations = {
-      amount: toBN,
-      gas: toBN,
-      gasUsed: toBN,
-      is: toBN,
-      len: toBN,
-      param1: toBN,
-      param2: toBN,
-      pc: toBN,
-      ptr: toBN,
-      ra: toBN,
-      rb: toBN,
-      rc: toBN,
-      rd: toBN,
-      val: toBN,
-    };
-    return evolve(commonTransformations, data) as unknown as Receipt;
+    // Apply transformations based on receipt type
+    switch (data.type) {
+      case 'Call':
+        return evolve(
+          {
+            amount: safeToBN,
+            gas: safeToBN,
+            param1: safeToBN,
+            param2: safeToBN,
+            pc: safeToBN,
+            is: safeToBN,
+          },
+          data,
+        ) as unknown as Receipt;
+
+      case 'Return':
+      case 'Revert':
+        return evolve(
+          {
+            val: safeToBN,
+            pc: safeToBN,
+            is: safeToBN,
+          },
+          data,
+        ) as unknown as Receipt;
+
+      case 'ReturnData':
+      case 'LogData':
+        return evolve(
+          {
+            ptr: safeToBN,
+            len: safeToBN,
+            pc: safeToBN,
+            is: safeToBN,
+          },
+          data,
+        ) as unknown as Receipt;
+
+      case 'Panic':
+        return evolve(
+          {
+            reason: safeToBN,
+            pc: safeToBN,
+            is: safeToBN,
+          },
+          data,
+        ) as unknown as Receipt;
+
+      case 'Log':
+        return evolve(
+          {
+            ra: safeToBN,
+            rb: safeToBN,
+            rc: safeToBN,
+            rd: safeToBN,
+            pc: safeToBN,
+            is: safeToBN,
+          },
+          data,
+        ) as unknown as Receipt;
+
+      case 'Transfer':
+      case 'TransferOut':
+        return evolve(
+          {
+            amount: safeToBN,
+            pc: safeToBN,
+            is: safeToBN,
+          },
+          data,
+        ) as unknown as Receipt;
+
+      case 'ScriptResult':
+        return evolve(
+          {
+            result: safeToBN,
+            gasUsed: safeToBN,
+          },
+          data,
+        ) as unknown as Receipt;
+
+      case 'MessageOut':
+        return evolve(
+          {
+            amount: safeToBN,
+            len: safeToBN,
+          },
+          data,
+        ) as unknown as Receipt;
+
+      case 'Mint':
+      case 'Burn':
+        return evolve(
+          {
+            val: safeToBN,
+            pc: safeToBN,
+            is: safeToBN,
+          },
+          data,
+        ) as unknown as Receipt;
+
+      default:
+        throw new Error(`Unknown receipt type: ${(data as any).type}`);
+    }
   }
 }
 
@@ -224,17 +316,17 @@ export class TransactionParser
 
   parse(data: RawTransaction): Transaction {
     const transformations = {
-      mintAmount: toBN,
-      mintGasPrice: toBN,
-      scriptGasLimit: toBN,
-      amount: toBN,
-      gas: toBN,
-      gasUsed: toBN,
+      mintAmount: safeToBN,
+      mintGasPrice: safeToBN,
+      scriptGasLimit: safeToBN,
+      amount: safeToBN,
+      gas: safeToBN,
+      gasUsed: safeToBN,
       policies: {
-        maxFee: toBN,
-        witnessLimit: toBN,
-        maturity: toBN,
-        maxSize: toBN,
+        maxFee: safeToBN,
+        witnessLimit: safeToBN,
+        maturity: safeToBN,
+        maxSize: safeToBN,
       },
       witnesses: this.toWitnesses,
       inputs: this.parseInputs.bind(this),
@@ -248,7 +340,7 @@ export class TransactionParser
 
 export class UtxoParser implements EntityParser<Utxo, RawUtxo> {
   parse(data: RawUtxo): Utxo {
-    const transformations = { amount: toBN };
+    const transformations = { amount: safeToBN };
     return evolve(transformations, data) as Utxo;
   }
 }
