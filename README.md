@@ -28,18 +28,16 @@
 > [!WARNING]
 > This project is currently under development and is not yet ready for production use.
 
-The Fuel Streams TypeScript SDK provides a simple and robust way to interact with a NATS server, enabling seamless integration of pub/sub patterns, message streaming, and typed data structures. This SDK extends the capabilities of NATS by supporting type-safe interactions and convenient utilities for developers.
+The Fuel Streams TypeScript SDK provides a simple and robust way to interact with Fuel blockchain data streams through WebSocket connections, enabling real-time data access with type-safe interactions and convenient utilities for developers.
 
 ## 🚀 Features
 
-- **Typed Pub/Sub:** Publish and subscribe to NATS subjects with strong typing support
-- **Wildcard Filtering:** Consume messages from subjects with wildcards for flexible subscription patterns
-- **Stream Management:** Efficiently handle streaming data with utilities like `BlockStream`
-- **Ease of Use:** Intuitive APIs for initializing clients and managing subjects
-- **Type Safety:** Full TypeScript support with typed data structures
+- **WebSocket-Based Streaming:** Real-time data streaming using WebSocket connections
+- **Typed Data Structures:** Full TypeScript support with typed data structures
 - **Multiple Stream Types:** Support for blocks, transactions, receipts, inputs, outputs, and logs
-
-## 🚀 Features
+- **Flexible Delivery Policies:** Control how you receive data with options like `new` and `fromBlock`
+- **Network Support:** Connect to different networks (Mainnet, Local, Staging)
+- **Error Handling:** Comprehensive error handling and reporting
 
 ## 🛠 Installation
 
@@ -57,15 +55,14 @@ pnpm add @fuels/streams
 
 Here are some examples to get you started with the Fuel Streams TypeScript SDK:
 
-### Connecting to NATS
+### Connecting to WebSocket Server
 
 ```typescript
-import { Client, ClientOpts } from '@fuels/streams';
+import { Client, FuelNetwork } from '@fuels/streams';
 
 async function main() {
-  const opts = new ClientOpts();
-  const client = await Client.connect(opts);
-  console.log('Connected to NATS');
+  const connection = await Client.connect(FuelNetwork.Mainnet, 'your-api-key');
+  console.log('Connected to WebSocket server');
 }
 
 main().catch(console.error);
@@ -74,50 +71,64 @@ main().catch(console.error);
 ### Subscribing to Blocks
 
 ```typescript
-import { Client, ClientOpts, BlocksSubject, BlockStream } from '@fuels/streams';
+import { BlocksSubject, Client, DeliverPolicy, FuelNetwork } from '@fuels/streams';
 
 async function main() {
-  const opts = new ClientOpts();
-  const client = await Client.connect(opts);
-  const stream = await BlockStream.init(client);
-  const subscription = await stream.subscribe(BlocksSubject.all());
+  const connection = await Client.connect(FuelNetwork.Mainnet, 'your-api-key');
 
-  for await (const msg of subscription) {
-    console.log(`Received block message: ${msg.key}`);
+  // Create a subject for all blocks
+  const subject = BlocksSubject.build();
+
+  // Subscribe to new blocks
+  const stream = await connection.subscribe(subject, DeliverPolicy.new());
+
+  for await (const message of stream) {
+    console.log('Block:', message.data);
   }
-
-  await stream.flushAwait();
 }
 
 main().catch(console.error);
 ```
 
-### Filtered Streams
+### Filtered Transaction Streams
 
 ```typescript
-import { BlockStream, BlocksSubject, Client, ClientOpts } from '@fuels/streams';
+import {
+  Client,
+  DeliverPolicy,
+  FuelNetwork,
+  TransactionKind,
+  TransactionStatus,
+  TransactionsSubject
+} from '@fuels/streams';
 
 async function main() {
-  const opts = new ClientOpts();
-  const client = await Client.connect(opts);
-  const stream = await BlockStream.init(client);
+  const connection = await Client.connect(FuelNetwork.Mainnet, 'your-api-key');
 
-  // Create a filtered subject for blocks at height 1000
-  const filteredSubject = new BlocksSubject().withHeight(1000);
-  const consumer = await stream.subscribeConsumer({
-    filterSubjects: [filteredSubject],
+  // Create a filtered subject for successful script transactions
+  const subject = TransactionsSubject.build({
+    kind: TransactionKind.Script,
+    txStatus: TransactionStatus.Success
   });
 
-  const iter = await consumer.consume({ max_messages: 10 });
-  for await (const msg of iter) {
-    console.log(`Received filtered block message: ${msg.subject}`);
-  }
+  // Subscribe from a specific block height
+  const deliverPolicy = DeliverPolicy.fromBlock(1000000);
+  const stream = await connection.subscribe(subject, deliverPolicy);
 
-  await stream.flushAwait();
+  for await (const message of stream) {
+    console.log('Transaction:', message.data);
+  }
 }
 
 main().catch(console.error);
 ```
+
+## ⚙️ Delivery Policies
+
+The SDK supports different delivery policies for controlling how you receive data:
+
+- `DeliverPolicy.new()`: Receive only new data from the point of subscription
+- `DeliverPolicy.fromBlock(blockNumber)`: Receive data starting from a specific block height
 
 ## ⚙️ Filters
 
