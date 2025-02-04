@@ -36,7 +36,6 @@ The Fuel Streams TypeScript SDK provides a simple and robust way to interact wit
 - **Typed Data Structures:** Full TypeScript support with typed data structures
 - **Multiple Stream Types:** Support for blocks, transactions, receipts, inputs, outputs, and logs
 - **Flexible Delivery Policies:** Control how you receive data with options like `new` and `fromBlock`
-- **Network Support:** Connect to different networks (Mainnet, Local, Staging)
 - **Error Handling:** Comprehensive error handling and reporting
 
 ## 🛠 Installation
@@ -49,6 +48,8 @@ npm install @fuels/streams
 yarn add @fuels/streams
 # or
 pnpm add @fuels/streams
+# or
+bun install @fuels/streams
 ```
 
 ## 📊 Usage
