@@ -14,21 +14,21 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
-    "build:watch": {
-      "dependsOn": ["ts:check", "^build"],
-      "outputs": ["dist/**"]
-    },
     "test": {
       "dependsOn": ["^build"],
-      "outputs": ["coverage/**", ".vitest-result/**"]
+      "outputs": ["dist/**"]
     },
     "test:e2e": {
       "dependsOn": ["^build"],
-      "outputs": ["coverage/**", ".vitest-result/**"]
+      "outputs": ["dist/**"]
     },
     "test:coverage": {
       "dependsOn": ["^build"],
       "outputs": ["coverage/**", ".vitest-result/**", "test-results/**"]
+    },
+    "deps:update": {
+      "dependsOn": [],
+      "outputs": []
     }
   }
 }

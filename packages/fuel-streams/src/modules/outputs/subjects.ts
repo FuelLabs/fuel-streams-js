@@ -4,11 +4,11 @@
  *
  * Generated Subjects:
  * - OutputsSubject
+ * - OutputsCoinSubject
+ * - OutputsContractSubject
+ * - OutputsChangeSubject
  * - OutputsVariableSubject
  * - OutputsContractCreatedSubject
- * - OutputsCoinSubject
- * - OutputsChangeSubject
- * - OutputsContractSubject
  */
 
 import { OutputParser } from '../../parsers';
@@ -26,10 +26,10 @@ import { SubjectBase } from '../subject-base';
 
 type OutputsFields = {
   outputType: OutputType;
-  outputIndex: number;
+  blockHeight: BlockHeight;
   txId: TxId;
   txIndex: number;
-  blockHeight: BlockHeight;
+  outputIndex: number;
 };
 
 export class OutputsSubject extends SubjectBase<
@@ -45,13 +45,78 @@ export class OutputsSubject extends SubjectBase<
   };
 }
 
-type OutputsVariableFields = {
+type OutputsCoinFields = {
   blockHeight: BlockHeight;
-  asset: AssetId;
   txId: TxId;
   txIndex: number;
-  to: Address;
   outputIndex: number;
+  to: Address;
+  asset: AssetId;
+};
+
+export class OutputsCoinSubject extends SubjectBase<
+  OutputsCoinFields,
+  Output,
+  RawOutput
+> {
+  metadata = {
+    id: 'outputs_coin',
+    format:
+      'outputs.coin.{block_height}.{tx_id}.{tx_index}.{output_index}.{to}.{asset}',
+    parser: new OutputParser(),
+  };
+}
+
+type OutputsContractFields = {
+  blockHeight: BlockHeight;
+  txId: TxId;
+  txIndex: number;
+  outputIndex: number;
+  contract: ContractId;
+};
+
+export class OutputsContractSubject extends SubjectBase<
+  OutputsContractFields,
+  Output,
+  RawOutput
+> {
+  metadata = {
+    id: 'outputs_contract',
+    format:
+      'outputs.contract.{block_height}.{tx_id}.{tx_index}.{output_index}.{contract}',
+    parser: new OutputParser(),
+  };
+}
+
+type OutputsChangeFields = {
+  blockHeight: BlockHeight;
+  txId: TxId;
+  txIndex: number;
+  outputIndex: number;
+  to: Address;
+  asset: AssetId;
+};
+
+export class OutputsChangeSubject extends SubjectBase<
+  OutputsChangeFields,
+  Output,
+  RawOutput
+> {
+  metadata = {
+    id: 'outputs_change',
+    format:
+      'outputs.change.{block_height}.{tx_id}.{tx_index}.{output_index}.{to}.{asset}',
+    parser: new OutputParser(),
+  };
+}
+
+type OutputsVariableFields = {
+  blockHeight: BlockHeight;
+  txId: TxId;
+  txIndex: number;
+  outputIndex: number;
+  to: Address;
+  asset: AssetId;
 };
 
 export class OutputsVariableSubject extends SubjectBase<
@@ -68,11 +133,11 @@ export class OutputsVariableSubject extends SubjectBase<
 }
 
 type OutputsContractCreatedFields = {
+  blockHeight: BlockHeight;
+  txId: TxId;
   txIndex: number;
   outputIndex: number;
-  blockHeight: BlockHeight;
   contract: ContractId;
-  txId: TxId;
 };
 
 export class OutputsContractCreatedSubject extends SubjectBase<
@@ -84,71 +149,6 @@ export class OutputsContractCreatedSubject extends SubjectBase<
     id: 'outputs_contract_created',
     format:
       'outputs.contract_created.{block_height}.{tx_id}.{tx_index}.{output_index}.{contract}',
-    parser: new OutputParser(),
-  };
-}
-
-type OutputsCoinFields = {
-  outputIndex: number;
-  to: Address;
-  txIndex: number;
-  blockHeight: BlockHeight;
-  asset: AssetId;
-  txId: TxId;
-};
-
-export class OutputsCoinSubject extends SubjectBase<
-  OutputsCoinFields,
-  Output,
-  RawOutput
-> {
-  metadata = {
-    id: 'outputs_coin',
-    format:
-      'outputs.coin.{block_height}.{tx_id}.{tx_index}.{output_index}.{to}.{asset}',
-    parser: new OutputParser(),
-  };
-}
-
-type OutputsChangeFields = {
-  outputIndex: number;
-  asset: AssetId;
-  txId: TxId;
-  blockHeight: BlockHeight;
-  to: Address;
-  txIndex: number;
-};
-
-export class OutputsChangeSubject extends SubjectBase<
-  OutputsChangeFields,
-  Output,
-  RawOutput
-> {
-  metadata = {
-    id: 'outputs_change',
-    format:
-      'outputs.change.{block_height}.{tx_id}.{tx_index}.{output_index}.{to}.{asset}',
-    parser: new OutputParser(),
-  };
-}
-
-type OutputsContractFields = {
-  txIndex: number;
-  blockHeight: BlockHeight;
-  contract: ContractId;
-  txId: TxId;
-  outputIndex: number;
-};
-
-export class OutputsContractSubject extends SubjectBase<
-  OutputsContractFields,
-  Output,
-  RawOutput
-> {
-  metadata = {
-    id: 'outputs_contract',
-    format:
-      'outputs.contract.{block_height}.{tx_id}.{tx_index}.{output_index}.{contract}',
     parser: new OutputParser(),
   };
 }

@@ -23,15 +23,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: FuelLabs/github-actions/setups/node@master
-        with:
-          node-version: 20.11.0
-          pnpm-version: 9.5.0
-      - uses: FuelLabs/github-actions/setups/npm@master
-        with:
-          npm-token: ${{ secrets.NPM_TOKEN_STREAMS }}
-      - run: pnpm install
-      - run: pnpm tsx ./scripts/unpublish.ts
+      - uses: ./.github/actions/setup-bun
+      - run: bun install
+      - run: bun ./scripts/unpublish.ts
         env:
           DELETE_PACKAGES: ${{ github.event.inputs.delete_packages}}
           VERSION_TO_DELETE: ${{ github.event.inputs.version }}

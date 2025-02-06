@@ -4,6 +4,7 @@
   "description": "Official data streaming Typescript library for Fuel Network",
   "author": "Fuel Labs <contact@fuel.sh> (https://fuel.network/)",
   "homepage": "https://github.com/FuelLabs/fuel-streams-js",
+  "type": "module",
   "main": "./src/index.ts",
   "exports": {
     ".": "./src/index.ts",
@@ -35,8 +36,8 @@
   },
   "files": ["dist"],
   "scripts": {
-    "example:blocks": "tsx ./examples/ws/blocks.ts",
-    "example:transactions": "tsx ./examples/ws/transactions.ts",
+    "example:blocks": "bun ./examples/ws/blocks.ts",
+    "example:transactions": "bun ./examples/ws/transactions.ts",
     "build": "tsup",
     "build:watch": "tsup --watch",
     "ts:check": "tsc --noEmit",
@@ -51,9 +52,6 @@
   "devDependencies": {
     "@types/ramda": "0.30.2",
     "@types/ws": "8.5.13",
-    "tsx": "4.19.2",
-    "tsup": "8.3.5",
-    "typescript": "^5.0.0",
-    "vitest": "3.0.4"
+    "@types/bun": "latest"
   }
 }

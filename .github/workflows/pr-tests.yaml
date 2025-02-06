@@ -12,10 +12,6 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: true
 
-env:
-  NODE_VERSION: 20.11.0
-  PNPM_VERSION: 9.5.0
-
 jobs:
   test:
     name: Tests
@@ -26,20 +22,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Node
-        uses: FuelLabs/github-actions/setups/node@master
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
+      - name: Setup Bun
+        uses: ./.github/actions/setup-bun
 
       - name: Build packages
-        run: pnpm build:libs
+        run: bun run build:libs
 
       - name: Run unit tests
-        run: pnpm test
+        run: bun run test
 
       - name: Install Playwright Browsers
-        run: pnpm exec playwright install --with-deps chromium
+        run: bun x playwright install --with-deps chromium
 
       - name: Run E2E tests
-        run: pnpm test:e2e
+        run: bun run test:e2e

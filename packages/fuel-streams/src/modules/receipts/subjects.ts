@@ -4,19 +4,19 @@
  *
  * Generated Subjects:
  * - ReceiptsSubject
+ * - ReceiptsCallSubject
  * - ReceiptsReturnSubject
+ * - ReceiptsReturnDataSubject
+ * - ReceiptsPanicSubject
+ * - ReceiptsRevertSubject
+ * - ReceiptsLogSubject
  * - ReceiptsLogDataSubject
  * - ReceiptsTransferSubject
+ * - ReceiptsTransferOutSubject
  * - ReceiptsScriptResultSubject
- * - ReceiptsRevertSubject
  * - ReceiptsMessageOutSubject
- * - ReceiptsCallSubject
- * - ReceiptsReturnDataSubject
  * - ReceiptsMintSubject
  * - ReceiptsBurnSubject
- * - ReceiptsPanicSubject
- * - ReceiptsLogSubject
- * - ReceiptsTransferOutSubject
  */
 
 import { ReceiptParser } from '../../parsers';
@@ -34,11 +34,11 @@ import type {
 import { SubjectBase } from '../subject-base';
 
 type ReceiptsFields = {
-  txId: TxId;
   receiptType: ReceiptType;
+  blockHeight: BlockHeight;
+  txId: TxId;
   txIndex: number;
   receiptIndex: number;
-  blockHeight: BlockHeight;
 };
 
 export class ReceiptsSubject extends SubjectBase<
@@ -54,142 +54,14 @@ export class ReceiptsSubject extends SubjectBase<
   };
 }
 
-type ReceiptsReturnFields = {
-  txId: TxId;
-  blockHeight: BlockHeight;
-  contract: ContractId;
-  txIndex: number;
-  receiptIndex: number;
-};
-
-export class ReceiptsReturnSubject extends SubjectBase<
-  ReceiptsReturnFields,
-  Receipt,
-  RawReceipt
-> {
-  metadata = {
-    id: 'receipts_return',
-    format:
-      'receipts.return.{block_height}.{tx_id}.{tx_index}.{receipt_index}.{contract}',
-    parser: new ReceiptParser(),
-  };
-}
-
-type ReceiptsLogDataFields = {
-  receiptIndex: number;
-  contract: ContractId;
-  blockHeight: BlockHeight;
-  txId: TxId;
-  txIndex: number;
-};
-
-export class ReceiptsLogDataSubject extends SubjectBase<
-  ReceiptsLogDataFields,
-  Receipt,
-  RawReceipt
-> {
-  metadata = {
-    id: 'receipts_log_data',
-    format:
-      'receipts.log_data.{block_height}.{tx_id}.{tx_index}.{receipt_index}.{contract}',
-    parser: new ReceiptParser(),
-  };
-}
-
-type ReceiptsTransferFields = {
-  to: ContractId;
-  blockHeight: BlockHeight;
-  txIndex: number;
-  asset: AssetId;
-  txId: TxId;
-  receiptIndex: number;
-  from: ContractId;
-};
-
-export class ReceiptsTransferSubject extends SubjectBase<
-  ReceiptsTransferFields,
-  Receipt,
-  RawReceipt
-> {
-  metadata = {
-    id: 'receipts_transfer',
-    format:
-      'receipts.transfer.{block_height}.{tx_id}.{tx_index}.{receipt_index}.{from}.{to}.{asset}',
-    parser: new ReceiptParser(),
-  };
-}
-
-type ReceiptsScriptResultFields = {
-  txIndex: number;
-  blockHeight: BlockHeight;
-  receiptIndex: number;
-  txId: TxId;
-};
-
-export class ReceiptsScriptResultSubject extends SubjectBase<
-  ReceiptsScriptResultFields,
-  Receipt,
-  RawReceipt
-> {
-  metadata = {
-    id: 'receipts_script_result',
-    format:
-      'receipts.script_result.{block_height}.{tx_id}.{tx_index}.{receipt_index}',
-    parser: new ReceiptParser(),
-  };
-}
-
-type ReceiptsRevertFields = {
-  txId: TxId;
-  txIndex: number;
-  receiptIndex: number;
-  contract: ContractId;
-  blockHeight: BlockHeight;
-};
-
-export class ReceiptsRevertSubject extends SubjectBase<
-  ReceiptsRevertFields,
-  Receipt,
-  RawReceipt
-> {
-  metadata = {
-    id: 'receipts_revert',
-    format:
-      'receipts.revert.{block_height}.{tx_id}.{tx_index}.{receipt_index}.{contract}',
-    parser: new ReceiptParser(),
-  };
-}
-
-type ReceiptsMessageOutFields = {
-  receiptIndex: number;
-  txIndex: number;
-  recipient: Address;
-  txId: TxId;
-  blockHeight: BlockHeight;
-  sender: Address;
-};
-
-export class ReceiptsMessageOutSubject extends SubjectBase<
-  ReceiptsMessageOutFields,
-  Receipt,
-  RawReceipt
-> {
-  metadata = {
-    id: 'receipts_message_out',
-    format:
-      'receipts.message_out.{block_height}.{tx_id}.{tx_index}.{receipt_index}.{sender}.{recipient}',
-    parser: new ReceiptParser(),
-  };
-}
-
 type ReceiptsCallFields = {
-  txIndex: number;
-  from: ContractId;
-  asset: AssetId;
-  to: ContractId;
   blockHeight: BlockHeight;
   txId: TxId;
+  txIndex: number;
   receiptIndex: number;
+  from: ContractId;
+  to: ContractId;
+  asset: AssetId;
 };
 
 export class ReceiptsCallSubject extends SubjectBase<
@@ -205,10 +77,31 @@ export class ReceiptsCallSubject extends SubjectBase<
   };
 }
 
-type ReceiptsReturnDataFields = {
-  txIndex: number;
+type ReceiptsReturnFields = {
   blockHeight: BlockHeight;
   txId: TxId;
+  txIndex: number;
+  receiptIndex: number;
+  contract: ContractId;
+};
+
+export class ReceiptsReturnSubject extends SubjectBase<
+  ReceiptsReturnFields,
+  Receipt,
+  RawReceipt
+> {
+  metadata = {
+    id: 'receipts_return',
+    format:
+      'receipts.return.{block_height}.{tx_id}.{tx_index}.{receipt_index}.{contract}',
+    parser: new ReceiptParser(),
+  };
+}
+
+type ReceiptsReturnDataFields = {
+  blockHeight: BlockHeight;
+  txId: TxId;
+  txIndex: number;
   receiptIndex: number;
   contract: ContractId;
 };
@@ -226,12 +119,184 @@ export class ReceiptsReturnDataSubject extends SubjectBase<
   };
 }
 
-type ReceiptsMintFields = {
-  txId: TxId;
-  contract: ContractId;
-  receiptIndex: number;
-  txIndex: number;
+type ReceiptsPanicFields = {
   blockHeight: BlockHeight;
+  txId: TxId;
+  txIndex: number;
+  receiptIndex: number;
+  contract: ContractId;
+};
+
+export class ReceiptsPanicSubject extends SubjectBase<
+  ReceiptsPanicFields,
+  Receipt,
+  RawReceipt
+> {
+  metadata = {
+    id: 'receipts_panic',
+    format:
+      'receipts.panic.{block_height}.{tx_id}.{tx_index}.{receipt_index}.{contract}',
+    parser: new ReceiptParser(),
+  };
+}
+
+type ReceiptsRevertFields = {
+  blockHeight: BlockHeight;
+  txId: TxId;
+  txIndex: number;
+  receiptIndex: number;
+  contract: ContractId;
+};
+
+export class ReceiptsRevertSubject extends SubjectBase<
+  ReceiptsRevertFields,
+  Receipt,
+  RawReceipt
+> {
+  metadata = {
+    id: 'receipts_revert',
+    format:
+      'receipts.revert.{block_height}.{tx_id}.{tx_index}.{receipt_index}.{contract}',
+    parser: new ReceiptParser(),
+  };
+}
+
+type ReceiptsLogFields = {
+  blockHeight: BlockHeight;
+  txId: TxId;
+  txIndex: number;
+  receiptIndex: number;
+  contract: ContractId;
+};
+
+export class ReceiptsLogSubject extends SubjectBase<
+  ReceiptsLogFields,
+  Receipt,
+  RawReceipt
+> {
+  metadata = {
+    id: 'receipts_log',
+    format:
+      'receipts.log.{block_height}.{tx_id}.{tx_index}.{receipt_index}.{contract}',
+    parser: new ReceiptParser(),
+  };
+}
+
+type ReceiptsLogDataFields = {
+  blockHeight: BlockHeight;
+  txId: TxId;
+  txIndex: number;
+  receiptIndex: number;
+  contract: ContractId;
+};
+
+export class ReceiptsLogDataSubject extends SubjectBase<
+  ReceiptsLogDataFields,
+  Receipt,
+  RawReceipt
+> {
+  metadata = {
+    id: 'receipts_log_data',
+    format:
+      'receipts.log_data.{block_height}.{tx_id}.{tx_index}.{receipt_index}.{contract}',
+    parser: new ReceiptParser(),
+  };
+}
+
+type ReceiptsTransferFields = {
+  blockHeight: BlockHeight;
+  txId: TxId;
+  txIndex: number;
+  receiptIndex: number;
+  from: ContractId;
+  to: ContractId;
+  asset: AssetId;
+};
+
+export class ReceiptsTransferSubject extends SubjectBase<
+  ReceiptsTransferFields,
+  Receipt,
+  RawReceipt
+> {
+  metadata = {
+    id: 'receipts_transfer',
+    format:
+      'receipts.transfer.{block_height}.{tx_id}.{tx_index}.{receipt_index}.{from}.{to}.{asset}',
+    parser: new ReceiptParser(),
+  };
+}
+
+type ReceiptsTransferOutFields = {
+  blockHeight: BlockHeight;
+  txId: TxId;
+  txIndex: number;
+  receiptIndex: number;
+  from: ContractId;
+  toAddress: Address;
+  asset: AssetId;
+};
+
+export class ReceiptsTransferOutSubject extends SubjectBase<
+  ReceiptsTransferOutFields,
+  Receipt,
+  RawReceipt
+> {
+  metadata = {
+    id: 'receipts_transfer_out',
+    format:
+      'receipts.transfer_out.{block_height}.{tx_id}.{tx_index}.{receipt_index}.{from}.{to_address}.{asset}',
+    parser: new ReceiptParser(),
+  };
+}
+
+type ReceiptsScriptResultFields = {
+  blockHeight: BlockHeight;
+  txId: TxId;
+  txIndex: number;
+  receiptIndex: number;
+};
+
+export class ReceiptsScriptResultSubject extends SubjectBase<
+  ReceiptsScriptResultFields,
+  Receipt,
+  RawReceipt
+> {
+  metadata = {
+    id: 'receipts_script_result',
+    format:
+      'receipts.script_result.{block_height}.{tx_id}.{tx_index}.{receipt_index}',
+    parser: new ReceiptParser(),
+  };
+}
+
+type ReceiptsMessageOutFields = {
+  blockHeight: BlockHeight;
+  txId: TxId;
+  txIndex: number;
+  receiptIndex: number;
+  sender: Address;
+  recipient: Address;
+};
+
+export class ReceiptsMessageOutSubject extends SubjectBase<
+  ReceiptsMessageOutFields,
+  Receipt,
+  RawReceipt
+> {
+  metadata = {
+    id: 'receipts_message_out',
+    format:
+      'receipts.message_out.{block_height}.{tx_id}.{tx_index}.{receipt_index}.{sender}.{recipient}',
+    parser: new ReceiptParser(),
+  };
+}
+
+type ReceiptsMintFields = {
+  blockHeight: BlockHeight;
+  txId: TxId;
+  txIndex: number;
+  receiptIndex: number;
+  contract: ContractId;
   subId: Bytes32;
 };
 
@@ -249,12 +314,12 @@ export class ReceiptsMintSubject extends SubjectBase<
 }
 
 type ReceiptsBurnFields = {
+  blockHeight: BlockHeight;
   txId: TxId;
   txIndex: number;
-  subId: Bytes32;
-  blockHeight: BlockHeight;
-  contract: ContractId;
   receiptIndex: number;
+  contract: ContractId;
+  subId: Bytes32;
 };
 
 export class ReceiptsBurnSubject extends SubjectBase<
@@ -266,71 +331,6 @@ export class ReceiptsBurnSubject extends SubjectBase<
     id: 'receipts_burn',
     format:
       'receipts.burn.{block_height}.{tx_id}.{tx_index}.{receipt_index}.{contract}.{sub_id}',
-    parser: new ReceiptParser(),
-  };
-}
-
-type ReceiptsPanicFields = {
-  receiptIndex: number;
-  blockHeight: BlockHeight;
-  txId: TxId;
-  txIndex: number;
-  contract: ContractId;
-};
-
-export class ReceiptsPanicSubject extends SubjectBase<
-  ReceiptsPanicFields,
-  Receipt,
-  RawReceipt
-> {
-  metadata = {
-    id: 'receipts_panic',
-    format:
-      'receipts.panic.{block_height}.{tx_id}.{tx_index}.{receipt_index}.{contract}',
-    parser: new ReceiptParser(),
-  };
-}
-
-type ReceiptsLogFields = {
-  receiptIndex: number;
-  blockHeight: BlockHeight;
-  txId: TxId;
-  txIndex: number;
-  contract: ContractId;
-};
-
-export class ReceiptsLogSubject extends SubjectBase<
-  ReceiptsLogFields,
-  Receipt,
-  RawReceipt
-> {
-  metadata = {
-    id: 'receipts_log',
-    format:
-      'receipts.log.{block_height}.{tx_id}.{tx_index}.{receipt_index}.{contract}',
-    parser: new ReceiptParser(),
-  };
-}
-
-type ReceiptsTransferOutFields = {
-  txIndex: number;
-  asset: AssetId;
-  receiptIndex: number;
-  toAddress: Address;
-  blockHeight: BlockHeight;
-  txId: TxId;
-  from: ContractId;
-};
-
-export class ReceiptsTransferOutSubject extends SubjectBase<
-  ReceiptsTransferOutFields,
-  Receipt,
-  RawReceipt
-> {
-  metadata = {
-    id: 'receipts_transfer_out',
-    format:
-      'receipts.transfer_out.{block_height}.{tx_id}.{tx_index}.{receipt_index}.{from}.{to_address}.{asset}',
     parser: new ReceiptParser(),
   };
 }

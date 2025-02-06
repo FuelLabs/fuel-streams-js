@@ -20,10 +20,10 @@ import { SubjectBase } from '../subject-base';
 type UtxosFields = {
   blockHeight: BlockHeight;
   txId: TxId;
-  inputIndex: number;
-  utxoId: HexData;
-  utxoType: UtxoType;
   txIndex: number;
+  inputIndex: number;
+  utxoType: UtxoType;
+  utxoId: HexData;
 };
 
 export class UtxosSubject extends SubjectBase<UtxosFields, Utxo, RawUtxo> {

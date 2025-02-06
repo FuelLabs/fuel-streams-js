@@ -1,18 +1,3 @@
 {
-  "compilerOptions": {
-    "target": "ES2020",
-    "useDefineForClassFields": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable", "ESNext.AsyncIterable"],
-    "module": "ESNext",
-    "skipLibCheck": true,
-    "moduleResolution": "Bundler",
-    "isolatedModules": true,
-    "moduleDetection": "force",
-    "jsx": "react-jsx",
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
-  },
-  "exclude": ["**/dist", "**/build", "node_modules", "**/node_modules"]
+  "extends": "./tsconfig.base.json"
 }

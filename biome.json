@@ -50,7 +50,7 @@
       "**/.turbo",
       "**/build",
       "**/contracts",
-      "pnpm-lock.yaml",
+      "bun.lock",
       "**/examples/react-app/src/types",
       "**/examples/react-next/.next",
       "**/factories/**/*.ts",

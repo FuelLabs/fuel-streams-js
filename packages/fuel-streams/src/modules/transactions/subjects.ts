@@ -19,9 +19,9 @@ import { SubjectBase } from '../subject-base';
 
 type TransactionsFields = {
   blockHeight: BlockHeight;
+  txId: TxId;
   txIndex: number;
   txStatus: TransactionStatus;
-  txId: TxId;
   kind: TransactionKind;
 };
 

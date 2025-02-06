@@ -4,9 +4,9 @@
  *
  * Generated Subjects:
  * - InputsSubject
- * - InputsMessageSubject
  * - InputsCoinSubject
  * - InputsContractSubject
+ * - InputsMessageSubject
  */
 
 import { InputParser } from '../../parsers';
@@ -23,11 +23,11 @@ import type {
 import { SubjectBase } from '../subject-base';
 
 type InputsFields = {
-  blockHeight: BlockHeight;
-  inputIndex: number;
-  txIndex: number;
   inputType: InputType;
+  blockHeight: BlockHeight;
   txId: TxId;
+  txIndex: number;
+  inputIndex: number;
 };
 
 export class InputsSubject extends SubjectBase<InputsFields, Input, RawInput> {
@@ -39,35 +39,13 @@ export class InputsSubject extends SubjectBase<InputsFields, Input, RawInput> {
   };
 }
 
-type InputsMessageFields = {
-  inputIndex: number;
-  txId: TxId;
-  recipient: Address;
-  blockHeight: BlockHeight;
-  txIndex: number;
-  sender: Address;
-};
-
-export class InputsMessageSubject extends SubjectBase<
-  InputsMessageFields,
-  Input,
-  RawInput
-> {
-  metadata = {
-    id: 'inputs_message',
-    format:
-      'inputs.message.{block_height}.{tx_id}.{tx_index}.{input_index}.{sender}.{recipient}',
-    parser: new InputParser(),
-  };
-}
-
 type InputsCoinFields = {
-  asset: AssetId;
-  txIndex: number;
   blockHeight: BlockHeight;
   txId: TxId;
-  owner: Address;
+  txIndex: number;
   inputIndex: number;
+  owner: Address;
+  asset: AssetId;
 };
 
 export class InputsCoinSubject extends SubjectBase<
@@ -85,10 +63,10 @@ export class InputsCoinSubject extends SubjectBase<
 
 type InputsContractFields = {
   blockHeight: BlockHeight;
-  contract: ContractId;
   txId: TxId;
-  inputIndex: number;
   txIndex: number;
+  inputIndex: number;
+  contract: ContractId;
 };
 
 export class InputsContractSubject extends SubjectBase<
@@ -100,6 +78,28 @@ export class InputsContractSubject extends SubjectBase<
     id: 'inputs_contract',
     format:
       'inputs.contract.{block_height}.{tx_id}.{tx_index}.{input_index}.{contract}',
+    parser: new InputParser(),
+  };
+}
+
+type InputsMessageFields = {
+  blockHeight: BlockHeight;
+  txId: TxId;
+  txIndex: number;
+  inputIndex: number;
+  sender: Address;
+  recipient: Address;
+};
+
+export class InputsMessageSubject extends SubjectBase<
+  InputsMessageFields,
+  Input,
+  RawInput
+> {
+  metadata = {
+    id: 'inputs_message',
+    format:
+      'inputs.message.{block_height}.{tx_id}.{tx_index}.{input_index}.{sender}.{recipient}',
     parser: new InputParser(),
   };
 }

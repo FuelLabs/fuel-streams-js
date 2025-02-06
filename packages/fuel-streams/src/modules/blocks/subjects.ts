@@ -11,8 +11,8 @@ import type { Address, Block, BlockHeight, RawBlock } from '../../types';
 import { SubjectBase } from '../subject-base';
 
 type BlocksFields = {
-  height: BlockHeight;
   producer: Address;
+  height: BlockHeight;
 };
 
 export class BlocksSubject extends SubjectBase<BlocksFields, Block, RawBlock> {

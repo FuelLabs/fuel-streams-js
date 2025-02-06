@@ -1,8 +1,0 @@
-{
-  "extends": "@fuels/ts-config/base.json",
-  "compilerOptions": {
-    "noEmit": true
-  },
-  "include": ["**/*.test.ts"],
-  "exclude": ["node_modules"]
-}

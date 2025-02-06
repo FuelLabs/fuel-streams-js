@@ -11,8 +11,6 @@ concurrency:
 
 env:
   BUILD_VERSION: ""
-  NODE_VERSION: 20.11.0
-  PNPM_VERSION: 9.5.0
 
 jobs:
   release-changesets:
@@ -29,10 +27,8 @@ jobs:
           # see https://github.com/changesets/action/issues/70
           persist-credentials: false
 
-      - uses: FuelLabs/github-actions/setups/node@master
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          pnpm-version: ${{ env.PNPM_VERSION }}
+      - name: Setup Bun
+        uses: ./.github/actions/setup-bun
 
       - uses: FuelLabs/github-actions/setups/npm@master
         with:
@@ -40,8 +36,8 @@ jobs:
 
       - name: Bump and Collect Version
         run: |
-          pnpm changeset version
-          echo "BUILD_VERSION=$(pnpm -s packages:version)" >> $GITHUB_ENV
+          bun run changeset version
+          echo "BUILD_VERSION=$(bun run --silent packages:version)" >> $GITHUB_ENV
           git reset --hard
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -52,14 +48,14 @@ jobs:
           git config --global user.email "${{ github.actor }}@users.noreply.github.com"
 
       - name: Build Lib
-        run: pnpm build:libs
+        run: bun run build:libs
 
       - name: Create Release Pull Request or Publish to NPM
         id: changesets
         uses: FuelLabs/changesets-action@main
         with:
-          publish: pnpm changeset publish --tag latest
-          version: pnpm changeset version
+          publish: bun run changeset publish --tag latest
+          version: bun run changeset version
           commit: "ci(changesets): versioning packages"
           title: "ci(changesets): versioning packages"
           createGithubReleases: aggregate

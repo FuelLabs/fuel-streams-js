@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "test": "vitest run --passWithNoTests",
     "test:coverage": "vitest run --coverage --passWithNoTests",
-    "test:e2e": "vitest run -c vitest.e2e.config.ts --passWithNoTests"
+    "test:e2e": "vitest run -c vitest.e2e.config.ts --passWithNoTests",
+    "ts:check": "tsc --noEmit"
   },
   "dependencies": {
     "@fuels/streams": "workspace:*",
