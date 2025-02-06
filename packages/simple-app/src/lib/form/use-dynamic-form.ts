@@ -1,4 +1,4 @@
-import type { SubscriptionPayload } from '@fuels/streams';
+import type { SubjectPayload } from '@fuels/streams';
 import { DeliverPolicy, DeliverPolicyType } from '@fuels/streams';
 import {
   type FormField,
@@ -26,7 +26,7 @@ export const formMachine = setup({
       moduleOptions: SelectOption[];
       variantOptions: SelectOption[];
       subjectClass: string | null;
-      subscriptionPayload: SubscriptionPayload | null;
+      subjectPayload: SubjectPayload | null;
       deliverPolicy: DeliverPolicy;
       deliverPolicyType: DeliverPolicyType;
       blockNumber: string;
@@ -96,14 +96,13 @@ export const formMachine = setup({
         });
       },
     }),
-    updateSubscriptionPayload: assign({
-      subscriptionPayload: ({ context }) => {
+    updateSubjectPayload: assign({
+      subjectPayload: ({ context }) => {
         if (!context.selectedModule) return null;
         return subjectBuilder.buildPayload({
           selectedModule: context.selectedModule,
           selectedVariant: context.selectedVariant,
           selectedFields: context.selectedFields ?? {},
-          deliverPolicy: context.deliverPolicy,
         });
       },
     }),
@@ -130,7 +129,7 @@ export const formMachine = setup({
     moduleOptions: fieldsManager.getModuleOptions(),
     variantOptions: [],
     subjectClass: null,
-    subscriptionPayload: null,
+    subjectPayload: null,
     deliverPolicy: DeliverPolicy.new(),
     deliverPolicyType: DeliverPolicyType.New,
     blockNumber: '',
@@ -149,7 +148,7 @@ export const formMachine = setup({
             }),
             'updateModuleFields',
             'updateSubject',
-            'updateSubscriptionPayload',
+            'updateSubjectPayload',
           ],
         },
         'CHANGE.VARIANT': {
@@ -160,15 +159,11 @@ export const formMachine = setup({
             }),
             'updateVariantFields',
             'updateSubject',
-            'updateSubscriptionPayload',
+            'updateSubjectPayload',
           ],
         },
         'CHANGE.FIELD': {
-          actions: [
-            'updateField',
-            'updateSubject',
-            'updateSubscriptionPayload',
-          ],
+          actions: ['updateField', 'updateSubject', 'updateSubjectPayload'],
         },
         'CHANGE.DELIVER_POLICY_TYPE': {
           actions: [
@@ -176,7 +171,7 @@ export const formMachine = setup({
               deliverPolicyType: ({ event }) => event.value,
             }),
             'updateDeliverPolicy',
-            'updateSubscriptionPayload',
+            'updateSubjectPayload',
           ],
         },
         'CHANGE.BLOCK_NUMBER': {
@@ -185,7 +180,7 @@ export const formMachine = setup({
               blockNumber: ({ event }) => event.value,
             }),
             'updateDeliverPolicy',
-            'updateSubscriptionPayload',
+            'updateSubjectPayload',
           ],
         },
       },
@@ -205,7 +200,7 @@ const selectors = {
   subject: (state: State) => state.context.subject,
   subjectClass: (state: State) => state.context.subjectClass,
   variantOptions: (state: State) => state.context.variantOptions,
-  subscriptionPayload: (state: State) => state.context.subscriptionPayload,
+  subjectPayload: (state: State) => state.context.subjectPayload,
   deliverPolicy: (state: State) => state.context.deliverPolicy,
 };
 
@@ -222,9 +217,7 @@ export function useDynamicForm() {
   const subject = FormContext.useSelector(selectors.subject);
   const subjectClass = FormContext.useSelector(selectors.subjectClass);
   const selectedFields = FormContext.useSelector(selectors.selectedFields);
-  const subscriptionPayload = FormContext.useSelector(
-    selectors.subscriptionPayload,
-  );
+  const subjectPayload = FormContext.useSelector(selectors.subjectPayload);
   const deliverPolicy = FormContext.useSelector(selectors.deliverPolicy);
   const deliverPolicyType = FormContext.useSelector(
     (state) => state.context.deliverPolicyType,
@@ -266,7 +259,7 @@ export function useDynamicForm() {
     subject,
     subjectClass,
     variantOptions,
-    subscriptionPayload,
+    subjectPayload,
     deliverPolicy,
     deliverPolicyType,
     blockNumber,

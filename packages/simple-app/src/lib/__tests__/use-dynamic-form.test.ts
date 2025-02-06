@@ -17,7 +17,7 @@ describe('Dynamic Form Machine', () => {
       formData: null,
       currentFields: [],
       subjectClass: null,
-      subscriptionPayload: null,
+      subjectPayload: null,
       deliverPolicy: expect.any(DeliverPolicy),
       deliverPolicyType: DeliverPolicyType.New,
       blockNumber: '',
@@ -37,10 +37,9 @@ describe('Dynamic Form Machine', () => {
     expect(snapshot.context.formData).toEqual({});
     expect(snapshot.context.currentFields).toBeDefined();
     expect(snapshot.context.variantOptions).toBeDefined();
-    expect(snapshot.context.subscriptionPayload).toEqual({
+    expect(snapshot.context.subjectPayload).toEqual({
       subject: 'blocks',
       params: {},
-      deliverPolicy: DeliverPolicy.new(),
     });
   });
 
@@ -71,10 +70,9 @@ describe('Dynamic Form Machine', () => {
     expect(snapshot.context.selectedVariant).toBe('coin');
     expect(snapshot.context.formData).toEqual({});
     expect(snapshot.context.currentFields).toBeDefined();
-    expect(snapshot.context.subscriptionPayload).toEqual({
+    expect(snapshot.context.subjectPayload).toEqual({
       subject: 'inputs_coin',
       params: {},
-      deliverPolicy: DeliverPolicy.new(),
     });
   });
 
@@ -88,10 +86,9 @@ describe('Dynamic Form Machine', () => {
     expect(snapshot.context.formData).toEqual({ blockId: '123' });
     expect(snapshot.context.selectedFields).toEqual({ blockId: '123' });
     expect(snapshot.context.subject).toBeDefined();
-    expect(snapshot.context.subscriptionPayload).toEqual({
+    expect(snapshot.context.subjectPayload).toEqual({
       subject: 'blocks',
       params: { blockId: '123' },
-      deliverPolicy: DeliverPolicy.new(),
     });
   });
 
@@ -111,13 +108,12 @@ describe('Dynamic Form Machine', () => {
       blockId: '123',
       height: '456',
     });
-    expect(snapshot.context.subscriptionPayload).toEqual({
+    expect(snapshot.context.subjectPayload).toEqual({
       subject: 'blocks',
       params: {
         blockId: '123',
         height: '456',
       },
-      deliverPolicy: DeliverPolicy.new(),
     });
   });
 
@@ -131,10 +127,9 @@ describe('Dynamic Form Machine', () => {
     const snapshot = actor.getSnapshot();
     expect(snapshot.context.formData).toEqual({});
     expect(snapshot.context.selectedFields).toEqual({});
-    expect(snapshot.context.subscriptionPayload).toEqual({
+    expect(snapshot.context.subjectPayload).toEqual({
       subject: 'transactions',
       params: {},
-      deliverPolicy: DeliverPolicy.new(),
     });
   });
 
@@ -149,10 +144,9 @@ describe('Dynamic Form Machine', () => {
     const snapshot = actor.getSnapshot();
     expect(snapshot.context.formData).toEqual({});
     expect(snapshot.context.selectedFields).toEqual({});
-    expect(snapshot.context.subscriptionPayload).toEqual({
+    expect(snapshot.context.subjectPayload).toEqual({
       subject: 'inputs_message',
       params: {},
-      deliverPolicy: DeliverPolicy.new(),
     });
   });
 
@@ -168,10 +162,9 @@ describe('Dynamic Form Machine', () => {
 
     const snapshot = actor.getSnapshot();
     expect(snapshot.context.deliverPolicy.toString()).toBe('from_block:123');
-    expect(snapshot.context.subscriptionPayload).toEqual({
+    expect(snapshot.context.subjectPayload).toEqual({
       subject: 'transactions',
       params: {},
-      deliverPolicy: DeliverPolicy.fromBlock(123),
     });
   });
 
@@ -188,10 +181,9 @@ describe('Dynamic Form Machine', () => {
 
     const snapshot = actor.getSnapshot();
     expect(snapshot.context.deliverPolicy.toString()).toBe('from_block:123');
-    expect(snapshot.context.subscriptionPayload).toEqual({
+    expect(snapshot.context.subjectPayload).toEqual({
       subject: 'inputs_message',
       params: {},
-      deliverPolicy: DeliverPolicy.fromBlock(123),
     });
   });
 });

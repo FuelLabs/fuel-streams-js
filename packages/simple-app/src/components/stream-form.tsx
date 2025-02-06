@@ -14,14 +14,15 @@ export function StreamForm() {
     currentFields,
     variantOptions,
     subject,
-    subscriptionPayload,
+    subjectPayload,
+    deliverPolicy,
   } = useDynamicForm();
 
   const { start, stop, isSubscribing } = useStreamData();
 
   function handleSubmit() {
-    if (!selectedModule || !subscriptionPayload || !subject) return;
-    start(subject, subscriptionPayload);
+    if (!selectedModule || !subjectPayload || !subject) return;
+    start(subject, subjectPayload, deliverPolicy);
   }
 
   return (

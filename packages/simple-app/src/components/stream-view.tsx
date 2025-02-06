@@ -155,12 +155,12 @@ function DataVisualization() {
           <AnimatePresence>
             {data.map((item) => (
               <MotionCard
-                key={item.key}
+                key={item.subject}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.4, ease: 'easeOut' }}
-                aria-label={`Stream data for ${item.key}`}
+                aria-label={`Stream data for ${item.subject}`}
                 className="shadow-none rounded-sm max-w-full w-full overflow-hidden mb-4"
               >
                 <CardHeader className="py-0 px-4 mb-4 bg-muted border-b">
@@ -169,11 +169,11 @@ function DataVisualization() {
                       <Tooltip>
                         <TooltipTrigger>
                           <div className="truncate max-w-[300px]">
-                            {item.key}
+                            {item.subject}
                           </div>
                         </TooltipTrigger>
                         <TooltipContent side="top" align="start">
-                          {item.key}
+                          {item.subject}
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
@@ -196,7 +196,7 @@ function DataVisualization() {
                       isTheme('dark') ? 'summerfruit' : 'summerfruit:inverted'
                     }
                     displayDataTypes={false}
-                    src={item.rawData}
+                    src={item.rawPayload}
                     style={{
                       padding: 0,
                       background: 'transparent',

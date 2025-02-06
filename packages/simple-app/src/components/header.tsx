@@ -13,6 +13,8 @@ import { ThemeToggle } from './theme-toggle';
 
 export function Header() {
   const { network, changeNetwork, isConnecting } = useStreamData();
+  const isDev = import.meta.env.DEV;
+
   return (
     <header className="border-b">
       <div className="flex h-14 items-center justify-between px-6">
@@ -53,6 +55,11 @@ export function Header() {
               <SelectItem value="mainnet" aria-label="Fuel Ignition">
                 Fuel Ignition
               </SelectItem>
+              {isDev && (
+                <SelectItem value="local" aria-label="Fuel Local">
+                  Fuel Local
+                </SelectItem>
+              )}
               {/*<SelectItem value="testnet" aria-label="Fuel Testnet">
                 Fuel Testnet
               </SelectItem>

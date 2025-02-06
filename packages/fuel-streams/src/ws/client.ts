@@ -16,12 +16,12 @@ import { ClientError } from './error';
 import { getWsUrl } from './networks';
 import { WebSocket } from './platform';
 import type {
-  ClientMessage,
   ClientResponse,
   FuelNetwork,
   ServerMessage,
+  ServerRequest,
   ServerResponse,
-  SubscriptionPayload,
+  SubjectPayload,
 } from './types';
 
 export interface ConnectionOpts {
@@ -50,7 +50,7 @@ export class Connection {
           event.data instanceof Blob
             ? await event.data.text()
             : event.data.toString();
-
+        console.log(data);
         const msg = JSON.parse(data) as ServerMessage;
         if ('error' in msg) {
           switch (msg.error) {
@@ -99,9 +99,9 @@ export class Connection {
               resolve({
                 done: false,
                 value: {
-                  key: data.key,
-                  data: parser.parse(data.data),
-                  rawData: data.data,
+                  ...data,
+                  payload: parser.parse(data.payload),
+                  rawPayload: data.payload,
                 },
               });
             };
@@ -123,9 +123,9 @@ export class Connection {
       onMessage: (handler) => {
         const messageHandler = (data: ServerResponse<R>) => {
           handler({
-            key: data.key,
-            data: parser.parse(data.data),
-            rawData: data.data,
+            ...data,
+            payload: parser.parse(data.payload),
+            rawPayload: data.payload,
           });
         };
         this.messageHandlers.set(subject, messageHandler);
@@ -146,10 +146,14 @@ export class Connection {
   ): Promise<SubscriptionIterator<Entity, RawEntity>> {
     try {
       const parser = subject.parser as EntityParser<Entity, RawEntity>;
-      const message = subject.subscriptionPayloadJson(deliverPolicy);
-      await this.sendMessage(message);
+      const payload = subject.toPayload();
+      await this.sendMessage({
+        subscribe: [payload],
+        deliverPolicy: deliverPolicy.toString(),
+      });
+
       return this.createSubscriptionIterator<S, Entity, RawEntity>(
-        message.subscribe.subject,
+        payload.subject,
         parser,
       );
     } catch (err) {
@@ -163,14 +167,16 @@ export class Connection {
   async subscribeWithPayload<
     T extends GenericRecord,
     RawT extends GenericRecord,
-  >(payload: SubscriptionPayload): Promise<SubscriptionIterator<T, RawT>> {
+  >(
+    deliverPolicy: DeliverPolicy,
+    payload: SubjectPayload,
+  ): Promise<SubscriptionIterator<T, RawT>> {
     try {
-      const message: ClientMessage = {
-        subscribe: {
-          ...payload,
-          deliverPolicy: payload.deliverPolicy.toString(),
-        },
+      const message: ServerRequest = {
+        deliverPolicy: deliverPolicy.toString(),
+        subscribe: [payload],
       };
+
       await this.sendMessage(message);
       const parser = this.findParser(payload.subject);
       return this.createSubscriptionIterator<any, T, RawT>(
@@ -205,7 +211,7 @@ export class Connection {
     return new parserMap[matchingKey]();
   }
 
-  private async sendMessage(message: ClientMessage): Promise<void> {
+  private async sendMessage(message: ServerRequest): Promise<void> {
     if (this.ws.readyState !== this.ws.OPEN) {
       throw ClientError.WebSocketError(
         new Error('WebSocket connection is not open'),
