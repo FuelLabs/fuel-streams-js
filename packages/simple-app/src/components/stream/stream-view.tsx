@@ -13,6 +13,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { useSubscriptions } from '@/lib/stream/use-subscriptions';
 import { cn } from '@/lib/utils';
 import ReactJsonView from '@microlink/react-json-view';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
@@ -49,6 +50,7 @@ const headerButton = cva(
 
 export function StreamView({ className }: StreamViewProps) {
   const { clear, tab, changeTab } = useStreamData();
+  const { subscriptions } = useSubscriptions();
 
   return (
     <Card
@@ -88,6 +90,7 @@ export function StreamView({ className }: StreamViewProps) {
             <Button
               size="sm"
               variant="ghost"
+              disabled={!subscriptions.length}
               onClick={() => changeTab('code')}
               className={headerButton({ active: tab === 'code' })}
             >
@@ -113,6 +116,7 @@ export function StreamView({ className }: StreamViewProps) {
 function DataVisualization() {
   const { data, isConnecting } = useStreamData();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const { subscriptions } = useSubscriptions();
   const { isTheme } = useTheme();
 
   return (
@@ -135,7 +139,11 @@ function DataVisualization() {
         </div>
       ) : data.length === 0 ? (
         <div
-          className={'flex items-center justify-center text-muted-foreground'}
+          className={`flex items-center justify-center text-muted-foreground ${
+            !subscriptions.length
+              ? 'h-[calc(100vh-350px)]'
+              : 'h-[calc(100vh-250px)]'
+          }`}
           aria-label="No stream data available"
         >
           No stream data available. Click "Start Listening" to begin receiving

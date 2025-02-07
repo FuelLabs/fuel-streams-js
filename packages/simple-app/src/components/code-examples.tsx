@@ -1,44 +1,51 @@
 import { useStreamData } from '@/lib/stream/use-stream-data';
+import {
+  type Subscription,
+  useSubscriptions,
+} from '@/lib/stream/use-subscriptions';
 import { DeliverPolicy, type FuelNetwork } from '@fuels/streams';
-import type { ModuleKeys } from '@fuels/streams/subjects-def';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import { vs } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import { vs2015 } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import v from 'voca';
-import { useDynamicForm } from '../lib/form';
 import { useTheme } from './theme-provider';
 import { CardContent } from './ui/card';
 
 function getFuelExample(
   network: FuelNetwork,
-  stream: string,
-  subjectClass: string | null,
-  selectedFields: Record<string, string>,
+  subscriptions: Subscription[],
   deliverPolicy: DeliverPolicy,
 ) {
-  const baseClass = stream.replace('Stream', '');
-  const subjectImport = subjectClass ?? `${baseClass}Subject`;
-  const formattedFields = Object.entries(selectedFields)
-    .map(([key, value]) => `  ${v.camelCase(key)}: '${value}'`)
-    .join(',\n');
+  const subjectImports = new Set(subscriptions.map((sub) => sub.subjectClass));
+  const subjectsInit = subscriptions
+    .map((sub) => {
+      const formattedFields = Object.entries(sub.selectedFields)
+        .map(([key, value]) => `    ${v.camelCase(key)}: '${value}'`)
+        .join(',\n');
 
-  const subjectInit = Object.values(selectedFields).some(Boolean)
-    ? `const subject = ${subjectImport}.build({\n${formattedFields}\n});`
-    : `const subject = ${subjectImport}.build();`;
+      return Object.values(sub.selectedFields).some(Boolean)
+        ? `  ${sub.subjectClass}.build({\n${formattedFields}\n  })`
+        : `  ${sub.subjectClass}.build()`;
+    })
+    .join(',\n');
 
   return `import {
   Client,
-  ${subjectImport},
+  ${Array.from(subjectImports).join(',\n  ')},
   DeliverPolicy,
   FuelNetwork,
 } from '@fuels/streams';
 
-${subjectInit}
+const subjects = [
+${subjectsInit}
+];
 
 async function main() {
-  const client = await Client.new(FuelNetwork.${v.capitalize(network)});
-  const connection = await client.connect();
-  const stream = await connection.subscribe(subject, ${deliverPolicy.stringStatic()});
+  const client = await Client.connect(FuelNetwork.${v.capitalize(network)});
+  const stream = await client.subscribe(
+    subjects,
+    ${deliverPolicy.stringStatic()}
+  );
   
   for await (const msg of stream) {
     console.log('Subject:', msg.subject);
@@ -51,37 +58,20 @@ main().catch(console.error);`;
 
 function getExamples(
   network: FuelNetwork,
-  selectedModule: ModuleKeys = 'blocks',
-  subjectClass: string | null = 'BlocksSubject',
-  selectedFields: Record<string, string> = {},
+  subscriptions: Subscription[],
   deliverPolicy: DeliverPolicy = DeliverPolicy.new(),
 ) {
-  const stream = v.capitalize(`${selectedModule}Stream`);
-
   return {
-    fuel: getFuelExample(
-      network,
-      stream,
-      subjectClass,
-      selectedFields,
-      deliverPolicy,
-    ),
+    fuel: getFuelExample(network, subscriptions, deliverPolicy),
   };
 }
 
 export function CodeExamples() {
-  const { selectedModule, selectedFields, subjectClass, deliverPolicy } =
-    useDynamicForm();
+  const { subscriptions } = useSubscriptions();
   const { isTheme } = useTheme();
-  const { network } = useStreamData();
+  const { network, deliverPolicy } = useStreamData();
   const codeTheme = isTheme('dark') ? vs2015 : vs;
-  const examples = getExamples(
-    network,
-    selectedModule ?? 'blocks',
-    subjectClass,
-    selectedFields ?? {},
-    deliverPolicy,
-  );
+  const examples = getExamples(network, subscriptions, deliverPolicy);
 
   return (
     <CardContent className="pt-6 text-sm">

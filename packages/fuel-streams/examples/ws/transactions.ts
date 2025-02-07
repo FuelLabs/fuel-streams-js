@@ -12,14 +12,16 @@ async function main() {
   const connection = await Client.connect(FuelNetwork.Mainnet, 'your-api-key');
 
   // You can filter using subject fields before subscribing
-  const subject = TransactionsSubject.build({
-    kind: TransactionKind.Script,
-    txStatus: TransactionStatus.Success,
-  });
+  const subjects = [
+    TransactionsSubject.build({
+      kind: TransactionKind.Script,
+      txStatus: TransactionStatus.Success,
+    }),
+  ];
 
   // Subscribe to transactions from block 1000000
   const deliverPolicy = DeliverPolicy.fromBlock(1000000);
-  const stream = await connection.subscribe(subject, deliverPolicy);
+  const stream = await connection.subscribe(subjects, deliverPolicy);
   for await (const message of stream) {
     console.log('Subject:', message.subject);
     console.log('Payload:', message.payload);

@@ -23,14 +23,20 @@ export const formMachine = setup({
   },
   actions: {
     updateModuleFields: assign({
-      currentFields: ({ event }) => {
+      currentFields: ({ context, event }) => {
+        if (!event.value) return context.currentFields;
         return fieldsManager.getModuleFields(event.value as ModuleKeys);
       },
-      selectedFields: () => ({}),
-      variantOptions: ({ event }) => {
+      selectedFields: ({ context, event }) => {
+        if (!event.value) return context.selectedFields;
+        return {};
+      },
+      variantOptions: ({ context, event }) => {
+        if (!event.value) return context.variantOptions;
         return fieldsManager.getVariantOptions(event.value as ModuleKeys);
       },
-      subjectClass: ({ event }) => {
+      subjectClass: ({ context, event }) => {
+        if (!event.value) return context.subjectClass;
         const mod = fieldsManager.getModule(event.value as ModuleKeys);
         if (!mod?.variants) return mod?.subject ?? null;
         return mod?.subject ?? null;
@@ -38,14 +44,19 @@ export const formMachine = setup({
     }),
     updateVariantFields: assign({
       currentFields: ({ context, event }) => {
+        if (!event.value) return context.currentFields;
         if (!context.selectedModule) return [];
         return fieldsManager.getModuleFields(
           context.selectedModule,
           event.value,
         );
       },
-      selectedFields: () => ({}),
+      selectedFields: ({ context, event }) => {
+        if (!event.value) return context.selectedFields;
+        return {};
+      },
       subjectClass: ({ context, event }) => {
+        if (!event.value) return context.subjectClass;
         if (!context.selectedModule) return null;
         const mod = fieldsManager.getModule(context.selectedModule);
         if (!mod?.variants) return mod?.subject ?? null;
@@ -55,6 +66,7 @@ export const formMachine = setup({
     }),
     updateField: assign({
       formData: ({ context, event }) => {
+        if (!event.value) return context.formData;
         if (event.type !== 'CHANGE.FIELD') return context.formData;
         return {
           ...context.formData,
@@ -62,6 +74,7 @@ export const formMachine = setup({
         };
       },
       selectedFields: ({ context, event }) => {
+        if (!event.value) return context.selectedFields;
         if (event.type !== 'CHANGE.FIELD') return context.selectedFields;
         return {
           ...context.selectedFields,
@@ -93,10 +106,12 @@ export const formMachine = setup({
 }).createMachine({
   id: 'dynamicForm',
   initial: 'idle',
-  context: ({ input }) => ({
-    ...input,
-    moduleOptions: fieldsManager.getModuleOptions(),
-  }),
+  context: ({ input }) => {
+    return {
+      ...input,
+      moduleOptions: fieldsManager.getModuleOptions(),
+    };
+  },
   states: {
     idle: {
       entry: [

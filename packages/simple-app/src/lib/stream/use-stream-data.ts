@@ -338,6 +338,7 @@ const selectors = {
   data: (state: State) => state.context.data,
   apiKey: (state: State) => state.context.apiKey,
   subscriptions: (state: State) => state.context.subscriptions,
+  deliverPolicy: (state: State) => state.context.deliverPolicy,
 };
 
 export const StreamDataContext = createActorContext(streamMachine);
@@ -352,6 +353,7 @@ export function useStreamData() {
   const data = StreamDataContext.useSelector(selectors.data);
   const apiKey = StreamDataContext.useSelector(selectors.apiKey);
   const subscriptions = StreamDataContext.useSelector(selectors.subscriptions);
+  const deliverPolicy = StreamDataContext.useSelector(selectors.deliverPolicy);
 
   function start(subscriptions: Subscription[], deliverPolicy: DeliverPolicy) {
     actor.send({ type: 'START', subscriptions, deliverPolicy });
@@ -387,6 +389,7 @@ export function useStreamData() {
     tab,
     data,
     subscriptions,
+    deliverPolicy,
     isConnecting,
     isSubscribing,
     isConnected,

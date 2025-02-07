@@ -3,9 +3,9 @@ import { BlocksSubject, Client, DeliverPolicy, FuelNetwork } from '../../src';
 
 async function main() {
   const connection = await Client.connect(FuelNetwork.Local, 'test');
-  const subject = BlocksSubject.build();
+  const subjects = [BlocksSubject.build()];
   const stream = await connection.subscribe(
-    subject,
+    subjects,
     DeliverPolicy.fromBlock(0),
   );
 
