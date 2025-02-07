@@ -19,9 +19,11 @@ import type { FormField, SelectOption } from '@fuels/streams/subjects-def';
 import { CircleHelp } from 'lucide-react';
 
 export function InputField({ field }: { field: FormField }) {
-  const { formData, handleFieldChange } = useDynamicForm();
+  const { context, handleFieldChange } = useDynamicForm();
+  const { formData } = context;
   const { predefinedOptions, hasOptions, formattedLabel, inputType, tsType } =
     useInputField(field);
+
   return (
     <div>
       <div className="flex items-center gap-2 mb-2">

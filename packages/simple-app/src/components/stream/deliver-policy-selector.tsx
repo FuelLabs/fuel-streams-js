@@ -6,7 +6,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { Switch } from '@/components/ui/switch';
-import { useDynamicForm } from '@/lib/form/use-dynamic-form';
+import { useDeliverPolicy } from '@/lib/form/use-deliver-policy';
 import { DeliverPolicyType } from '@fuels/streams';
 import { Settings2 } from 'lucide-react';
 
@@ -16,7 +16,7 @@ export function DeliverPolicySelector() {
     blockNumber,
     handleDeliverPolicyTypeChange,
     handleBlockNumberChange,
-  } = useDynamicForm();
+  } = useDeliverPolicy();
 
   return (
     <div className="flex items-center gap-2">
@@ -61,9 +61,11 @@ export function DeliverPolicySelector() {
                 <Input
                   id="block-number"
                   type="number"
-                  value={blockNumber}
-                  onChange={(e) => handleBlockNumberChange(e.target.value)}
                   placeholder="Enter block number"
+                  value={blockNumber}
+                  onChange={(e) =>
+                    handleBlockNumberChange(Number(e.target.value))
+                  }
                 />
               </div>
             </div>

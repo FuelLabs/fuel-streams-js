@@ -118,7 +118,7 @@ export class FormFieldsManager {
     selectedModule: ModuleKeys,
   ): { value: string; label: string }[] {
     const mod = this.getModule(selectedModule);
-    if (!mod.variants) return [];
+    if (!mod?.variants) return [];
 
     // Return only variant options
     return Object.entries(mod.variants).map(([key, value]) => ({

@@ -20,10 +20,9 @@ import { cva } from 'class-variance-authority';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Code, Database, Eraser } from 'lucide-react';
 import { useRef } from 'react';
-import { useDynamicForm } from '../lib/form';
-import { useStreamData } from '../lib/stream/use-stream-data';
-import { CodeExamples } from './code-examples';
-import { useTheme } from './theme-provider';
+import { useStreamData } from '../../lib/stream/use-stream-data';
+import { CodeExamples } from '../code-examples';
+import { useTheme } from '../theme-provider';
 
 type StreamViewProps = {
   className?: string;
@@ -45,7 +44,6 @@ const headerButton = cva('h-9 gap-2 text-sm font-medium transition-colors', {
 });
 
 export function StreamView({ className }: StreamViewProps) {
-  const { subject } = useDynamicForm();
   const { clear, tab, changeTab } = useStreamData();
 
   return (
@@ -83,12 +81,12 @@ export function StreamView({ className }: StreamViewProps) {
           </Button>
         </nav>
       </CardHeader>
-      {subject && (
-        <div
-          className="flex justify-between items-center px-6 py-2 border-b"
-          aria-label="Current Subject Query"
-        >
-          <code className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+      <div
+        className="flex justify-between items-center px-6 py-2 border-b"
+        aria-label="Current Subject Query"
+      >
+        <code className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+          {/* {subject && (
             <span className="text-foreground">Subject Query:</span>
             <TooltipProvider>
               <Tooltip>
@@ -100,24 +98,23 @@ export function StreamView({ className }: StreamViewProps) {
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-          </code>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={clear}
-            aria-label="Clear Stream Data"
-          >
-            <Eraser size={16} /> Clear
-          </Button>
-        </div>
-      )}
+        )} */}
+        </code>
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={clear}
+          aria-label="Clear Stream Data"
+        >
+          <Eraser size={16} /> Clear
+        </Button>
+      </div>
       {tab === 'data' ? <DataVisualization /> : <CodeExamples />}
     </Card>
   );
 }
 
 function DataVisualization() {
-  const { subject } = useDynamicForm();
   const { data, isConnecting } = useStreamData();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const { isTheme } = useTheme();
@@ -142,9 +139,7 @@ function DataVisualization() {
         </div>
       ) : data.length === 0 ? (
         <div
-          className={`flex items-center justify-center text-muted-foreground ${
-            subject ? 'h-[calc(100vh-350px)]' : 'h-[calc(100vh-250px)]'
-          }`}
+          className={'flex items-center justify-center text-muted-foreground'}
           aria-label="No stream data available"
         >
           No stream data available. Click "Start Listening" to begin receiving

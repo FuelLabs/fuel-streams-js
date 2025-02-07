@@ -3,7 +3,6 @@ import {
   type ClientResponse,
   DeliverPolicy,
   FuelNetwork,
-  type SubjectPayload,
 } from '@fuels/streams';
 import { Client, type Connection } from '@fuels/streams';
 import { createActorContext } from '@xstate/react';
@@ -17,17 +16,17 @@ import {
   setup,
 } from 'xstate';
 import { LocalStorage } from './local-storage';
+import type { Subscription } from './use-subscriptions';
 
 const localStorage = new LocalStorage('@fuel-streams/api-key');
 
 type StreamEvent =
   | {
       type: 'START';
-      subject: string;
-      subjectPayload: SubjectPayload;
+      subscriptions: Subscription[];
       deliverPolicy: DeliverPolicy;
     }
-  | { type: 'STOP_CONNECTION' }
+  | { type: 'STOP' }
   | { type: 'CLEAR' }
   | { type: 'DATA'; data: ClientResponse<any, any> }
   | { type: 'CHANGE_NETWORK'; network: FuelNetwork }
@@ -37,7 +36,7 @@ type StreamEvent =
 
 type StreamActorInput = {
   deliverPolicy: DeliverPolicy;
-  subjectPayload: SubjectPayload;
+  subscriptions: Subscription[];
   network: FuelNetwork;
   apiKey: string | null;
 };
@@ -67,12 +66,13 @@ const subscriptionActor = fromCallback<StreamEvent, StreamActorInput>(
     let connection: Connection | undefined;
 
     (async () => {
-      const { subjectPayload: payload, deliverPolicy, network, apiKey } = input;
+      const { subscriptions, deliverPolicy, network, apiKey } = input;
       if (!apiKey) throw ClientError.MissingApiKey();
       connection = await Client.connect(network, apiKey);
+      const payloads = subscriptions.map((sub) => sub.subjectPayload!);
       const subscription = await connection.subscribeWithPayload(
         deliverPolicy,
-        payload,
+        payloads,
       );
       cleanup = subscription.onMessage((data) => {
         sendBack({ type: 'DATA', data });
@@ -80,7 +80,7 @@ const subscriptionActor = fromCallback<StreamEvent, StreamActorInput>(
     })();
 
     receive((event) => {
-      if (event.type === 'STOP_CONNECTION') {
+      if (event.type === 'STOP') {
         cleanup?.();
         connection?.close();
         sendBack({ type: 'DISCONNECT' });
@@ -98,8 +98,7 @@ export const streamMachine = setup({
   types: {
     context: {} as {
       deliverPolicy: DeliverPolicy;
-      subject: string | null;
-      subjectPayload: SubjectPayload | null;
+      subscriptions: Subscription[];
       data: Array<ClientResponse<any, any>>;
       network: FuelNetwork;
       tab: 'data' | 'code';
@@ -113,13 +112,9 @@ export const streamMachine = setup({
   },
   actions: {
     setSubjectAndPayload: assign({
-      subject: ({ event }) => {
-        if (event.type !== 'START') return null;
-        return event.subject;
-      },
-      subjectPayload: ({ event }) => {
-        if (event.type !== 'START') return null;
-        return event.subjectPayload;
+      subscriptions: ({ event }) => {
+        if (event.type !== 'START') return [];
+        return event.subscriptions;
       },
       deliverPolicy: ({ event }) => {
         if (event.type !== 'START') return DeliverPolicy.new();
@@ -128,12 +123,18 @@ export const streamMachine = setup({
     }),
     newDataFromSubscription: assign({
       data: ({ context, event }) => {
-        if (event.type !== 'DATA') return [];
+        if (event.type !== 'DATA') return context.data;
         return [event.data, ...context.data.slice(0, 19)];
       },
     }),
     clearData: assign({
       data: () => [],
+    }),
+    removeSubscription: assign({
+      subscriptions: ({ context, event }) => {
+        if (event.type !== 'STOP') return context.subscriptions;
+        return context.subscriptions.filter((sub) => sub.id !== event.id);
+      },
     }),
     setNetwork: assign({
       network: ({ event }) => {
@@ -148,9 +149,8 @@ export const streamMachine = setup({
       },
     }),
     clearState: assign({
-      subject: () => null,
-      subjectPayload: () => null,
       data: () => [],
+      subscriptions: () => [],
       apiKey: () => {
         localStorage.removeApiKey();
         return null;
@@ -196,8 +196,7 @@ export const streamMachine = setup({
   initial: 'checkingApiKey',
   context: () => ({
     deliverPolicy: DeliverPolicy.new(),
-    subject: null,
-    subjectPayload: null,
+    subscriptions: [],
     data: [],
     tab: 'data',
     network: import.meta.env.DEV ? FuelNetwork.Local : FuelNetwork.Mainnet,
@@ -242,8 +241,7 @@ export const streamMachine = setup({
     },
     idle: {
       entry: assign({
-        subject: () => null,
-        subjectPayload: () => null,
+        data: () => [],
       }),
     },
     ready: {
@@ -287,17 +285,12 @@ export const streamMachine = setup({
       invoke: {
         id: 'subscribe',
         src: 'subscriptionActor',
-        input: ({ context }) => {
-          if (!context.subject || !context.subjectPayload) {
-            throw new Error('Missing required subscription parameters');
-          }
-          return {
-            deliverPolicy: context.deliverPolicy,
-            subjectPayload: context.subjectPayload,
-            network: context.network,
-            apiKey: context.apiKey,
-          };
-        },
+        input: ({ context }) => ({
+          deliverPolicy: context.deliverPolicy,
+          subscriptions: context.subscriptions,
+          network: context.network,
+          apiKey: context.apiKey,
+        }),
         onError: {
           target: 'ready',
           actions: ['notifySubscriptionError'],
@@ -307,8 +300,11 @@ export const streamMachine = setup({
         DATA: {
           actions: ['newDataFromSubscription'],
         },
-        STOP_CONNECTION: {
-          actions: sendTo('subscribe', { type: 'STOP_CONNECTION' }),
+        STOP: {
+          actions: [
+            sendTo('subscribe', { type: 'STOP' }),
+            'removeSubscription',
+          ],
         },
         DISCONNECT: {
           target: 'ready',
@@ -337,9 +333,11 @@ const selectors = {
   isSubscribing: (state: State) => state.matches('subscribing'),
   isConnecting: (state: State) => state.hasTag('connecting'),
   isConnected: (state: State) => state.hasTag('connected'),
-  data: (state: State) => state.context.data,
   network: (state: State) => state.context.network,
   tab: (state: State) => state.context.tab,
+  data: (state: State) => state.context.data,
+  apiKey: (state: State) => state.context.apiKey,
+  subscriptions: (state: State) => state.context.subscriptions,
 };
 
 export const StreamDataContext = createActorContext(streamMachine);
@@ -349,21 +347,18 @@ export function useStreamData() {
   const isSubscribing = StreamDataContext.useSelector(selectors.isSubscribing);
   const isConnecting = StreamDataContext.useSelector(selectors.isConnecting);
   const isConnected = StreamDataContext.useSelector(selectors.isConnected);
-  const data = StreamDataContext.useSelector(selectors.data);
   const network = StreamDataContext.useSelector(selectors.network);
   const tab = StreamDataContext.useSelector(selectors.tab);
-  const apiKey = StreamDataContext.useSelector((state) => state.context.apiKey);
+  const data = StreamDataContext.useSelector(selectors.data);
+  const apiKey = StreamDataContext.useSelector(selectors.apiKey);
+  const subscriptions = StreamDataContext.useSelector(selectors.subscriptions);
 
-  function start(
-    subject: string,
-    subjectPayload: SubjectPayload,
-    deliverPolicy: DeliverPolicy,
-  ) {
-    actor.send({ type: 'START', subject, subjectPayload, deliverPolicy });
+  function start(subscriptions: Subscription[], deliverPolicy: DeliverPolicy) {
+    actor.send({ type: 'START', subscriptions, deliverPolicy });
   }
 
   function stop() {
-    actor.send({ type: 'STOP_CONNECTION' });
+    actor.send({ type: 'STOP' });
   }
 
   function clear() {
@@ -371,12 +366,10 @@ export function useStreamData() {
   }
 
   function changeNetwork(network: FuelNetwork) {
-    stop();
     actor.send({ type: 'CHANGE_NETWORK', network });
   }
 
   function changeTab(tab: 'data' | 'code') {
-    stop();
     actor.send({ type: 'CHANGE_TAB', tab });
   }
 
@@ -390,9 +383,10 @@ export function useStreamData() {
     clear,
     changeNetwork,
     changeTab,
-    data,
     network,
     tab,
+    data,
+    subscriptions,
     isConnecting,
     isSubscribing,
     isConnected,

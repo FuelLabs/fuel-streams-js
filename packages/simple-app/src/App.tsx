@@ -1,22 +1,22 @@
 'use client';
 
 import { Header } from './components/header';
-import { StreamConfiguration } from './components/stream-configuration';
-import { StreamView } from './components/stream-view';
+import { StreamConfiguration } from './components/stream/stream-configuration';
+import { StreamView } from './components/stream/stream-view';
 import { ThemeProvider } from './components/theme-provider';
 import { Toaster } from './components/ui/sonner';
-import { FormContext } from './lib/form';
 import { StreamDataContext } from './lib/stream/use-stream-data';
+import { SubscriptionsContext } from './lib/stream/use-subscriptions';
 
 export function App() {
   return (
     <ThemeProvider defaultTheme="system" storageKey="fuel-streams-theme">
-      <FormContext.Provider>
+      <SubscriptionsContext.Provider>
         <StreamDataContext.Provider>
           <AppContent />
           <Toaster />
         </StreamDataContext.Provider>
-      </FormContext.Provider>
+      </SubscriptionsContext.Provider>
     </ThemeProvider>
   );
 }
