@@ -21,6 +21,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import { Code, Database, Eraser } from 'lucide-react';
 import { useRef } from 'react';
 import { useStreamData } from '../../lib/stream/use-stream-data';
+import { ApiKeyPopover } from '../api-key-popover';
 import { CodeExamples } from '../code-examples';
 import { useTheme } from '../theme-provider';
 
@@ -30,18 +31,21 @@ type StreamViewProps = {
 
 const MotionCard = motion(Card);
 
-const headerButton = cva('h-9 gap-2 text-sm font-medium transition-colors', {
-  variants: {
-    active: {
-      true: '',
-      false:
-        'bg-muted text-muted-foreground hover:text-foreground hover:bg-accent/50',
+const headerButton = cva(
+  'h-12 gap-2 text-sm font-medium transition-colors rounded-none border-b-2',
+  {
+    variants: {
+      active: {
+        true: 'border-primary text-foreground',
+        false:
+          'border-transparent text-muted-foreground/70 hover:text-foreground hover:border-muted',
+      },
+    },
+    defaultVariants: {
+      active: false,
     },
   },
-  defaultVariants: {
-    active: false,
-  },
-});
+);
 
 export function StreamView({ className }: StreamViewProps) {
   const { clear, tab, changeTab } = useStreamData();
@@ -62,44 +66,36 @@ export function StreamView({ className }: StreamViewProps) {
               : 'Example code snippets for implementing the stream'}
           </CardDescription>
         </div>
-        <nav className="flex items-center gap-2">
-          <Button
-            size="sm"
-            onClick={() => changeTab('data')}
-            className={headerButton({ active: tab === 'data' })}
-          >
-            <Database size={16} />
-            Live Data
-          </Button>
-          <Button
-            size="sm"
-            onClick={() => changeTab('code')}
-            className={headerButton({ active: tab === 'code' })}
-          >
-            <Code size={16} />
-            How to Use
-          </Button>
-        </nav>
+        <div className="flex items-center gap-2 ml-4">
+          <ApiKeyPopover />
+        </div>
       </CardHeader>
       <div
-        className="flex justify-between items-center px-6 py-2 border-b"
+        className="flex justify-between items-center px-6 h-12 border-b"
         aria-label="Current Subject Query"
       >
-        <code className="inline-flex items-center gap-2 text-sm text-muted-foreground">
-          {/* {subject && (
-            <span className="text-foreground">Subject Query:</span>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <div className="truncate max-w-[400px]">{subject}</div>
-                </TooltipTrigger>
-                <TooltipContent side="top" align="start">
-                  {subject}
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-        )} */}
-        </code>
+        <div className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+          <nav className="flex items-center">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => changeTab('data')}
+              className={headerButton({ active: tab === 'data' })}
+            >
+              <Database size={16} />
+              Live Data
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => changeTab('code')}
+              className={headerButton({ active: tab === 'code' })}
+            >
+              <Code size={16} />
+              How to Use
+            </Button>
+          </nav>
+        </div>
         <Button
           size="sm"
           variant="ghost"

@@ -1,6 +1,5 @@
 import {
   Card,
-  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
@@ -19,7 +18,7 @@ export function StreamConfiguration({ className }: StreamConfigurationProps) {
       className={cn('shadow-none rounded-none border-0', className)}
       aria-label="Stream Configuration Panel"
     >
-      <CardHeader layout="row" className="h-20 border-b mb-4">
+      <CardHeader layout="row" className="h-20 border-b">
         <div className="flex-1">
           <CardTitle className="text-lg" aria-level={2}>
             Stream Configuration
@@ -29,11 +28,9 @@ export function StreamConfiguration({ className }: StreamConfigurationProps) {
           </CardDescription>
         </div>
       </CardHeader>
-      <CardContent className="space-y-8">
-        <DeliverPolicyContext.Provider>
-          <StreamForm />
-        </DeliverPolicyContext.Provider>
-      </CardContent>
+      <DeliverPolicyContext.Provider>
+        <StreamForm />
+      </DeliverPolicyContext.Provider>
     </Card>
   );
 }
