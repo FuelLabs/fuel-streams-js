@@ -13,6 +13,8 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { useConnection } from '@/lib/stream/use-connection';
+import { useStreamTab } from '@/lib/stream/use-stream-tab';
 import { useSubscriptions } from '@/lib/stream/use-subscriptions';
 import { cn } from '@/lib/utils';
 import ReactJsonView from '@microlink/react-json-view';
@@ -49,7 +51,8 @@ const headerButton = cva(
 );
 
 export function StreamView({ className }: StreamViewProps) {
-  const { clear, tab, changeTab } = useStreamData();
+  const { clear } = useStreamData();
+  const { tab, setTab } = useStreamTab();
   const { subscriptions } = useSubscriptions();
 
   return (
@@ -81,7 +84,7 @@ export function StreamView({ className }: StreamViewProps) {
             <Button
               size="sm"
               variant="ghost"
-              onClick={() => changeTab('data')}
+              onClick={() => setTab('data')}
               className={headerButton({ active: tab === 'data' })}
             >
               <Database size={16} />
@@ -91,7 +94,7 @@ export function StreamView({ className }: StreamViewProps) {
               size="sm"
               variant="ghost"
               disabled={!subscriptions.length}
-              onClick={() => changeTab('code')}
+              onClick={() => setTab('code')}
               className={headerButton({ active: tab === 'code' })}
             >
               <Code size={16} />
@@ -114,7 +117,8 @@ export function StreamView({ className }: StreamViewProps) {
 }
 
 function DataVisualization() {
-  const { data, isConnecting } = useStreamData();
+  const { data } = useStreamData();
+  const { isConnecting } = useConnection();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const { subscriptions } = useSubscriptions();
   const { isTheme } = useTheme();
@@ -152,7 +156,7 @@ function DataVisualization() {
       ) : (
         <ScrollArea className="h-[calc(100vh-200px)]" ref={scrollAreaRef}>
           <AnimatePresence>
-            {data.map((item) => (
+            {data.map(({ rawPayload, ...item }) => (
               <MotionCard
                 key={item.subject}
                 initial={{ opacity: 0, y: 10 }}
@@ -195,7 +199,7 @@ function DataVisualization() {
                       isTheme('dark') ? 'summerfruit' : 'summerfruit:inverted'
                     }
                     displayDataTypes={false}
-                    src={item.rawPayload}
+                    src={{ ...item, payload: rawPayload }}
                     style={{
                       padding: 0,
                       background: 'transparent',

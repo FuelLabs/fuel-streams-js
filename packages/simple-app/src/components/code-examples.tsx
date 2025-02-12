@@ -1,4 +1,5 @@
-import { useStreamData } from '@/lib/stream/use-stream-data';
+import { useConnection } from '@/lib/stream/use-connection';
+import { useDeliverPolicy } from '@/lib/stream/use-deliver-policy';
 import {
   type Subscription,
   useSubscriptions,
@@ -46,7 +47,7 @@ async function main() {
     subjects,
     ${deliverPolicy.stringStatic()}
   );
-  
+
   for await (const msg of stream) {
     console.log('Subject:', msg.subject);
     console.log('Payload:', msg.payload);
@@ -69,7 +70,8 @@ function getExamples(
 export function CodeExamples() {
   const { subscriptions } = useSubscriptions();
   const { isTheme } = useTheme();
-  const { network, deliverPolicy } = useStreamData();
+  const { network } = useConnection();
+  const { deliverPolicy } = useDeliverPolicy();
   const codeTheme = isTheme('dark') ? vs2015 : vs;
   const examples = getExamples(network, subscriptions, deliverPolicy);
 

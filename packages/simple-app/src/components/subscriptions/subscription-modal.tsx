@@ -8,14 +8,15 @@ import {
 import { FormContext } from '@/lib/form';
 import {
   type SubscriptionProps,
+  useSubscriptionModal,
   useSubscriptions,
 } from '@/lib/stream/use-subscriptions';
 import type { Nullable } from '@/lib/utils';
 import { SubscriptionForm } from './subscription-form';
 
 export function SubscriptionModal() {
-  const { isEditing, isOpened, cancel, selectedSubscription } =
-    useSubscriptions();
+  const { isEditing, cancel, selectedSubscription } = useSubscriptions();
+  const { isOpened } = useSubscriptionModal();
   return (
     <Dialog open={isOpened} onOpenChange={cancel}>
       <DialogContent className="sm:max-w-[425px]">

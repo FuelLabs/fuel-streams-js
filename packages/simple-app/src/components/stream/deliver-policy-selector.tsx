@@ -6,7 +6,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { Switch } from '@/components/ui/switch';
-import { useDeliverPolicy } from '@/lib/form/use-deliver-policy';
+import { useDeliverPolicy } from '@/lib/stream/use-deliver-policy';
 import { DeliverPolicyType } from '@fuels/streams';
 import { Settings2 } from 'lucide-react';
 
@@ -14,8 +14,8 @@ export function DeliverPolicySelector() {
   const {
     deliverPolicyType,
     blockNumber,
-    handleDeliverPolicyTypeChange,
-    handleBlockNumberChange,
+    changeDeliverPolicyType,
+    changeBlockNumber,
   } = useDeliverPolicy();
 
   return (
@@ -25,7 +25,7 @@ export function DeliverPolicySelector() {
           id="historical-data"
           checked={deliverPolicyType === DeliverPolicyType.FromBlock}
           onCheckedChange={(checked) =>
-            handleDeliverPolicyTypeChange(
+            changeDeliverPolicyType(
               checked ? DeliverPolicyType.FromBlock : DeliverPolicyType.New,
             )
           }
@@ -63,9 +63,7 @@ export function DeliverPolicySelector() {
                   type="number"
                   placeholder="Enter block number"
                   value={blockNumber}
-                  onChange={(e) =>
-                    handleBlockNumberChange(Number(e.target.value))
-                  }
+                  onChange={(e) => changeBlockNumber(Number(e.target.value))}
                 />
               </div>
             </div>

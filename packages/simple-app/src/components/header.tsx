@@ -7,12 +7,12 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Spinner } from '@/components/ui/spinner';
+import { useConnection } from '@/lib/stream/use-connection';
 import { ChevronsLeftRightEllipsis, Github } from 'lucide-react';
-import { useStreamData } from '../lib/stream/use-stream-data';
 import { ThemeToggle } from './theme-toggle';
 
 export function Header() {
-  const { network, changeNetwork, isConnecting } = useStreamData();
+  const { network, setNetwork, isConnecting } = useConnection();
   const isDev = import.meta.env.DEV;
 
   return (
@@ -37,7 +37,7 @@ export function Header() {
         <div className="flex items-center gap-2">
           <Select
             value={network}
-            onValueChange={changeNetwork}
+            onValueChange={setNetwork}
             disabled={isConnecting}
             defaultValue="mainnet"
           >
@@ -64,12 +64,11 @@ export function Header() {
                   Fuel Local
                 </SelectItem>
               )}
-              {/*<SelectItem value="testnet" aria-label="Fuel Testnet">
-                Fuel Testnet
-              </SelectItem>
-              <SelectItem value="staging" aria-label="Fuel Staging">
-                Fuel Staging
-              </SelectItem>*/}
+              {isDev && (
+                <SelectItem value="staging" aria-label="Fuel Staging">
+                  Fuel Staging
+                </SelectItem>
+              )}
             </SelectContent>
           </Select>
         </div>

@@ -4,7 +4,6 @@ export enum FuelNetwork {
   Local = 'local',
   Staging = 'staging',
   Mainnet = 'mainnet',
-  // Testnet = 'testnet',
 }
 
 export type SubjectPayload = {
@@ -12,12 +11,17 @@ export type SubjectPayload = {
   params: Record<string, any>;
 };
 
-export type ServerRequest = {
+export type SubscribeRequest = {
   deliverPolicy: string;
   subscribe: SubjectPayload[];
 };
 
-export type ServerResponse<R extends GenericRecord> = {
+export type UnsubscribeRequest = {
+  deliverPolicy: string;
+  unsubscribe: SubjectPayload[];
+};
+
+export type StreamResponse<R extends GenericRecord> = {
   version: string;
   type: string;
   subject: string;
@@ -36,9 +40,5 @@ export type ClientResponse<
 };
 
 export type ServerMessage =
-  | {
-      response: ServerResponse<any>;
-    }
-  | {
-      error: string;
-    };
+  | { response: StreamResponse<any> }
+  | { error: string };

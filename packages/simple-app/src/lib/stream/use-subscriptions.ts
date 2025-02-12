@@ -4,10 +4,10 @@ import type {
   ModuleKeys,
   SelectOption,
 } from '@fuels/streams/subjects-def';
-import { createActorContext } from '@xstate/react';
-import { type StateFrom, assign, setup } from 'xstate';
+import { create } from 'zustand';
 import type { Nullable } from '../utils';
 
+// Types from the original file
 export type SubscriptionProps = {
   subject: string;
   formData: Record<string, string>;
@@ -26,166 +26,82 @@ export type Subscription = SubscriptionProps & {
   isActive: boolean;
 };
 
-export const subscriptionsMachine = setup({
-  types: {
-    context: {} as {
-      subscriptions: Subscription[];
-      selectedSubscription: Subscription | null;
-    },
-    events: {} as
-      | {
-          type: 'ADD_SUBSCRIPTION';
-          input: SubscriptionProps;
-        }
-      | { type: 'REMOVE_SUBSCRIPTION'; id: string }
-      | {
-          id: string;
-          type: 'EDIT_SUBSCRIPTION';
-          input: Nullable<SubscriptionProps>;
-        }
-      | { type: 'START_ADDING' }
-      | { type: 'START_EDITING'; id: string }
-      | { type: 'CANCEL' },
-  },
-  actions: {
-    clearSelectedSubscription: assign({
-      selectedSubscription: () => null,
-    }),
-    setSelectedSubscription: assign({
-      selectedSubscription: ({ context, event }) => {
-        if (event.type !== 'START_EDITING') return null;
-        return context.subscriptions.find((sub) => sub.id === event.id) ?? null;
-      },
-    }),
-    addSubscription: assign({
-      subscriptions: ({ context, event }) => {
-        if (event.type !== 'ADD_SUBSCRIPTION') return context.subscriptions;
-        const newSubscription: Subscription = {
-          ...event.input,
-          id: crypto.randomUUID(),
-          isActive: false,
-        };
-        return [...context.subscriptions, newSubscription];
-      },
-    }),
-    removeSubscription: assign({
-      subscriptions: ({ context, event }) => {
-        if (event.type !== 'REMOVE_SUBSCRIPTION') return context.subscriptions;
-        return context.subscriptions.filter((sub) => sub.id !== event.id);
-      },
-    }),
-    editSubscription: assign({
-      subscriptions: ({ context, event }) => {
-        if (event.type !== 'EDIT_SUBSCRIPTION') return context.subscriptions;
-        const newProps = event.input as SubscriptionProps;
-        return context.subscriptions.map((sub) =>
-          sub.id === event.id ? { ...sub, ...newProps } : sub,
-        );
-      },
-    }),
-  },
-}).createMachine({
-  id: 'subscriptionsMachine',
-  initial: 'idle',
-  context: {
-    subscriptions: [],
-    selectedSubscription: null,
-  },
-  states: {
-    idle: {
-      tags: ['closed'],
-      entry: 'clearSelectedSubscription',
-      on: {
-        REMOVE_SUBSCRIPTION: { actions: 'removeSubscription' },
-        START_ADDING: 'adding',
-        START_EDITING: {
-          target: 'editing',
-          actions: 'setSelectedSubscription',
-        },
-      },
-    },
-    adding: {
-      tags: ['opened'],
-      on: {
-        ADD_SUBSCRIPTION: {
-          actions: 'addSubscription',
-          target: 'idle',
-        },
-        CANCEL: 'idle',
-      },
-    },
-    editing: {
-      tags: ['opened'],
-      on: {
-        EDIT_SUBSCRIPTION: {
-          actions: 'editSubscription',
-          target: 'idle',
-        },
-        CANCEL: 'idle',
-      },
-    },
-  },
-});
+type SubscriptionState = {
+  subscriptions: Subscription[];
+  selectedSubscription: Subscription | null;
+  isAdding: boolean;
+  isEditing: boolean;
 
-export const SubscriptionsContext = createActorContext(subscriptionsMachine);
-
-type State = StateFrom<typeof subscriptionsMachine>;
-
-const selectors = {
-  subscriptions: (state: State) => state.context.subscriptions,
-  isAdding: (state: State) => state.matches('adding'),
-  isEditing: (state: State) => state.matches('editing'),
-  selectedSubscription: (state: State) => state.context.selectedSubscription,
-  isOpened: (state: State) => state.hasTag('opened'),
+  // Actions
+  startAdding: () => void;
+  startEditing: (id: string) => void;
+  cancel: () => void;
+  addSubscription: (input: SubscriptionProps) => void;
+  removeSubscription: (id: string) => void;
+  editSubscription: (id: string, input: Nullable<SubscriptionProps>) => void;
 };
 
-export function useSubscriptions() {
-  const actor = SubscriptionsContext.useActorRef();
-  const subscriptions = SubscriptionsContext.useSelector(
-    selectors.subscriptions,
-  );
-  const isAdding = SubscriptionsContext.useSelector(selectors.isAdding);
-  const isEditing = SubscriptionsContext.useSelector(selectors.isEditing);
-  const isOpened = SubscriptionsContext.useSelector(selectors.isOpened);
-  const selectedSubscription = SubscriptionsContext.useSelector(
-    selectors.selectedSubscription,
-  );
+export const useSubscriptions = create<SubscriptionState>((set) => ({
+  subscriptions: [],
+  selectedSubscription: null,
+  isAdding: false,
+  isEditing: false,
 
-  function startAdding() {
-    actor.send({ type: 'START_ADDING' });
-  }
+  startAdding: () =>
+    set({
+      isAdding: true,
+      isEditing: false,
+      selectedSubscription: null,
+    }),
 
-  function startEditing(id: string) {
-    actor.send({ type: 'START_EDITING', id });
-  }
+  startEditing: (id) =>
+    set((state) => ({
+      isEditing: true,
+      isAdding: false,
+      selectedSubscription:
+        state.subscriptions.find((sub) => sub.id === id) ?? null,
+    })),
 
-  function cancel() {
-    actor.send({ type: 'CANCEL' });
-  }
+  cancel: () =>
+    set({
+      isAdding: false,
+      isEditing: false,
+      selectedSubscription: null,
+    }),
 
-  function addSubscription(input: SubscriptionProps) {
-    actor.send({ type: 'ADD_SUBSCRIPTION', input });
-  }
+  addSubscription: (input) =>
+    set((state) => ({
+      subscriptions: [
+        ...state.subscriptions,
+        {
+          ...input,
+          id: crypto.randomUUID(),
+          isActive: false,
+        },
+      ],
+      isAdding: false,
+    })),
 
-  function removeSubscription(id: string) {
-    actor.send({ type: 'REMOVE_SUBSCRIPTION', id });
-  }
+  removeSubscription: (id) =>
+    set((state) => ({
+      subscriptions: state.subscriptions.filter((sub) => sub.id !== id),
+    })),
 
-  function editSubscription(id: string, input: Nullable<SubscriptionProps>) {
-    actor.send({ id, type: 'EDIT_SUBSCRIPTION', input });
-  }
+  editSubscription: (id, input) =>
+    set((state) => ({
+      subscriptions: state.subscriptions.map((sub) =>
+        sub.id === id ? { ...sub, ...(input as SubscriptionProps) } : sub,
+      ),
+      isEditing: false,
+      selectedSubscription: null,
+    })),
+}));
 
+export function useSubscriptionModal() {
+  const state = useSubscriptions();
+  const { isAdding, isEditing } = state;
   return {
-    subscriptions,
-    isAdding,
-    isEditing,
-    isOpened,
-    selectedSubscription,
-    startAdding,
-    startEditing,
-    cancel,
-    addSubscription,
-    removeSubscription,
-    editSubscription,
+    ...state,
+    isOpened: isAdding || isEditing,
   };
 }

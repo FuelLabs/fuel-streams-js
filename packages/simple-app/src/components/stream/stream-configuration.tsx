@@ -4,7 +4,6 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { DeliverPolicyContext } from '@/lib/form/use-deliver-policy';
 import { cn } from '@/lib/utils';
 import { StreamForm } from './stream-form';
 
@@ -28,9 +27,7 @@ export function StreamConfiguration({ className }: StreamConfigurationProps) {
           </CardDescription>
         </div>
       </CardHeader>
-      <DeliverPolicyContext.Provider>
-        <StreamForm />
-      </DeliverPolicyContext.Provider>
+      <StreamForm />
     </Card>
   );
 }

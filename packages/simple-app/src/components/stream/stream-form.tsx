@@ -1,5 +1,4 @@
 import { Button } from '@/components/ui/button';
-import { useDeliverPolicy } from '@/lib/form/use-deliver-policy';
 import { useStreamData } from '@/lib/stream/use-stream-data';
 import { useSubscriptions } from '@/lib/stream/use-subscriptions';
 import { Play, Plus, Square } from 'lucide-react';
@@ -11,12 +10,11 @@ import { DeliverPolicySelector } from './deliver-policy-selector';
 export function StreamForm() {
   const { start, stop, isSubscribing } = useStreamData();
   const { subscriptions, startAdding } = useSubscriptions();
-  const { deliverPolicy } = useDeliverPolicy();
   const canStart = subscriptions.length > 0;
 
   function handleSubmit() {
     if (!subscriptions.length) return;
-    start(subscriptions, deliverPolicy);
+    start();
   }
 
   return (
