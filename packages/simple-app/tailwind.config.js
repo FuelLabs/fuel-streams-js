@@ -8,6 +8,7 @@ export default {
       fontFamily: {
         sans: ['Geist', 'system-ui', 'sans-serif'],
         mono: ['Geist Mono', 'monospace'],
+        'px-grotesk': ['Px Grotesk', 'system-ui', 'sans-serif'],
       },
       borderRadius: {
         lg: 'var(--radius)',
@@ -47,6 +48,24 @@ export default {
         card: {
           DEFAULT: 'hsl(var(--card))',
           foreground: 'hsl(var(--card-foreground))',
+        },
+      },
+      typography: {
+        DEFAULT: {
+          css: {
+            h1: {
+              fontFamily: 'Px Grotesk, system-ui, sans-serif',
+            },
+            h2: {
+              fontFamily: 'Px Grotesk, system-ui, sans-serif',
+            },
+            h3: {
+              fontFamily: 'Px Grotesk, system-ui, sans-serif',
+            },
+            h4: {
+              fontFamily: 'Px Grotesk, system-ui, sans-serif',
+            },
+          },
         },
       },
     },

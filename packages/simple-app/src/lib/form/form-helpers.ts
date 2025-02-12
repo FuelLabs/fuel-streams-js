@@ -1,4 +1,4 @@
-import { DeliverPolicy, type SubscriptionPayload } from '@fuels/streams';
+import type { SubjectPayload } from '@fuels/streams';
 import {
   type Fields,
   type FormField,
@@ -118,7 +118,7 @@ export class FormFieldsManager {
     selectedModule: ModuleKeys,
   ): { value: string; label: string }[] {
     const mod = this.getModule(selectedModule);
-    if (!mod.variants) return [];
+    if (!mod?.variants) return [];
 
     // Return only variant options
     return Object.entries(mod.variants).map(([key, value]) => ({
@@ -135,20 +135,14 @@ export class SubjectBuilder {
     selectedModule: ModuleKeys;
     selectedVariant: string | null;
     selectedFields: Record<string, string>;
-    deliverPolicy: DeliverPolicy;
-  }): SubscriptionPayload {
-    const {
-      selectedModule,
-      selectedVariant,
-      selectedFields,
-      deliverPolicy = DeliverPolicy.new(),
-    } = params;
-    if (!selectedModule)
+  }): SubjectPayload {
+    const { selectedModule, selectedVariant, selectedFields } = params;
+    if (!selectedModule) {
       return {
         subject: '',
         params: {},
-        deliverPolicy,
       };
+    }
 
     const manager = new FormFieldsManager(this.formStructure);
     const mod = manager.getModule(selectedModule);
@@ -175,7 +169,6 @@ export class SubjectBuilder {
     return {
       subject: subjectId,
       params: filteredParams,
-      deliverPolicy,
     };
   }
 

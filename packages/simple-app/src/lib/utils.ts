@@ -4,3 +4,7 @@ import { twMerge } from 'tailwind-merge';
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+export type Nullable<T> = {
+  [P in keyof T]: T[P] | null;
+};

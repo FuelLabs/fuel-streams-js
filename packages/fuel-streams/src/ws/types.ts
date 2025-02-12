@@ -1,55 +1,44 @@
 import type { GenericRecord } from '../modules/subject-base';
-import type { DeliverPolicy } from './deliver-policy';
 
 export enum FuelNetwork {
   Local = 'local',
   Staging = 'staging',
-  // Testnet = 'testnet',
   Mainnet = 'mainnet',
 }
 
-export interface SubscriptionPayload {
-  deliverPolicy: DeliverPolicy;
+export type SubjectPayload = {
   subject: string;
   params: Record<string, any>;
-}
-
-export type ClientMessageSubscribe = {
-  subscribe: {
-    deliverPolicy: string;
-    subject: string;
-    params: Record<string, any>;
-  };
 };
 
-export type ClientMessageUnsubscribe = {
-  unsubscribe: {
-    deliverPolicy: string;
-    subject: string;
-    params: Record<string, any>;
-  };
+export type SubscribeRequest = {
+  deliverPolicy: string;
+  subscribe: SubjectPayload[];
 };
 
-export type ClientMessage = ClientMessageSubscribe | ClientMessageUnsubscribe;
+export type UnsubscribeRequest = {
+  deliverPolicy: string;
+  unsubscribe: SubjectPayload[];
+};
 
-export type ServerResponse<R extends GenericRecord> = {
-  key: string;
-  data: R;
+export type StreamResponse<R extends GenericRecord> = {
+  version: string;
+  type: string;
+  subject: string;
+  payload: R;
 };
 
 export type ClientResponse<
   T extends GenericRecord,
   RawT extends GenericRecord,
 > = {
-  key: string;
-  data: T;
-  rawData: RawT;
+  version: string;
+  type: string;
+  subject: string;
+  payload: T;
+  rawPayload: RawT;
 };
 
 export type ServerMessage =
-  | {
-      response: ServerResponse<any>;
-    }
-  | {
-      error: string;
-    };
+  | { response: StreamResponse<any> }
+  | { error: string };

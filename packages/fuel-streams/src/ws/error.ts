@@ -59,6 +59,12 @@ export class ClientError extends Error {
     );
   }
 
+  static UnsubscriptionError(subject: string): ClientError {
+    return new ClientError(
+      `Failed to unsubscribe from ${subject}. Please try again.`,
+    );
+  }
+
   static NetworkError(network: string): ClientError {
     return new ClientError(
       `Failed to connect to ${network} network. Please check your network settings and try again.`,
@@ -68,6 +74,17 @@ export class ClientError extends Error {
   static UnauthorizedError(): ClientError {
     return new ClientError(
       'Unauthorized access. Please check your API key and permissions.',
+    );
+  }
+
+  static ParserNotFound(subject: string): ClientError {
+    return new ClientError(`No parser found for subject: ${subject}`);
+  }
+
+  static ParserInitializationError(subject: string, cause: Error): ClientError {
+    return new ClientError(
+      `Failed to initialize parser for subject: ${subject}. Please try again.`,
+      cause,
     );
   }
 

@@ -13,6 +13,9 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import { useConnection } from '@/lib/stream/use-connection';
+import { useStreamTab } from '@/lib/stream/use-stream-tab';
+import { useSubscriptions } from '@/lib/stream/use-subscriptions';
 import { cn } from '@/lib/utils';
 import ReactJsonView from '@microlink/react-json-view';
 import { TooltipProvider } from '@radix-ui/react-tooltip';
@@ -20,10 +23,10 @@ import { cva } from 'class-variance-authority';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Code, Database, Eraser } from 'lucide-react';
 import { useRef } from 'react';
-import { useDynamicForm } from '../lib/form';
-import { useStreamData } from '../lib/stream/use-stream-data';
-import { CodeExamples } from './code-examples';
-import { useTheme } from './theme-provider';
+import { useStreamData } from '../../lib/stream/use-stream-data';
+import { ApiKeyPopover } from '../api-key-popover';
+import { CodeExamples } from '../code-examples';
+import { useTheme } from '../theme-provider';
 
 type StreamViewProps = {
   className?: string;
@@ -31,22 +34,26 @@ type StreamViewProps = {
 
 const MotionCard = motion(Card);
 
-const headerButton = cva('h-9 gap-2 text-sm font-medium transition-colors', {
-  variants: {
-    active: {
-      true: '',
-      false:
-        'bg-muted text-muted-foreground hover:text-foreground hover:bg-accent/50',
+const headerButton = cva(
+  'h-12 gap-2 text-sm font-medium transition-colors rounded-none border-b-2',
+  {
+    variants: {
+      active: {
+        true: 'border-primary text-foreground',
+        false:
+          'border-transparent text-muted-foreground/70 hover:text-foreground hover:border-muted',
+      },
+    },
+    defaultVariants: {
+      active: false,
     },
   },
-  defaultVariants: {
-    active: false,
-  },
-});
+);
 
 export function StreamView({ className }: StreamViewProps) {
-  const { subject } = useDynamicForm();
-  const { clear, tab, changeTab } = useStreamData();
+  const { clear } = useStreamData();
+  const { tab, setTab } = useStreamTab();
+  const { subscriptions } = useSubscriptions();
 
   return (
     <Card
@@ -64,62 +71,56 @@ export function StreamView({ className }: StreamViewProps) {
               : 'Example code snippets for implementing the stream'}
           </CardDescription>
         </div>
-        <nav className="flex items-center gap-2">
-          <Button
-            size="sm"
-            onClick={() => changeTab('data')}
-            className={headerButton({ active: tab === 'data' })}
-          >
-            <Database size={16} />
-            Live Data
-          </Button>
-          <Button
-            size="sm"
-            onClick={() => changeTab('code')}
-            className={headerButton({ active: tab === 'code' })}
-          >
-            <Code size={16} />
-            How to Use
-          </Button>
-        </nav>
-      </CardHeader>
-      {subject && (
-        <div
-          className="flex justify-between items-center px-6 py-2 border-b"
-          aria-label="Current Subject Query"
-        >
-          <code className="inline-flex items-center gap-2 text-sm text-muted-foreground">
-            <span className="text-foreground">Subject Query:</span>
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <div className="truncate max-w-[400px]">{subject}</div>
-                </TooltipTrigger>
-                <TooltipContent side="top" align="start">
-                  {subject}
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-          </code>
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={clear}
-            aria-label="Clear Stream Data"
-          >
-            <Eraser size={16} /> Clear
-          </Button>
+        <div className="flex items-center gap-2 ml-4">
+          <ApiKeyPopover />
         </div>
-      )}
+      </CardHeader>
+      <div
+        className="flex justify-between items-center px-6 h-12 border-b"
+        aria-label="Current Subject Query"
+      >
+        <div className="inline-flex items-center gap-2 text-sm text-muted-foreground">
+          <nav className="flex items-center">
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={() => setTab('data')}
+              className={headerButton({ active: tab === 'data' })}
+            >
+              <Database size={16} />
+              Live Data
+            </Button>
+            <Button
+              size="sm"
+              variant="ghost"
+              disabled={!subscriptions.length}
+              onClick={() => setTab('code')}
+              className={headerButton({ active: tab === 'code' })}
+            >
+              <Code size={16} />
+              How to Use
+            </Button>
+          </nav>
+        </div>
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={clear}
+          aria-label="Clear Stream Data"
+        >
+          <Eraser size={16} /> Clear
+        </Button>
+      </div>
       {tab === 'data' ? <DataVisualization /> : <CodeExamples />}
     </Card>
   );
 }
 
 function DataVisualization() {
-  const { subject } = useDynamicForm();
-  const { data, isConnecting } = useStreamData();
+  const { data } = useStreamData();
+  const { isConnecting } = useConnection();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const { subscriptions } = useSubscriptions();
   const { isTheme } = useTheme();
 
   return (
@@ -143,7 +144,9 @@ function DataVisualization() {
       ) : data.length === 0 ? (
         <div
           className={`flex items-center justify-center text-muted-foreground ${
-            subject ? 'h-[calc(100vh-350px)]' : 'h-[calc(100vh-250px)]'
+            !subscriptions.length
+              ? 'h-[calc(100vh-350px)]'
+              : 'h-[calc(100vh-250px)]'
           }`}
           aria-label="No stream data available"
         >
@@ -153,14 +156,14 @@ function DataVisualization() {
       ) : (
         <ScrollArea className="h-[calc(100vh-200px)]" ref={scrollAreaRef}>
           <AnimatePresence>
-            {data.map((item) => (
+            {data.map(({ rawPayload, ...item }) => (
               <MotionCard
-                key={item.key}
+                key={item.subject}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.4, ease: 'easeOut' }}
-                aria-label={`Stream data for ${item.key}`}
+                aria-label={`Stream data for ${item.subject}`}
                 className="shadow-none rounded-sm max-w-full w-full overflow-hidden mb-4"
               >
                 <CardHeader className="py-0 px-4 mb-4 bg-muted border-b">
@@ -169,11 +172,11 @@ function DataVisualization() {
                       <Tooltip>
                         <TooltipTrigger>
                           <div className="truncate max-w-[300px]">
-                            {item.key}
+                            {item.subject}
                           </div>
                         </TooltipTrigger>
                         <TooltipContent side="top" align="start">
-                          {item.key}
+                          {item.subject}
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
@@ -196,7 +199,7 @@ function DataVisualization() {
                       isTheme('dark') ? 'summerfruit' : 'summerfruit:inverted'
                     }
                     displayDataTypes={false}
-                    src={item.rawData}
+                    src={{ ...item, payload: rawPayload }}
                     style={{
                       padding: 0,
                       background: 'transparent',

@@ -4,7 +4,7 @@
  */
 
 import v from 'voca';
-import type { ClientMessageSubscribe, DeliverPolicy } from '../ws';
+import type { DeliverPolicy, SubjectPayload } from '../ws';
 
 export type GenericRecord = Record<string, any>;
 
@@ -68,15 +68,10 @@ export abstract class SubjectBase<
     );
   }
 
-  subscriptionPayloadJson(
-    deliverPolicy: DeliverPolicy,
-  ): ClientMessageSubscribe {
+  toPayload(): SubjectPayload {
     return {
-      subscribe: {
-        subject: this.id,
-        params: this.paramsFromFields(),
-        deliverPolicy: deliverPolicy.toString(),
-      },
+      subject: this.id,
+      params: this.paramsFromFields(),
     };
   }
 

@@ -32,7 +32,7 @@ export class TransactionsSubject extends SubjectBase<
 > {
   metadata = {
     id: 'transactions',
-    format: 'transactions.{block_height}.{tx_id}.{tx_index}.{tx_status}.{kind}',
+    format: 'transactions.{block_height}.{tx_id}.{tx_index}.{tx_status}.{type}',
     parser: new TransactionParser(),
   };
 }

@@ -14,12 +14,8 @@ function humanize(label: string): string {
 }
 
 export function InputVariant() {
-  const { variantOptions, selectedVariant, handleVariantChange } =
-    useDynamicForm();
-
-  if (variantOptions.length === 0) {
-    return null;
-  }
+  const { context, handleVariantChange } = useDynamicForm();
+  const { variantOptions = [], selectedVariant } = context ?? {};
 
   return (
     <div>
@@ -29,7 +25,11 @@ export function InputVariant() {
       >
         Variant
       </label>
-      <Select onValueChange={handleVariantChange} value={selectedVariant ?? ''}>
+      <Select
+        onValueChange={handleVariantChange}
+        defaultValue={(selectedVariant as string) ?? ''}
+        value={(selectedVariant as string) ?? ''}
+      >
         {selectedVariant && (
           <SelectClear
             onClick={() => handleVariantChange('')}
@@ -40,7 +40,7 @@ export function InputVariant() {
           <SelectValue placeholder="Select a variant" />
         </SelectTrigger>
         <SelectContent>
-          {variantOptions.map(({ value, label }) => (
+          {variantOptions?.map(({ value, label }) => (
             <SelectItem
               key={value}
               value={value}

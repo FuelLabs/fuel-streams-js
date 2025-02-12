@@ -6,7 +6,7 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { Switch } from '@/components/ui/switch';
-import { useDynamicForm } from '@/lib/form/use-dynamic-form';
+import { useDeliverPolicy } from '@/lib/stream/use-deliver-policy';
 import { DeliverPolicyType } from '@fuels/streams';
 import { Settings2 } from 'lucide-react';
 
@@ -14,9 +14,9 @@ export function DeliverPolicySelector() {
   const {
     deliverPolicyType,
     blockNumber,
-    handleDeliverPolicyTypeChange,
-    handleBlockNumberChange,
-  } = useDynamicForm();
+    changeDeliverPolicyType,
+    changeBlockNumber,
+  } = useDeliverPolicy();
 
   return (
     <div className="flex items-center gap-2">
@@ -25,7 +25,7 @@ export function DeliverPolicySelector() {
           id="historical-data"
           checked={deliverPolicyType === DeliverPolicyType.FromBlock}
           onCheckedChange={(checked) =>
-            handleDeliverPolicyTypeChange(
+            changeDeliverPolicyType(
               checked ? DeliverPolicyType.FromBlock : DeliverPolicyType.New,
             )
           }
@@ -61,9 +61,9 @@ export function DeliverPolicySelector() {
                 <Input
                   id="block-number"
                   type="number"
-                  value={blockNumber}
-                  onChange={(e) => handleBlockNumberChange(e.target.value)}
                   placeholder="Enter block number"
+                  value={blockNumber}
+                  onChange={(e) => changeBlockNumber(Number(e.target.value))}
                 />
               </div>
             </div>

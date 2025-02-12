@@ -16,12 +16,13 @@ import { ClientError } from './error';
 import { getWsUrl } from './networks';
 import { WebSocket } from './platform';
 import type {
-  ClientMessage,
   ClientResponse,
   FuelNetwork,
   ServerMessage,
-  ServerResponse,
-  SubscriptionPayload,
+  StreamResponse,
+  SubjectPayload,
+  SubscribeRequest,
+  UnsubscribeRequest,
 } from './types';
 
 export interface ConnectionOpts {
@@ -29,108 +30,170 @@ export interface ConnectionOpts {
   apiKey: string | null;
 }
 
+type ParserMap = Map<string, EntityParser<any, any>>;
+
 interface SubscriptionIterator<T extends GenericRecord, R extends GenericRecord>
   extends AsyncIterableIterator<ClientResponse<T, R>> {
   onMessage: (handler: (data: ClientResponse<T, R>) => void) => () => void;
+  onMessageError: (handler: (error: Error) => void) => () => void;
 }
 
 export class Connection {
   private ws: WebSocket;
   private messageHandlers: Map<string, (data: any) => void>;
+  private messageErrors: Map<string, (error: Error) => void>;
   private disconnectHandlers: Set<() => void>;
+  private parserMap: ParserMap = new Map();
+  private isClosing = false;
 
   constructor(ws: WebSocket) {
     this.ws = ws;
     this.messageHandlers = new Map();
+    this.messageErrors = new Map();
     this.disconnectHandlers = new Set();
 
     this.ws.onmessage = async (event) => {
       try {
-        const data =
-          event.data instanceof Blob
-            ? await event.data.text()
-            : event.data.toString();
+        const data = await this.parseEventData(event);
+        const msg = this.parseJsonMessage(data);
 
-        const msg = JSON.parse(data) as ServerMessage;
         if ('error' in msg) {
-          switch (msg.error) {
-            case 'unauthorized':
-              throw ClientError.UnauthorizedError();
-            case 'invalid_api_key':
-              throw ClientError.InvalidApiKey();
-            default:
-              throw new ClientError(msg.error);
-          }
+          const clientError = this.handleServerError(msg.error);
+          this.messageErrors.forEach((handler) => handler(clientError));
+          return;
         }
 
         if ('response' in msg) {
           this.messageHandlers.forEach((handler) => handler(msg.response));
         }
       } catch (err) {
-        if (err instanceof ClientError) {
-          throw err;
-        }
-        if (err instanceof SyntaxError) {
-          throw ClientError.JsonParseError(err);
-        }
-        throw ClientError.ApiError(err as Error);
+        const clientError = this.handleError(err);
+        this.messageErrors.forEach((handler) => handler(clientError));
       }
     };
 
     this.ws.onerror = (error) => {
-      throw ClientError.WebSocketError(error as unknown as Error);
+      const wsError = ClientError.WebSocketError(error as unknown as Error);
+      this.messageErrors.forEach((handler) => handler(wsError));
     };
 
-    this.ws.onclose = () => {
+    this.ws.onclose = (event) => {
+      if (!this.isClosing) {
+        const closeError = new ClientError(
+          `WebSocket closed: ${event.reason || 'Unknown reason'}`,
+        );
+        this.messageErrors.forEach((handler) => handler(closeError));
+      }
       this.disconnectHandlers.forEach((handler) => handler());
     };
   }
 
+  private async parseEventData(event: MessageEvent): Promise<string> {
+    return event.data instanceof Blob
+      ? await event.data.text()
+      : event.data.toString();
+  }
+
+  private parseJsonMessage(data: string): ServerMessage {
+    try {
+      return JSON.parse(data);
+    } catch (err) {
+      throw ClientError.JsonParseError(err as SyntaxError);
+    }
+  }
+
+  private handleServerError(error: string): ClientError {
+    return (() => {
+      switch (error) {
+        case 'unauthorized':
+          return ClientError.UnauthorizedError();
+        case 'invalid_api_key':
+          return ClientError.InvalidApiKey();
+        default:
+          return new ClientError(error);
+      }
+    })();
+  }
+
+  private handleError(err: unknown): ClientError {
+    return (() => {
+      if (err instanceof ClientError) {
+        return err;
+      }
+      if (err instanceof SyntaxError) {
+        return ClientError.JsonParseError(err);
+      }
+      return ClientError.ApiError(err as Error);
+    })();
+  }
+
   private createSubscriptionIterator<
-    S extends SubjectBase<GenericRecord, GenericRecord, GenericRecord>,
-    T extends ReturnType<S['_entity']>,
-    R extends ReturnType<S['_rawEntity']>,
-  >(subject: string, parser: EntityParser<T, R>): SubscriptionIterator<T, R> {
+    T extends GenericRecord,
+    R extends GenericRecord,
+  >(): SubscriptionIterator<T, R> {
+    const handlerId = `multi_${Array.from(this.parserMap.keys()).join('_')}`;
     return {
       next: () => {
         return new Promise<IteratorResult<ClientResponse<T, R>, any>>(
-          (resolve) => {
-            const handler = (data: ServerResponse<R>) => {
-              resolve({
-                done: false,
-                value: {
-                  key: data.key,
-                  data: parser.parse(data.data),
-                  rawData: data.data,
-                },
-              });
+          (resolve, reject) => {
+            const handler = (data: StreamResponse<R>) => {
+              try {
+                const parser = this.parserMap.get(data.type);
+                if (!parser) {
+                  throw ClientError.ParserNotFound(data.type);
+                }
+                resolve({
+                  done: false,
+                  value: {
+                    ...data,
+                    payload: parser.parse(data.payload),
+                    rawPayload: data.payload,
+                  },
+                });
+              } catch (err) {
+                reject(this.handleError(err));
+              }
             };
-            this.messageHandlers.set(subject, handler);
+            this.messageHandlers.set(handlerId, handler);
           },
         );
       },
       return: () => {
-        this.messageHandlers.delete(subject);
+        this.messageHandlers.delete(handlerId);
         return Promise.resolve({ done: true, value: undefined });
       },
       throw: (error) => {
-        this.messageHandlers.delete(subject);
+        this.messageHandlers.delete(handlerId);
         return Promise.reject(error);
       },
       [Symbol.asyncIterator]() {
         return this;
       },
       onMessage: (handler) => {
-        const messageHandler = (data: ServerResponse<R>) => {
-          handler({
-            key: data.key,
-            data: parser.parse(data.data),
-            rawData: data.data,
-          });
+        const messageHandler = (data: StreamResponse<R>) => {
+          try {
+            const parser = this.parserMap.get(data.type);
+            if (!parser) {
+              throw ClientError.ParserNotFound(data.type);
+            }
+            handler({
+              ...data,
+              payload: parser.parse(data.payload),
+              rawPayload: data.payload,
+            });
+          } catch (err) {
+            this.handleError(err);
+          }
         };
-        this.messageHandlers.set(subject, messageHandler);
+        this.messageHandlers.set(handlerId, messageHandler);
         return () => {
-          this.messageHandlers.delete(subject);
+          this.messageHandlers.delete(handlerId);
+        };
+      },
+      onMessageError: (handler) => {
+        this.messageErrors.set(handlerId, handler);
+        return () => {
+          this.messageErrors.delete(handlerId);
         };
       },
     };
@@ -141,47 +204,81 @@ export class Connection {
     Entity extends ReturnType<S['_entity']> = ReturnType<S['_entity']>,
     RawEntity extends ReturnType<S['_rawEntity']> = ReturnType<S['_rawEntity']>,
   >(
-    subject: S,
+    subjects: S[],
     deliverPolicy: DeliverPolicy,
   ): Promise<SubscriptionIterator<Entity, RawEntity>> {
     try {
-      const parser = subject.parser as EntityParser<Entity, RawEntity>;
-      const message = subject.subscriptionPayloadJson(deliverPolicy);
-      await this.sendMessage(message);
-      return this.createSubscriptionIterator<S, Entity, RawEntity>(
-        message.subscribe.subject,
-        parser,
-      );
+      const payloads = subjects.map((subject) => {
+        const payload = subject.toPayload();
+        this.parserMap.set(
+          payload.subject,
+          subject.parser as EntityParser<Entity, RawEntity>,
+        );
+        return payload;
+      });
+
+      await this.sendMessage({
+        subscribe: payloads,
+        deliverPolicy: deliverPolicy.toString(),
+      });
+
+      return this.createSubscriptionIterator<Entity, RawEntity>();
     } catch (err) {
       if (err instanceof ClientError) {
         throw err;
       }
-      throw ClientError.SubscriptionError(subject.toString());
+      throw ClientError.SubscriptionError(
+        subjects.map((s) => s.toString()).join(', '),
+      );
     }
   }
 
   async subscribeWithPayload<
     T extends GenericRecord,
     RawT extends GenericRecord,
-  >(payload: SubscriptionPayload): Promise<SubscriptionIterator<T, RawT>> {
+  >(
+    deliverPolicy: DeliverPolicy,
+    payloads: SubjectPayload[],
+  ): Promise<SubscriptionIterator<T, RawT>> {
     try {
-      const message: ClientMessage = {
-        subscribe: {
-          ...payload,
-          deliverPolicy: payload.deliverPolicy.toString(),
-        },
+      const message: SubscribeRequest = {
+        deliverPolicy: deliverPolicy.toString(),
+        subscribe: payloads,
       };
+
       await this.sendMessage(message);
-      const parser = this.findParser(payload.subject);
-      return this.createSubscriptionIterator<any, T, RawT>(
-        payload.subject,
-        parser,
-      );
+      payloads.forEach((payload) => {
+        this.parserMap.set(payload.subject, this.findParser(payload.subject));
+      });
+
+      return this.createSubscriptionIterator<T, RawT>();
     } catch (err) {
       if (err instanceof ClientError) {
         throw err;
       }
-      throw ClientError.SubscriptionError(payload.subject);
+      throw ClientError.SubscriptionError(
+        payloads.map((p) => p.subject).join(', '),
+      );
+    }
+  }
+
+  async unsubscribe(
+    deliverPolicy: DeliverPolicy,
+    payloads: SubjectPayload[],
+  ): Promise<void> {
+    try {
+      const message: UnsubscribeRequest = {
+        deliverPolicy: deliverPolicy.toString(),
+        unsubscribe: payloads,
+      };
+      await this.sendMessage(message);
+    } catch (err) {
+      if (err instanceof ClientError) {
+        throw err;
+      }
+      throw ClientError.UnsubscriptionError(
+        payloads.map((p) => p.subject).join(', '),
+      );
     }
   }
 
@@ -199,14 +296,24 @@ export class Connection {
       subject.includes(key),
     );
     if (!matchingKey) {
-      throw new Error(`No parser found for subject: ${subject}`);
+      throw ClientError.ParserNotFound(subject);
     }
 
-    return new parserMap[matchingKey]();
+    try {
+      return new parserMap[matchingKey]();
+    } catch (err) {
+      throw ClientError.ParserInitializationError(matchingKey, err as Error);
+    }
   }
 
-  private async sendMessage(message: ClientMessage): Promise<void> {
-    if (this.ws.readyState !== this.ws.OPEN) {
+  private canSendMessage(): boolean {
+    return !this.isClosing && this.ws.readyState === this.ws.OPEN;
+  }
+
+  private async sendMessage(
+    message: SubscribeRequest | UnsubscribeRequest,
+  ): Promise<void> {
+    if (!this.canSendMessage()) {
       throw ClientError.WebSocketError(
         new Error('WebSocket connection is not open'),
       );
@@ -214,10 +321,29 @@ export class Connection {
 
     return new Promise((resolve, reject) => {
       try {
+        if (!message || typeof message !== 'object') {
+          throw new Error('Invalid message format');
+        }
+
+        const timeoutId = setTimeout(() => {
+          reject(
+            ClientError.WebSocketError(new Error('Send operation timed out')),
+          );
+        }, 5000);
+
         this.ws.send(JSON.stringify(message));
+        clearTimeout(timeoutId);
         resolve();
       } catch (err) {
-        reject(ClientError.WebSocketError(err as Error));
+        if (err instanceof Error) {
+          reject(ClientError.WebSocketError(err));
+        } else {
+          reject(
+            ClientError.WebSocketError(
+              new Error('Unknown error during message send'),
+            ),
+          );
+        }
       }
     });
   }
@@ -234,9 +360,25 @@ export class Connection {
   }
 
   close() {
+    try {
+      this.isClosing = true;
+      this.messageHandlers.clear();
+      this.messageErrors.clear();
+      this.disconnectHandlers.clear();
+      if (this.ws.readyState === this.ws.OPEN) {
+        this.ws.close(1000, 'Closed by client');
+      }
+    } catch (err) {
+      console.error('Error during connection close:', err);
+    } finally {
+      this.isClosing = false;
+    }
+  }
+
+  reset() {
     this.messageHandlers.clear();
-    this.disconnectHandlers.clear();
-    this.ws.close();
+    this.messageErrors.clear();
+    this.parserMap.clear();
   }
 }
 
@@ -279,7 +421,7 @@ export class Client {
         const timeoutId = setTimeout(() => {
           cleanup();
           reject(ClientError.ConnectionTimeout());
-        }, 10000); // 10 second timeout
+        }, 10000);
 
         const cleanup = () => {
           clearTimeout(timeoutId);

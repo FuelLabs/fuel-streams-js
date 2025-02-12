@@ -5,7 +5,7 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from '@/components/ui/popover';
-import { useStreamData } from '@/lib/stream/use-stream-data';
+import { useConnection } from '@/lib/stream/use-connection';
 import type * as PopoverPrimitive from '@radix-ui/react-popover';
 import { cva } from 'class-variance-authority';
 import { useState } from 'react';
@@ -34,7 +34,7 @@ export function ApiKeyPopover({
   className,
   ...popoverProps
 }: ApiKeyPopoverProps) {
-  const { isConnected, apiKey, setApiKey } = useStreamData();
+  const { isConnected, apiKey, setApiKey } = useConnection();
   const [value, setValue] = useState(apiKey || '');
   const [open, setOpen] = useState(false);
 
