@@ -60,8 +60,8 @@ export const useConnection = create<ConnectionStore>((set, get) => ({
 
     if (!apiKey) {
       const error = new Error('API Key is required');
-      set({ error });
       toast.warning(error.message);
+      set({ error, isConnecting: false, isConnected: false });
       return null;
     }
 
