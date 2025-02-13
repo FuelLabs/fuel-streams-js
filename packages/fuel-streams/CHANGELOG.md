@@ -1,5 +1,11 @@
 # @fuels/streams
 
+## 0.6.0
+
+### Minor Changes
+
+- [`8d62110`](https://github.com/FuelLabs/fuel-streams-js/commit/8d621108e18be56ed308b0d11a417f09e8026ced) Thanks [@pedronauck](https://github.com/pedronauck)! - Feat: add support for multiple subscriptions
+
 ## 0.5.2
 
 ### Patch Changes
