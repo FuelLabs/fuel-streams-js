@@ -13,18 +13,45 @@ env:
   BUILD_VERSION: ""
 
 jobs:
-  release-changesets:
-    environment: npm-deploy
-    name: Release main or rc
-    runs-on: ubuntu-latest
-    permissions: write-all
+  create-pr:
+    name: Push changes to Changeset PR
+    runs-on: buildjet-4vcpu-ubuntu-2204
+    permissions:
+      contents: write
+      pull-requests: write
+    if: "!startsWith(github.event.head_commit.message, 'ci(changesets): versioning packages')"
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.ref }}
-          # workaround to ensure force pushes to changeset branch use GITHUB_TOKEN owner's account
-          # see https://github.com/changesets/action/issues/70
+          persist-credentials: false
+
+      - name: Setup Bun
+        uses: ./.github/actions/setup-bun
+
+      - name: Setup git user (for changelog step)
+        run: |
+          git config --global user.name "${{ github.actor }}"
+          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
+
+      - name: Create Changeset PR
+        uses: changesets/action@v1
+        with:
+          commit: "ci(changesets): versioning packages"
+          title: "ci(changesets): versioning packages"
+          createGithubReleases: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  publish-npm:
+    name: Release to NPM
+    runs-on: ubuntu-latest
+    environment: npm-deploy
+    if: "startsWith(github.event.head_commit.message, 'ci(changesets): versioning packages')"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
           persist-credentials: false
 
       - name: Setup Bun
@@ -47,21 +74,21 @@ jobs:
           git config --global user.name "${{ github.actor }}"
           git config --global user.email "${{ github.actor }}@users.noreply.github.com"
 
-      - name: Build Lib
-        run: bun run build:libs
+      - name: Build packages
+        run: |
+          bun run build:libs
+          bun run ./scripts/publish.ts
 
-      - name: Create Release Pull Request or Publish to NPM
+      - name: Publish to NPM
         id: changesets
-        uses: FuelLabs/changesets-action@main
+        uses: FuelLabs/changesets-action@v2.0.0
         with:
           publish: bun run changeset publish --tag latest
-          version: bun run changeset version
-          commit: "ci(changesets): versioning packages"
-          title: "ci(changesets): versioning packages"
           createGithubReleases: aggregate
-          githubReleaseName: v${{ env.BUILD_VERSION }}
-          githubTagName: v${{ env.BUILD_VERSION }}
+          version: bun run changeset version
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN_STREAMS }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN_STREAMS }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: |
+          git reset --hard
