@@ -13,22 +13,72 @@ env:
   BUILD_VERSION: ""
 
 jobs:
-  release-changesets:
-    environment: npm-deploy
-    name: Release main or rc
-    runs-on: ubuntu-latest
-    permissions: write-all
+  create-pr:
+    name: Push changes to Changeset PR
+    runs-on: buildjet-4vcpu-ubuntu-2204
+    permissions:
+      contents: write
+      pull-requests: write
+    if: "!startsWith(github.event.head_commit.message, 'ci(changesets): versioning packages')"
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ github.event.pull_request.head.ref }}
-          # workaround to ensure force pushes to changeset branch use GITHUB_TOKEN owner's account
-          # see https://github.com/changesets/action/issues/70
           persist-credentials: false
 
       - name: Setup Bun
         uses: ./.github/actions/setup-bun
+
+      - name: Setup git user (for changelog step)
+        run: |
+          git config --global user.name "${{ github.actor }}"
+          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
+
+      - name: Create Changeset PR
+        uses: changesets/action@v1
+        with:
+          commit: "ci(changesets): versioning packages"
+          title: "ci(changesets): versioning packages"
+          createGithubReleases: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  publish-npm:
+    name: Release to NPM
+    runs-on: ubuntu-latest
+    environment: npm-deploy
+    if: "startsWith(github.event.head_commit.message, 'ci(changesets): versioning packages')"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Remove package manager and engines from package.json
+        run: |
+          find . -name 'package.json' -exec node -e '
+            const fs = require("fs");
+            const file = process.argv[1];
+            const pkg = JSON.parse(fs.readFileSync(file, "utf8"));
+            delete pkg.packageManager;
+            delete pkg.engines;
+            fs.writeFileSync(file, JSON.stringify(pkg, null, 2));
+          ' {} \;
+
+      - uses: pnpm/action-setup@v4
+        name: Install pnpm
+        with:
+          version: latest
+          run_install: false
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22.14.0
+
+      - name: Install dependencies
+        shell: bash
+        run: pnpm install
 
       - uses: FuelLabs/github-actions/setups/npm@master
         with:
@@ -36,8 +86,8 @@ jobs:
 
       - name: Bump and Collect Version
         run: |
-          bun run changeset version
-          echo "BUILD_VERSION=$(bun run --silent packages:version)" >> $GITHUB_ENV
+          pnpm changeset version
+          echo "BUILD_VERSION=$(pnpm -s packages:version)" >> $GITHUB_ENV
           git reset --hard
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -47,20 +97,16 @@ jobs:
           git config --global user.name "${{ github.actor }}"
           git config --global user.email "${{ github.actor }}@users.noreply.github.com"
 
-      - name: Build Lib
-        run: bun run build:libs
+      - name: Build packages
+        run: pnpm build:libs
 
-      - name: Create Release Pull Request or Publish to NPM
+      - name: Publish to NPM
         id: changesets
-        uses: FuelLabs/changesets-action@main
+        uses: FuelLabs/changesets-action@v2.0.0
         with:
-          publish: bun run changeset publish --tag latest
-          version: bun run changeset version
-          commit: "ci(changesets): versioning packages"
-          title: "ci(changesets): versioning packages"
+          publish: pnpm changeset publish --tag latest
           createGithubReleases: aggregate
-          githubReleaseName: v${{ env.BUILD_VERSION }}
-          githubTagName: v${{ env.BUILD_VERSION }}
+          version: pnpm changeset version
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN_STREAMS }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN_STREAMS }}
