@@ -16,9 +16,7 @@ jobs:
   create-pr:
     name: Push changes to Changeset PR
     runs-on: buildjet-4vcpu-ubuntu-2204
-    permissions:
-      contents: write
-      pull-requests: write
+    permissions: write-all
     if: "!startsWith(github.event.head_commit.message, 'ci(changesets): versioning packages')"
     steps:
       - uses: actions/checkout@v4
@@ -48,6 +46,7 @@ jobs:
     runs-on: ubuntu-latest
     environment: npm-deploy
     if: "startsWith(github.event.head_commit.message, 'ci(changesets): versioning packages')"
+    permissions: write-all
     steps:
       - uses: actions/checkout@v4
         with:
@@ -74,6 +73,10 @@ jobs:
           git config --global user.name "${{ github.actor }}"
           git config --global user.email "${{ github.actor }}@users.noreply.github.com"
 
+      - name: Set branch name and changeset PR title
+        run: |
+          echo "CHANGESET_PR_TITLE=$(echo "ci(release): \`${{ env.BUILD_VERSION }}\` @ \`${{ github.ref_name }}\`")" >> $GITHUB_ENV
+
       - name: Build packages
         run: |
           bun run build:libs
@@ -81,13 +84,16 @@ jobs:
 
       - name: Publish to NPM
         id: changesets
-        uses: FuelLabs/changesets-action@v2.0.0
+        uses: FuelLabs/changesets-action@main
         with:
           publish: bun run changeset publish --tag latest
-          createGithubReleases: aggregate
           version: bun run changeset version
+          commit: "ci(release): versioning packages and changesets"
+          title: ${{ env.CHANGESET_PR_TITLE }}
+          createGithubReleases: aggregate
+          githubReleaseName: ${{ env.BUILD_VERSION }}
+          githubTagName: ${{ env.BUILD_VERSION }}
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN_STREAMS }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN_STREAMS }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: |
