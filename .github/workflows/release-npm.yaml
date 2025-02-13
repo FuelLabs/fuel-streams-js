@@ -101,7 +101,7 @@ jobs:
 
       - name: Publish to NPM
         id: changesets
-        uses: FuelLabs/changesets-action@main
+        uses: FuelLabs/changesets-action@pn/tag
         with:
           publish: bun run changeset publish --tag latest
           version: bun run changeset version
