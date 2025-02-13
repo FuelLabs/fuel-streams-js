@@ -24,6 +24,7 @@
     "generate:subjects": "bun ./scripts/generate-subjects.ts -o ./packages/fuel-streams/src/modules && bun run format",
     "changeset:next": "bun ./scripts/changeset-next.ts",
     "packages:version": "bun ./scripts/version.ts",
+    "packages:publish": "./scripts/publish.sh",
     "filters:list": "bun ./scripts/filters-list.ts"
   },
   "devDependencies": {
