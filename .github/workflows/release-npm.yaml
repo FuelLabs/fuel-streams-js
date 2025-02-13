@@ -17,7 +17,7 @@ jobs:
     name: Push changes to Changeset PR
     runs-on: buildjet-4vcpu-ubuntu-2204
     permissions: write-all
-    if: "!startsWith(github.event.head_commit.message, 'ci(changesets): versioning packages')"
+    if: "!startsWith(github.event.head_commit.message, 'ci(release)')"
     steps:
       - uses: actions/checkout@v4
         with:
@@ -32,11 +32,28 @@ jobs:
           git config --global user.name "${{ github.actor }}"
           git config --global user.email "${{ github.actor }}@users.noreply.github.com"
 
+      - name: Bump and Collect Version
+        run: |
+          bun run changeset version
+          echo "BUILD_VERSION=$(bun run --silent packages:version)" >> $GITHUB_ENV
+          git reset --hard
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup git user (for changelog step)
+        run: |
+          git config --global user.name "${{ github.actor }}"
+          git config --global user.email "${{ github.actor }}@users.noreply.github.com"
+
+      - name: Set branch name and changeset PR title
+        run: |
+          echo "CHANGESET_PR_TITLE=$(echo "ci(release): v${{ env.BUILD_VERSION }}")" >> $GITHUB_ENV
+
       - name: Create Changeset PR
         uses: changesets/action@v1
         with:
-          commit: "ci(changesets): versioning packages"
-          title: "ci(changesets): versioning packages"
+          commit: ${{ env.CHANGESET_PR_TITLE }}
+          title: ${{ env.CHANGESET_PR_TITLE }}
           createGithubReleases: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -45,7 +62,7 @@ jobs:
     name: Release to NPM
     runs-on: ubuntu-latest
     environment: npm-deploy
-    if: "startsWith(github.event.head_commit.message, 'ci(changesets): versioning packages')"
+    if: "startsWith(github.event.head_commit.message, 'ci(release)')"
     permissions: write-all
     steps:
       - uses: actions/checkout@v4
@@ -75,7 +92,7 @@ jobs:
 
       - name: Set branch name and changeset PR title
         run: |
-          echo "CHANGESET_PR_TITLE=$(echo "ci(release): \`${{ env.BUILD_VERSION }}\` @ \`${{ github.ref_name }}\`")" >> $GITHUB_ENV
+          echo "CHANGESET_PR_TITLE=$(echo "ci(release): v${{ env.BUILD_VERSION }}")" >> $GITHUB_ENV
 
       - name: Build packages
         run: |
@@ -88,7 +105,7 @@ jobs:
         with:
           publish: bun run changeset publish --tag latest
           version: bun run changeset version
-          commit: "ci(release): versioning packages and changesets"
+          commit: ${{ env.CHANGESET_PR_TITLE }}
           title: ${{ env.CHANGESET_PR_TITLE }}
           createGithubReleases: aggregate
           githubReleaseName: ${{ env.BUILD_VERSION }}
