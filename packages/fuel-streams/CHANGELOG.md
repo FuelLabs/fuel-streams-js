@@ -1,5 +1,11 @@
 # @fuels/streams
 
+## 0.7.0
+
+### Minor Changes
+
+- [`391b93f`](https://github.com/FuelLabs/fuel-streams-js/commit/391b93fe280608a6b9d241b66132ebb75bfebd70) Thanks [@pedronauck](https://github.com/pedronauck)! - Fix: release automated process
+
 ## 0.6.0
 
 ### Minor Changes
