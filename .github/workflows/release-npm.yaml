@@ -107,7 +107,7 @@ jobs:
           version: bun run changeset version
           commit: ${{ env.CHANGESET_PR_TITLE }}
           title: ${{ env.CHANGESET_PR_TITLE }}
-          createGithubReleases: true
+          createGithubReleases: aggregate
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN_STREAMS }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
