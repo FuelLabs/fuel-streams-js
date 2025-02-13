@@ -1,5 +1,11 @@
 # @fuels/streams
 
+## 0.6.2
+
+### Patch Changes
+
+- [`5d355c9`](https://github.com/FuelLabs/fuel-streams-js/commit/5d355c9965eebb6a05347b31440e1a50e973338f) Thanks [@pedronauck](https://github.com/pedronauck)! - Fix: release flow
+
 ## 0.6.1
 
 ### Patch Changes
