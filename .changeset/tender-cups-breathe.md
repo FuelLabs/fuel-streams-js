@@ -1,5 +1,0 @@
----
-"@fuels/streams": patch
----
-
-fasda
