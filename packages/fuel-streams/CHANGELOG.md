@@ -1,5 +1,11 @@
 # @fuels/streams
 
+## 0.6.11
+
+### Patch Changes
+
+- [`97d4e8e`](https://github.com/FuelLabs/fuel-streams-js/commit/97d4e8e8417f04b49a86262da237c0780f27dc1c) Thanks [@pedronauck](https://github.com/pedronauck)! - fix again
+
 ## 0.6.10
 
 ### Patch Changes
