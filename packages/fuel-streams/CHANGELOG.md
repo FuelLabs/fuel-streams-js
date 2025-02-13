@@ -5,12 +5,7 @@
 ### Minor Changes
 
 - [`391b93f`](https://github.com/FuelLabs/fuel-streams-js/commit/391b93fe280608a6b9d241b66132ebb75bfebd70) Thanks [@pedronauck](https://github.com/pedronauck)! - Fix: release automated process
-
-## 0.6.0
-
-### Minor Changes
-
-- [`8d62110`](https://github.com/FuelLabs/fuel-streams-js/commit/8d621108e18be56ed308b0d11a417f09e8026ced) Thanks [@pedronauck](https://github.com/pedronauck)! - Feat: add support for multiple subscriptions
+-   [`fc1bcf0 `](https://github.com/FuelLabs/fuel-streams-js/commit/fc1bcf07ccdd15739cd90d818a48f90c839b62dd) Thanks [@pedronauck](https://github.com/pedronauck)! - Feat: add support for multiple subscription
 
 ## 0.5.2
 
