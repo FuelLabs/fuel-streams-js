@@ -250,72 +250,72 @@ export type RawCallReceipt = {
   type: ReceiptType.Call;
   id: string;
   to: string;
-  amount: number;
+  amount: string;
   assetId: string;
-  gas: number;
-  param1: number;
-  param2: number;
-  pc: number;
-  is: number;
+  gas: string;
+  param1: string;
+  param2: string;
+  pc: string;
+  is: string;
 };
 
 export type RawReturnReceipt = {
   type: ReceiptType.Return;
   id: string;
-  val: number;
-  pc: number;
-  is: number;
+  val: string;
+  pc: string;
+  is: string;
 };
 
 export type RawReturnDataReceipt = {
   type: ReceiptType.ReturnData;
   id: string;
-  ptr: number;
-  len: number;
+  ptr: string;
+  len: string;
   digest: string;
-  pc: number;
-  is: number;
+  pc: string;
+  is: string;
   data?: string;
 };
 
 export type RawPanicReceipt = {
   type: ReceiptType.Panic;
   id: string;
-  reason: number;
-  pc: number;
-  is: number;
+  reason: string;
+  pc: string;
+  is: string;
   contractId?: string;
 };
 
 export type RawRevertReceipt = {
   type: ReceiptType.Revert;
   id: string;
-  ra: number;
-  pc: number;
-  is: number;
+  ra: string;
+  pc: string;
+  is: string;
 };
 
 export type RawLogReceipt = {
   type: ReceiptType.Log;
   id: string;
-  ra: number;
-  rb: number;
-  rc: number;
-  rd: number;
-  pc: number;
-  is: number;
+  ra: string;
+  rb: string;
+  rc: string;
+  rd: string;
+  pc: string;
+  is: string;
 };
 
 export type RawLogDataReceipt = {
   type: ReceiptType.LogData;
   id: string;
-  ra: number;
-  rb: number;
-  ptr: number;
-  len: number;
+  ra: string;
+  rb: string;
+  ptr: string;
+  len: string;
   digest: string;
-  pc: number;
-  is: number;
+  pc: string;
+  is: string;
   data?: string;
 };
 
@@ -323,35 +323,35 @@ export type RawTransferReceipt = {
   type: ReceiptType.Transfer;
   id: string;
   to: string;
-  amount: number;
+  amount: string;
   assetId: string;
-  pc: number;
-  is: number;
+  pc: string;
+  is: string;
 };
 
 export type RawTransferOutReceipt = {
   type: ReceiptType.TransferOut;
   id: string;
   to: string;
-  amount: number;
+  amount: string;
   assetId: string;
-  pc: number;
-  is: number;
+  pc: string;
+  is: string;
 };
 
 export type RawScriptResultReceipt = {
   type: ReceiptType.ScriptResult;
-  result: number;
-  gasUsed: number;
+  result: string;
+  gasUsed: string;
 };
 
 export type RawMessageOutReceipt = {
   type: ReceiptType.MessageOut;
   sender: string;
   recipient: string;
-  amount: number;
+  amount: string;
   nonce: string;
-  len: number;
+  len: string;
   digest: string;
   data?: string;
 };
@@ -360,18 +360,18 @@ export type RawMintReceipt = {
   type: ReceiptType.Mint;
   subId: string;
   contractId: string;
-  val: number;
-  pc: number;
-  is: number;
+  val: string;
+  pc: string;
+  is: string;
 };
 
 export type RawBurnReceipt = {
   type: ReceiptType.Burn;
   subId: string;
   contractId: string;
-  val: number;
-  pc: number;
-  is: number;
+  val: string;
+  pc: string;
+  is: string;
 };
 
 export type RawReceipt =

@@ -5,6 +5,7 @@ import { Play, Plus, Square } from 'lucide-react';
 import { SubscriptionList } from '../subscriptions/subscription-list';
 import { SubscriptionModal } from '../subscriptions/subscription-modal';
 import { CardContent } from '../ui/card';
+import { AbiSelector } from './abi-selector';
 import { DeliverPolicySelector } from './deliver-policy-selector';
 
 export function StreamForm() {
@@ -24,11 +25,14 @@ export function StreamForm() {
         aria-label="Current Subject Query"
       >
         <DeliverPolicySelector />
-        <SubscriptionModal />
-        <Button size="xs" onClick={startAdding}>
-          <Plus className="h-4 w-4" />
-          Add Subscription
-        </Button>
+        <div className="flex items-center gap-2">
+          <AbiSelector />
+          <SubscriptionModal />
+          <Button size="xs" onClick={startAdding} variant="default">
+            <Plus className="h-4 w-4" />
+            Add Subscription
+          </Button>
+        </div>
       </div>
       <CardContent className="space-y-4">
         <SubscriptionList />

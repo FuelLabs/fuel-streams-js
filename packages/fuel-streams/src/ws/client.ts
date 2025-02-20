@@ -1,3 +1,4 @@
+import { Interface, type JsonAbi } from 'fuels';
 import type {
   EntityParser,
   GenericRecord,
@@ -45,12 +46,14 @@ export class Connection {
   private disconnectHandlers: Set<() => void>;
   private parserMap: ParserMap = new Map();
   private isClosing = false;
+  private contractAbi?: JsonAbi;
 
-  constructor(ws: WebSocket) {
+  constructor(ws: WebSocket, contractAbi?: JsonAbi) {
     this.ws = ws;
     this.messageHandlers = new Map();
     this.messageErrors = new Map();
     this.disconnectHandlers = new Set();
+    this.contractAbi = contractAbi;
 
     this.ws.onmessage = async (event) => {
       try {
@@ -132,6 +135,7 @@ export class Connection {
     R extends GenericRecord,
   >(): SubscriptionIterator<T, R> {
     const handlerId = `multi_${Array.from(this.parserMap.keys()).join('_')}`;
+    const abi = this.contractAbi;
     return {
       next: () => {
         return new Promise<IteratorResult<ClientResponse<T, R>, any>>(
@@ -146,7 +150,7 @@ export class Connection {
                   done: false,
                   value: {
                     ...data,
-                    payload: parser.parse(data.payload),
+                    payload: parser.parse(data.payload, abi),
                     rawPayload: data.payload,
                   },
                 });
@@ -178,7 +182,7 @@ export class Connection {
             }
             handler({
               ...data,
-              payload: parser.parse(data.payload),
+              payload: parser.parse(data.payload, abi),
               rawPayload: data.payload,
             });
           } catch (err) {
@@ -382,6 +386,10 @@ export class Connection {
   }
 }
 
+export type ConnectOpts = {
+  abi?: JsonAbi;
+};
+
 export class Client {
   private opts: ConnectionOpts;
   private connection: Connection | null;
@@ -397,15 +405,18 @@ export class Client {
   static async connect(
     network: FuelNetwork,
     apiKey: string,
+    connectOpts?: ConnectOpts,
   ): Promise<Connection> {
     if (!apiKey) {
       throw ClientError.MissingApiKey();
     }
     const client = new Client({ network, apiKey });
-    return client.connectInternal();
+    return client.connectInternal(connectOpts);
   }
 
-  private async connectInternal(): Promise<Connection> {
+  private async connectInternal(
+    connectOpts?: ConnectOpts,
+  ): Promise<Connection> {
     if (!this.opts.apiKey) {
       throw ClientError.MissingApiKey();
     }
@@ -431,7 +442,7 @@ export class Client {
 
         ws.onopen = () => {
           cleanup();
-          this.connection = new Connection(ws);
+          this.connection = new Connection(ws, connectOpts?.abi);
           resolve(this.connection);
         };
 

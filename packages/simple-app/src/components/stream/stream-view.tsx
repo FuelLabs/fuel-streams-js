@@ -22,7 +22,7 @@ import { TooltipProvider } from '@radix-ui/react-tooltip';
 import { cva } from 'class-variance-authority';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Code, Database, Eraser } from 'lucide-react';
-import { useRef } from 'react';
+import { useRef, useState } from 'react';
 import { useStreamData } from '../../lib/stream/use-stream-data';
 import { ApiKeyPopover } from '../api-key-popover';
 import { CodeExamples } from '../code-examples';
@@ -116,12 +116,75 @@ export function StreamView({ className }: StreamViewProps) {
   );
 }
 
+function StreamDataCard({ item }: { item: any }) {
+  const { isTheme } = useTheme();
+  const [showPayload, setShowPayload] = useState(false);
+
+  return (
+    <MotionCard
+      key={item.subject}
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -10 }}
+      transition={{ duration: 0.4, ease: 'easeOut' }}
+      aria-label={`Stream data for ${item.subject}`}
+      className="shadow-none rounded-sm max-w-full w-full overflow-hidden mb-4"
+    >
+      <CardHeader className="py-0 px-4 mb-4 bg-muted border-b">
+        <div className="flex flex-row justify-between text-sm font-mono items-center h-10">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                <div className="truncate max-w-[300px]">{item.subject}</div>
+              </TooltipTrigger>
+              <TooltipContent side="top" align="start">
+                {item.subject}
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          <div className="m-0 text-slate-400 whitespace-nowrap">
+            <Button
+              variant="ghost"
+              size="xs"
+              onClick={() => setShowPayload(!showPayload)}
+            >
+              <Code size={16} /> {showPayload ? 'Show Parsed' : 'Show Raw'}
+            </Button>
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent className="p-4 pt-0 overflow-x-auto">
+        <ReactJsonView
+          collapsed={2}
+          name={null}
+          theme={isTheme('dark') ? 'summerfruit' : 'summerfruit:inverted'}
+          displayDataTypes={false}
+          collapseStringsAfterLength={200}
+          shouldCollapse={(field) => {
+            if (field.name === 'payload' || field.name === 'rawPayload') {
+              return true;
+            }
+            return false;
+          }}
+          src={item}
+          style={{
+            padding: 0,
+            background: 'transparent',
+            wordBreak: 'break-all',
+            whiteSpace: 'pre-wrap',
+          }}
+          enableClipboard={true}
+        />
+      </CardContent>
+    </MotionCard>
+  );
+}
+
 function DataVisualization() {
   const { data } = useStreamData();
   const { isConnecting } = useConnection();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const { subscriptions } = useSubscriptions();
-  const { isTheme } = useTheme();
 
   return (
     <CardContent className="pt-6 max-w-full w-full overflow-x-hidden">
@@ -156,60 +219,8 @@ function DataVisualization() {
       ) : (
         <ScrollArea className="h-[calc(100vh-200px)]" ref={scrollAreaRef}>
           <AnimatePresence>
-            {data.map(({ rawPayload, ...item }) => (
-              <MotionCard
-                key={item.subject}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.4, ease: 'easeOut' }}
-                aria-label={`Stream data for ${item.subject}`}
-                className="shadow-none rounded-sm max-w-full w-full overflow-hidden mb-4"
-              >
-                <CardHeader className="py-0 px-4 mb-4 bg-muted border-b">
-                  <div className="flex flex-row justify-between text-sm font-mono items-center h-10">
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger>
-                          <div className="truncate max-w-[300px]">
-                            {item.subject}
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent side="top" align="start">
-                          {item.subject}
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                    {/* <div className="m-0 text-slate-400 whitespace-nowrap">
-                      {new Date(item.timestamp).toLocaleString('en-US', {
-                        day: 'numeric',
-                        month: 'short',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        second: '2-digit',
-                      })}
-                    </div> */}
-                  </div>
-                </CardHeader>
-                <CardContent className="p-4 pt-0 overflow-x-auto">
-                  <ReactJsonView
-                    collapsed={2}
-                    name={null}
-                    theme={
-                      isTheme('dark') ? 'summerfruit' : 'summerfruit:inverted'
-                    }
-                    displayDataTypes={false}
-                    src={{ ...item, payload: rawPayload }}
-                    style={{
-                      padding: 0,
-                      background: 'transparent',
-                      wordBreak: 'break-all',
-                      whiteSpace: 'pre-wrap',
-                    }}
-                    enableClipboard={true}
-                  />
-                </CardContent>
-              </MotionCard>
+            {data.map((item) => (
+              <StreamDataCard key={item.subject} item={item} />
             ))}
           </AnimatePresence>
           <ScrollBar orientation="horizontal" />

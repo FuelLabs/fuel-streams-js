@@ -1,6 +1,6 @@
 import { Client, ClientError, type Connection } from '@fuels/streams';
 import { FuelNetwork } from '@fuels/streams';
-import { useEffect, useLayoutEffect } from 'react';
+import type { JsonAbi } from 'fuels';
 import { toast } from 'sonner';
 import { create } from 'zustand';
 import { LocalStorage } from '../local-storage';
@@ -26,7 +26,7 @@ type ConnectionStore = {
   // Actions
   setNetwork: (network: FuelNetwork) => Promise<void>;
   setApiKey: (apiKey: string | null) => Promise<void>;
-  connect: () => Promise<Connection | null>;
+  connect: (abi?: JsonAbi | null) => Promise<Connection | null>;
   disconnect: () => void;
 };
 
@@ -54,7 +54,7 @@ export const useConnection = create<ConnectionStore>((set, get) => ({
     await get().connect();
   },
 
-  connect: async (): Promise<Connection | null> => {
+  connect: async (abi?: JsonAbi | null): Promise<Connection | null> => {
     set({ isConnecting: true, error: null });
     const { network, apiKey } = get();
 
@@ -66,7 +66,9 @@ export const useConnection = create<ConnectionStore>((set, get) => ({
     }
 
     try {
-      const connection = await Client.connect(network, apiKey);
+      const connection = await Client.connect(network, apiKey, {
+        abi: abi ?? undefined,
+      });
       set({
         connection,
         isConnected: true,

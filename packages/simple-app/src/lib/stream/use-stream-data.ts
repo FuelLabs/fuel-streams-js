@@ -11,12 +11,14 @@ import {
 } from 'xstate';
 import { useConnection } from './use-connection';
 import { useDeliverPolicy } from './use-deliver-policy';
+import { useStreamTab } from './use-stream-tab';
 import { useSubscriptions } from './use-subscriptions';
 
 const connectionActor = fromPromise(async () => {
   const { connect, isConnected } = useConnection.getState();
+  const { abi } = useStreamTab.getState();
   if (!isConnected) {
-    await connect();
+    await connect(abi);
   }
 });
 

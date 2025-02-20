@@ -40,7 +40,8 @@ function generateSubjectBase() {
  */
 
 import v from "voca";
-import type { DeliverPolicy, SubjectPayload } from "../ws";
+import type { SubjectPayload } from "../ws";
+import type { JsonAbi } from "fuels";
 
 export type GenericRecord = Record<string, any>;
 
@@ -48,7 +49,7 @@ export interface EntityParser<
   T extends GenericRecord,
   R extends GenericRecord,
 > {
-  parse(data: R): T;
+  parse(data: R, abi?: JsonAbi): T;
 }
 
 export type SubjectMetadata<T extends GenericRecord, R extends GenericRecord> = {
