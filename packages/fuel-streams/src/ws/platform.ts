@@ -9,7 +9,7 @@ export interface WebSocketOptions {
 
 let wsImpl: WebSocketImpl;
 
-// Platform detection and initialization
+// Initialize WebSocket implementation
 if (typeof window !== 'undefined') {
   // Browser environment
   wsImpl = window.WebSocket;
@@ -17,8 +17,8 @@ if (typeof window !== 'undefined') {
   // Node.js environment
   try {
     // Using dynamic import for ESM compatibility
-    const WebSocket = await import('ws').then((m) => m.default || m);
-    wsImpl = WebSocket as unknown as WebSocketImpl;
+    const ws = require('ws');
+    wsImpl = ws as unknown as WebSocketImpl;
   } catch (error) {
     console.error('WebSocket import error:', error);
     throw new Error('Please install ws package for Node.js environment');

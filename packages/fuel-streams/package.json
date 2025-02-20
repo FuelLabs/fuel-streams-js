@@ -36,9 +36,9 @@
   },
   "files": ["dist"],
   "scripts": {
-    "example:blocks": "tsx ./examples/ws/blocks.ts",
-    "example:transactions": "tsx ./examples/ws/transactions.ts",
-    "example:decode": "tsx ./examples/ws/decode.ts",
+    "example:blocks": "bun run ./examples/ws/blocks.ts",
+    "example:transactions": "bun run ./examples/ws/transactions.ts",
+    "example:decode": "bun run ./examples/ws/decode.ts",
     "build": "tsup",
     "build:watch": "tsup --watch",
     "ts:check": "tsc --noEmit",

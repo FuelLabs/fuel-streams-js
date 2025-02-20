@@ -7,7 +7,6 @@ import {
   type RawReceipt,
   ReceiptType,
   ReceiptsLogDataSubject,
-  TransactionsSubject,
 } from '../../src';
 
 import miraAbiJson from './mira_abi.json';
