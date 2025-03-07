@@ -12,6 +12,7 @@ import type {
   RawTransaction,
   Transaction,
   TransactionStatus,
+  TransactionType,
   TxId,
 } from '../../types';
 import { SubjectBase } from '../subject-base';

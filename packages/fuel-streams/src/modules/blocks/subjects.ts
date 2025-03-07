@@ -7,7 +7,13 @@
  */
 
 import { BlockParser } from '../../parsers';
-import type { Address, Block, BlockHeight, RawBlock } from '../../types';
+import type {
+  Address,
+  Block,
+  BlockHeight,
+  DaBlockHeight,
+  RawBlock,
+} from '../../types';
 import { SubjectBase } from '../subject-base';
 
 type BlocksFields = {

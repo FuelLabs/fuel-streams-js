@@ -258,8 +258,8 @@ describe('SubjectBuilder', () => {
         testModuleVariant({
           module: 'blocks',
           variant: '',
-          fields: { producer: '', height: '100' },
-          expectedSubject: 'blocks.*.100',
+          fields: { producer: '', height: '100', da_height: '' },
+          expectedSubject: 'blocks.*.*.100',
           expectedPayload: {
             subject: 'blocks',
             params: {

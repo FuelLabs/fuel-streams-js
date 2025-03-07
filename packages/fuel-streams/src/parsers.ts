@@ -328,6 +328,15 @@ export class ReceiptParser implements EntityParser<Receipt, RawReceipt> {
   }
 }
 
+const TRANSACTION_TYPE_MAP = {
+  create: 0,
+  mint: 1,
+  script: 2,
+  upgrade: 3,
+  upload: 4,
+  blob: 5,
+};
+
 export class TransactionParser
   implements EntityParser<Transaction, RawTransaction>
 {
@@ -356,8 +365,8 @@ export class TransactionParser
   }
 
   parse(data: RawTransaction, abi?: JsonAbi): Transaction {
-    console.log({ abi });
     const transformations = {
+      type: () => TRANSACTION_TYPE_MAP[data.type],
       witnesses: this.toWitnesses,
       inputs: this.parseInputs.bind(this),
       outputs: this.parseOutputs.bind(this),

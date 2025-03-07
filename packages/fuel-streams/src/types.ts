@@ -29,6 +29,7 @@ export type Address = string;
 export type AssetId = string;
 export type ContractId = string;
 export type BlockHeight = number;
+export type DaBlockHeight = number;
 export type MessageId = string;
 export type TxId = string;
 export type HexData = string;

@@ -245,6 +245,7 @@ function getUsedTypes(fields: Record<string, any>): Set<string> {
       [
         'Address',
         'AssetId',
+        'DaBlockHeight',
         'BlockHeight',
         'Bytes32',
         'ContractId',
@@ -255,6 +256,7 @@ function getUsedTypes(fields: Record<string, any>): Set<string> {
         'UtxoType',
         'TxId',
         'HexData',
+        'TransactionType',
       ].includes(mappedType)
     ) {
       usedTypes.add(mappedType);
