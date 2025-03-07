@@ -11,7 +11,6 @@ import type {
   BlockHeight,
   RawTransaction,
   Transaction,
-  TransactionKind,
   TransactionStatus,
   TxId,
 } from '../../types';
@@ -22,7 +21,7 @@ type TransactionsFields = {
   txId: TxId;
   txIndex: number;
   txStatus: TransactionStatus;
-  kind: TransactionKind;
+  txType: TransactionType;
 };
 
 export class TransactionsSubject extends SubjectBase<
@@ -32,7 +31,8 @@ export class TransactionsSubject extends SubjectBase<
 > {
   metadata = {
     id: 'transactions',
-    format: 'transactions.{block_height}.{tx_id}.{tx_index}.{tx_status}.{kind}',
+    format:
+      'transactions.{block_height}.{tx_id}.{tx_index}.{tx_status}.{tx_type}',
     parser: new TransactionParser(),
   };
 }

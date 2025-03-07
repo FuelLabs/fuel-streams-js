@@ -6,7 +6,7 @@ import {
   type Schema,
   type SelectOption,
   type SubjectsDefinition,
-  transactionKindOptions,
+  TransactionTypeOptions,
   transactionStatusOptions,
   utxoTypeOptions,
 } from '@fuels/streams/subjects-def';
@@ -39,8 +39,8 @@ export function getFieldOptions(
   type: string,
 ): readonly SelectOption[] | undefined {
   switch (type) {
-    case 'TransactionKind':
-      return transactionKindOptions;
+    case 'TransactionType':
+      return TransactionTypeOptions;
     case 'TransactionStatus':
       return transactionStatusOptions;
     case 'UtxoType':

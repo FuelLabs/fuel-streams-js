@@ -1,6 +1,6 @@
 import type { FormField, SelectOption } from '@fuels/streams/subjects-def';
 import {
-  transactionKindOptions,
+  TransactionTypeOptions,
   transactionStatusOptions,
   utxoTypeOptions,
 } from '@fuels/streams/subjects-def';
@@ -14,8 +14,8 @@ function formatLabel(id: string): string {
 
 function getFieldOptions(type: string): readonly SelectOption[] | undefined {
   switch (type) {
-    case 'TransactionKind':
-      return transactionKindOptions;
+    case 'TransactionType':
+      return TransactionTypeOptions;
     case 'TransactionStatus':
       return transactionStatusOptions;
     case 'UtxoType':

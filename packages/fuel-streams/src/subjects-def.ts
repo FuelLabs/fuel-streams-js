@@ -1,4 +1,4 @@
-export const transactionKindOptions = [
+export const TransactionTypeOptions = [
   { value: 'create', label: 'Create' },
   { value: 'mint', label: 'Mint' },
   { value: 'script', label: 'Script' },
@@ -94,12 +94,16 @@ export const subjectsDefinitions: SubjectsDefinition = {
     id: 'blocks',
     entity: 'Block',
     subject: 'BlocksSubject',
-    format: 'blocks.{producer}.{height}',
+    format: 'blocks.{producer}.{da_height}.{height}',
     wildcard: 'blocks.>',
     fields: {
       producer: {
         type: 'Address',
         description: 'The address of the producer that created the block',
+      },
+      da_height: {
+        type: 'DaBlockHeight',
+        description: 'The height of the DA block as unsigned 64 bit integer',
       },
       height: {
         type: 'BlockHeight',
@@ -111,7 +115,8 @@ export const subjectsDefinitions: SubjectsDefinition = {
     id: 'transactions',
     entity: 'Transaction',
     subject: 'TransactionsSubject',
-    format: 'transactions.{block_height}.{tx_id}.{tx_index}.{tx_status}.{kind}',
+    format:
+      'transactions.{block_height}.{tx_id}.{tx_index}.{tx_status}.{tx_type}',
     wildcard: 'transactions.>',
     fields: {
       block_height: {
@@ -132,8 +137,8 @@ export const subjectsDefinitions: SubjectsDefinition = {
         description:
           'The status of the transaction (success, failure, or submitted)',
       },
-      kind: {
-        type: 'TransactionKind',
+      tx_type: {
+        type: 'TransactionType',
         description: 'The type of transaction (create, mint, script)',
       },
     },
@@ -995,7 +1000,7 @@ export const subjectsDefinitions: SubjectsDefinition = {
     entity: 'Utxo',
     subject: 'UtxosSubject',
     format:
-      'utxos.{block_height}.{tx_id}.{tx_index}.{input_index}.{utxo_type}.{utxo_id}',
+      'utxos.{block_height}.{tx_id}.{tx_index}.{input_index}.{utxo_type}.{utxo_id}.{contract_id}',
     wildcard: 'utxos.>',
     fields: {
       block_height: {
@@ -1023,6 +1028,11 @@ export const subjectsDefinitions: SubjectsDefinition = {
         type: 'HexData',
         description:
           'The unique identifier for this UTXO (32 byte string prefixed by 0x)',
+      },
+      contract_id: {
+        type: 'ContractId',
+        description:
+          'The ID of the contract that returned (32 byte string prefixed by 0x)',
       },
     },
   },

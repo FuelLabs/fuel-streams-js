@@ -12,13 +12,14 @@ import { SubjectBase } from '../subject-base';
 
 type BlocksFields = {
   producer: Address;
+  daHeight: DaBlockHeight;
   height: BlockHeight;
 };
 
 export class BlocksSubject extends SubjectBase<BlocksFields, Block, RawBlock> {
   metadata = {
     id: 'blocks',
-    format: 'blocks.{producer}.{height}',
+    format: 'blocks.{producer}.{da_height}.{height}',
     parser: new BlockParser(),
   };
 }

@@ -250,7 +250,7 @@ function getUsedTypes(fields: Record<string, any>): Set<string> {
         'ContractId',
         'IdentifierKind',
         'TransactionStatus',
-        'TransactionKind',
+        'TransactionType',
         'MessageId',
         'UtxoType',
         'TxId',

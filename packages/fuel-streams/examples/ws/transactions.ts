@@ -3,8 +3,8 @@ import {
   Client,
   DeliverPolicy,
   FuelNetwork,
-  TransactionKind,
   TransactionStatus,
+  TransactionType,
   TransactionsSubject,
 } from '../../src';
 
@@ -14,7 +14,7 @@ async function main() {
   // You can filter using subject fields before subscribing
   const subjects = [
     TransactionsSubject.build({
-      kind: TransactionKind.Script,
+      txType: TransactionType.Script,
       txStatus: TransactionStatus.Success,
     }),
   ];

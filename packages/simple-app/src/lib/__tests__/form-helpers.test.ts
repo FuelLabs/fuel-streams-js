@@ -113,7 +113,7 @@ describe('SubjectBuilder', () => {
             tx_id: '0x123',
             tx_index: '1',
             tx_status: 'success',
-            kind: 'script',
+            tx_type: 'script',
           },
           expectedSubject: 'transactions.100.0x123.1.success.script',
           expectedPayload: {
@@ -123,7 +123,7 @@ describe('SubjectBuilder', () => {
               tx_id: '0x123',
               tx_index: '1',
               tx_status: 'success',
-              kind: 'script',
+              tx_type: 'script',
             },
           },
         },

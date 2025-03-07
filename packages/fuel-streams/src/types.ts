@@ -19,7 +19,6 @@ import type {
   OutputVariable as FuelsOutputVariable,
   Receipt as FuelsReceipt,
   Transaction as FuelsTransaction,
-  TransactionType,
 } from 'fuels';
 
 // ----------------------------------------------------------------------------
@@ -468,9 +467,8 @@ export type RawTransaction = {
 };
 
 export type Transaction = FuelsTransaction;
-export { TransactionType } from 'fuels';
 
-export enum TransactionKind {
+export enum TransactionType {
   Create = 'create',
   Mint = 'mint',
   Script = 'script',
