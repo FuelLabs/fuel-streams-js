@@ -28,8 +28,8 @@ type OutputsFields = {
   outputType: OutputType;
   blockHeight: BlockHeight;
   txId: TxId;
-  txIndex: number;
-  outputIndex: number;
+  txIndex: BN;
+  outputIndex: BN;
 };
 
 export class OutputsSubject extends SubjectBase<
@@ -48,8 +48,8 @@ export class OutputsSubject extends SubjectBase<
 type OutputsCoinFields = {
   blockHeight: BlockHeight;
   txId: TxId;
-  txIndex: number;
-  outputIndex: number;
+  txIndex: BN;
+  outputIndex: BN;
   to: Address;
   asset: AssetId;
 };
@@ -70,8 +70,8 @@ export class OutputsCoinSubject extends SubjectBase<
 type OutputsContractFields = {
   blockHeight: BlockHeight;
   txId: TxId;
-  txIndex: number;
-  outputIndex: number;
+  txIndex: BN;
+  outputIndex: BN;
   contract: ContractId;
 };
 
@@ -91,8 +91,8 @@ export class OutputsContractSubject extends SubjectBase<
 type OutputsChangeFields = {
   blockHeight: BlockHeight;
   txId: TxId;
-  txIndex: number;
-  outputIndex: number;
+  txIndex: BN;
+  outputIndex: BN;
   to: Address;
   asset: AssetId;
 };
@@ -113,8 +113,8 @@ export class OutputsChangeSubject extends SubjectBase<
 type OutputsVariableFields = {
   blockHeight: BlockHeight;
   txId: TxId;
-  txIndex: number;
-  outputIndex: number;
+  txIndex: BN;
+  outputIndex: BN;
   to: Address;
   asset: AssetId;
 };
@@ -135,8 +135,8 @@ export class OutputsVariableSubject extends SubjectBase<
 type OutputsContractCreatedFields = {
   blockHeight: BlockHeight;
   txId: TxId;
-  txIndex: number;
-  outputIndex: number;
+  txIndex: BN;
+  outputIndex: BN;
   contract: ContractId;
 };
 

@@ -37,8 +37,8 @@ type ReceiptsFields = {
   receiptType: ReceiptType;
   blockHeight: BlockHeight;
   txId: TxId;
-  txIndex: number;
-  receiptIndex: number;
+  txIndex: BN;
+  receiptIndex: BN;
 };
 
 export class ReceiptsSubject extends SubjectBase<
@@ -57,8 +57,8 @@ export class ReceiptsSubject extends SubjectBase<
 type ReceiptsCallFields = {
   blockHeight: BlockHeight;
   txId: TxId;
-  txIndex: number;
-  receiptIndex: number;
+  txIndex: BN;
+  receiptIndex: BN;
   from: ContractId;
   to: ContractId;
   asset: AssetId;
@@ -80,8 +80,8 @@ export class ReceiptsCallSubject extends SubjectBase<
 type ReceiptsReturnFields = {
   blockHeight: BlockHeight;
   txId: TxId;
-  txIndex: number;
-  receiptIndex: number;
+  txIndex: BN;
+  receiptIndex: BN;
   contract: ContractId;
 };
 
@@ -101,8 +101,8 @@ export class ReceiptsReturnSubject extends SubjectBase<
 type ReceiptsReturnDataFields = {
   blockHeight: BlockHeight;
   txId: TxId;
-  txIndex: number;
-  receiptIndex: number;
+  txIndex: BN;
+  receiptIndex: BN;
   contract: ContractId;
 };
 
@@ -122,8 +122,8 @@ export class ReceiptsReturnDataSubject extends SubjectBase<
 type ReceiptsPanicFields = {
   blockHeight: BlockHeight;
   txId: TxId;
-  txIndex: number;
-  receiptIndex: number;
+  txIndex: BN;
+  receiptIndex: BN;
   contract: ContractId;
 };
 
@@ -143,8 +143,8 @@ export class ReceiptsPanicSubject extends SubjectBase<
 type ReceiptsRevertFields = {
   blockHeight: BlockHeight;
   txId: TxId;
-  txIndex: number;
-  receiptIndex: number;
+  txIndex: BN;
+  receiptIndex: BN;
   contract: ContractId;
 };
 
@@ -164,8 +164,8 @@ export class ReceiptsRevertSubject extends SubjectBase<
 type ReceiptsLogFields = {
   blockHeight: BlockHeight;
   txId: TxId;
-  txIndex: number;
-  receiptIndex: number;
+  txIndex: BN;
+  receiptIndex: BN;
   contract: ContractId;
 };
 
@@ -185,8 +185,8 @@ export class ReceiptsLogSubject extends SubjectBase<
 type ReceiptsLogDataFields = {
   blockHeight: BlockHeight;
   txId: TxId;
-  txIndex: number;
-  receiptIndex: number;
+  txIndex: BN;
+  receiptIndex: BN;
   contract: ContractId;
 };
 
@@ -206,8 +206,8 @@ export class ReceiptsLogDataSubject extends SubjectBase<
 type ReceiptsTransferFields = {
   blockHeight: BlockHeight;
   txId: TxId;
-  txIndex: number;
-  receiptIndex: number;
+  txIndex: BN;
+  receiptIndex: BN;
   from: ContractId;
   to: ContractId;
   asset: AssetId;
@@ -229,8 +229,8 @@ export class ReceiptsTransferSubject extends SubjectBase<
 type ReceiptsTransferOutFields = {
   blockHeight: BlockHeight;
   txId: TxId;
-  txIndex: number;
-  receiptIndex: number;
+  txIndex: BN;
+  receiptIndex: BN;
   from: ContractId;
   toAddress: Address;
   asset: AssetId;
@@ -252,8 +252,8 @@ export class ReceiptsTransferOutSubject extends SubjectBase<
 type ReceiptsScriptResultFields = {
   blockHeight: BlockHeight;
   txId: TxId;
-  txIndex: number;
-  receiptIndex: number;
+  txIndex: BN;
+  receiptIndex: BN;
 };
 
 export class ReceiptsScriptResultSubject extends SubjectBase<
@@ -272,8 +272,8 @@ export class ReceiptsScriptResultSubject extends SubjectBase<
 type ReceiptsMessageOutFields = {
   blockHeight: BlockHeight;
   txId: TxId;
-  txIndex: number;
-  receiptIndex: number;
+  txIndex: BN;
+  receiptIndex: BN;
   sender: Address;
   recipient: Address;
 };
@@ -294,8 +294,8 @@ export class ReceiptsMessageOutSubject extends SubjectBase<
 type ReceiptsMintFields = {
   blockHeight: BlockHeight;
   txId: TxId;
-  txIndex: number;
-  receiptIndex: number;
+  txIndex: BN;
+  receiptIndex: BN;
   contract: ContractId;
   subId: Bytes32;
 };
@@ -316,8 +316,8 @@ export class ReceiptsMintSubject extends SubjectBase<
 type ReceiptsBurnFields = {
   blockHeight: BlockHeight;
   txId: TxId;
-  txIndex: number;
-  receiptIndex: number;
+  txIndex: BN;
+  receiptIndex: BN;
   contract: ContractId;
   subId: Bytes32;
 };

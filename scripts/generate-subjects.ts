@@ -153,6 +153,7 @@ function mapRustTypeToTS(rustType: string): string {
     u16: 'number',
     u32: 'number',
     u64: 'number',
+    i32: 'BN',
   };
 
   return typeMap[rustType] || rustType;

@@ -7,7 +7,11 @@ import {
   type SelectOption,
   type SubjectsDefinition,
   TransactionTypeOptions,
+  inputTypeOptions,
+  outputTypeOptions,
+  receiptTypeOptions,
   transactionStatusOptions,
+  utxoStatusOptions,
   utxoTypeOptions,
 } from '@fuels/streams/subjects-def';
 
@@ -45,6 +49,14 @@ export function getFieldOptions(
       return transactionStatusOptions;
     case 'UtxoType':
       return utxoTypeOptions;
+    case 'UtxoStatus':
+      return utxoStatusOptions;
+    case 'InputType':
+      return inputTypeOptions;
+    case 'OutputType':
+      return outputTypeOptions;
+    case 'ReceiptType':
+      return receiptTypeOptions;
     default:
       return undefined;
   }

@@ -26,8 +26,8 @@ type InputsFields = {
   inputType: InputType;
   blockHeight: BlockHeight;
   txId: TxId;
-  txIndex: number;
-  inputIndex: number;
+  txIndex: BN;
+  inputIndex: BN;
 };
 
 export class InputsSubject extends SubjectBase<InputsFields, Input, RawInput> {
@@ -42,8 +42,8 @@ export class InputsSubject extends SubjectBase<InputsFields, Input, RawInput> {
 type InputsCoinFields = {
   blockHeight: BlockHeight;
   txId: TxId;
-  txIndex: number;
-  inputIndex: number;
+  txIndex: BN;
+  inputIndex: BN;
   owner: Address;
   asset: AssetId;
 };
@@ -64,8 +64,8 @@ export class InputsCoinSubject extends SubjectBase<
 type InputsContractFields = {
   blockHeight: BlockHeight;
   txId: TxId;
-  txIndex: number;
-  inputIndex: number;
+  txIndex: BN;
+  inputIndex: BN;
   contract: ContractId;
 };
 
@@ -85,8 +85,8 @@ export class InputsContractSubject extends SubjectBase<
 type InputsMessageFields = {
   blockHeight: BlockHeight;
   txId: TxId;
-  txIndex: number;
-  inputIndex: number;
+  txIndex: BN;
+  inputIndex: BN;
   sender: Address;
   recipient: Address;
 };
