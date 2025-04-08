@@ -21,8 +21,8 @@ import { SubjectBase } from '../subject-base';
 type PredicatesFields = {
   blockHeight: BlockHeight;
   txId: TxId;
-  txIndex: BN;
-  inputIndex: BN;
+  txIndex: number;
+  inputIndex: number;
   blobId: HexData;
   predicateAddress: Address;
   asset: AssetId;

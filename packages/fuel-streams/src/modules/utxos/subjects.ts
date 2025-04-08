@@ -15,6 +15,8 @@ import type {
   RawUtxo,
   TxId,
   Utxo,
+  UtxoId,
+  UtxoStatus,
   UtxoType,
 } from '../../types';
 import { SubjectBase } from '../subject-base';
@@ -22,8 +24,8 @@ import { SubjectBase } from '../subject-base';
 type UtxosFields = {
   blockHeight: BlockHeight;
   txId: TxId;
-  txIndex: BN;
-  outputIndex: BN;
+  txIndex: number;
+  outputIndex: number;
   utxoType: UtxoType;
   assetId: AssetId;
   utxoId: UtxoId;

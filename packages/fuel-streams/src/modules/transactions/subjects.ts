@@ -20,7 +20,7 @@ import { SubjectBase } from '../subject-base';
 type TransactionsFields = {
   blockHeight: BlockHeight;
   txId: TxId;
-  txIndex: BN;
+  txIndex: number;
   status: TransactionStatus;
   txType: TransactionType;
 };

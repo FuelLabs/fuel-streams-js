@@ -15,7 +15,7 @@ async function main() {
   const subjects = [
     TransactionsSubject.build({
       txType: TransactionType.Script,
-      txStatus: TransactionStatus.Success,
+      status: TransactionStatus.Success,
     }),
   ];
 
