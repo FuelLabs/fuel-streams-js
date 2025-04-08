@@ -9,7 +9,7 @@ import {
 } from '../../src';
 
 async function main() {
-  const connection = await Client.connect(FuelNetwork.Mainnet, 'your-api-key');
+  const connection = await Client.connect(FuelNetwork.Local, 'your_key');
 
   // You can filter using subject fields before subscribing
   const subjects = [
@@ -20,7 +20,7 @@ async function main() {
   ];
 
   // Subscribe to transactions from block 1000000
-  const deliverPolicy = DeliverPolicy.fromBlock(1000000);
+  const deliverPolicy = DeliverPolicy.fromBlock(0);
   const stream = await connection.subscribe(subjects, deliverPolicy);
   for await (const message of stream) {
     console.log('Subject:', message.subject);

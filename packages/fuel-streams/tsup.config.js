@@ -1,8 +1,6 @@
-import baseConfig from '@fuels/tsup-config';
 import { defineConfig } from 'tsup';
 
-export default defineConfig((options) => ({
-  ...baseConfig(options, { withReact: false }),
+export default defineConfig(() => ({
   entry: {
     index: 'src/index.ts',
     'index.browser': 'src/index.ts',
@@ -11,7 +9,6 @@ export default defineConfig((options) => ({
   },
   format: ['cjs', 'esm'],
   external: [],
-  minify: 'terser',
   dts: true,
   splitting: true,
   metafile: true,

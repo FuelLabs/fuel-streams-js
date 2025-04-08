@@ -59,12 +59,10 @@ export class BlockParser implements EntityParser<Block, RawBlock> {
         daHeight: safeToBN,
         height: safeToBN,
         stateTransitionBytecodeVersion: safeToBN,
-        transactionsCount: safeToBN,
-        messageReceiptCount: safeToBN,
         consensusParametersVersion: safeToBN,
       },
     };
-    return evolve(transformations, data) as Block;
+    return evolve(transformations, data) as unknown as Block;
   }
 }
 
@@ -75,16 +73,14 @@ export class InputCoinParser {
       type: () => InputType.Coin,
       amount: safeToBN,
       predicateGasUsed: safeToBN,
-      predicateDataLength: safeToBN,
-      predicateLength: safeToBN,
     };
 
     return evolve(transformations, {
       ...rest,
       txID: utxoId.txId,
       outputIndex: utxoId.outputIndex,
-      predicateDataLength: safeToBN(rest.predicateData?.length),
-      predicateLength: safeToBN(rest.predicate?.length),
+      predicateDataLength: rest.predicateData?.length,
+      predicateLength: rest.predicate?.length,
     }) as unknown as InputCoin;
   }
 }
@@ -113,14 +109,12 @@ export class InputMessageParser {
       type: () => InputType.Message,
       amount: safeToBN,
       predicateGasUsed: safeToBN,
-      predicateDataLength: safeToBN,
-      predicateLength: safeToBN,
     };
 
     return evolve(transformations, {
       ...data,
-      predicateDataLength: safeToBN(data.predicateData?.length),
-      predicateLength: safeToBN(data.predicate?.length),
+      predicateDataLength: data.predicateData?.length,
+      predicateLength: data.predicate?.length,
     }) as unknown as InputMessage;
   }
 }
@@ -397,36 +391,29 @@ export class TransactionParser
       inputs: this.parseInputs.bind(this),
       outputs: this.parseOutputs.bind(this),
       receipts: this.parseReceipts.bind(this, data, data.receipts, abi),
-      bytecodeWitnessIndex: safeToBN,
       maturity: safeToBN,
       mintAmount: safeToBN,
       mintGasPrice: safeToBN,
       scriptGasLimit: safeToBN,
-      subsectionIndex: safeToBN,
-      subsectionsNumber: safeToBN,
       upgradePurpose: safeToBN,
-      scriptLength: safeToBN,
-      scriptDataLength: safeToBN,
-      storageSlotsCount: safeToBN,
-      proofSetCount: safeToBN,
-      witnessesCount: safeToBN,
-      inputsCount: safeToBN,
-      outputsCount: safeToBN,
       policies: (policies: Policies) => ({
         maxFee: safeToBN(policies?.maxFee),
         witnessLimit: safeToBN(policies?.witnessLimit),
         maturity: safeToBN(policies?.maturity),
         maxSize: safeToBN(policies?.maxSize),
       }),
-      txPointer: (txPointer: TxPointer) => ({
-        ...txPointer,
-        blockHeight: safeToBN(txPointer.blockHeight),
-      }),
+      txPointer: (txPointer: TxPointer) =>
+        txPointer
+          ? {
+              ...txPointer,
+              blockHeight: safeToBN(txPointer?.blockHeight),
+            }
+          : {},
       txIndex: safeToBN(data.txIndex),
     };
 
     try {
-      return evolve(transformations, data) as Transaction;
+      return evolve(transformations, data) as unknown as Transaction;
     } catch (error) {
       console.error('Transaction parsing failed:', error, data);
       throw error;

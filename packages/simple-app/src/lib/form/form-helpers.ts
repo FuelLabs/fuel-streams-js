@@ -222,7 +222,14 @@ export class SubjectBuilder {
   ): string {
     return format.replace(/\{(\w+)\}/g, (_, field) => {
       const value = selectedFields[field];
-      return value && value !== '' ? value : '*';
+
+      // Check if the field is set and has a non-empty value
+      if (value !== undefined && value !== '') {
+        return value;
+      }
+
+      // For missing or empty fields, use wildcard (*)
+      return '*';
     });
   }
 }
