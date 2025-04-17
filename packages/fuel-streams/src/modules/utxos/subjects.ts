@@ -8,12 +8,15 @@
 
 import { UtxoParser } from '../../parsers';
 import type {
+  Address,
+  AssetId,
   BlockHeight,
   ContractId,
-  HexData,
   RawUtxo,
   TxId,
   Utxo,
+  UtxoId,
+  UtxoStatus,
   UtxoType,
 } from '../../types';
 import { SubjectBase } from '../subject-base';
@@ -22,17 +25,21 @@ type UtxosFields = {
   blockHeight: BlockHeight;
   txId: TxId;
   txIndex: number;
-  inputIndex: number;
+  outputIndex: number;
   utxoType: UtxoType;
-  utxoId: HexData;
+  assetId: AssetId;
+  utxoId: UtxoId;
+  from: Address;
+  to: Address;
   contractId: ContractId;
+  status: UtxoStatus;
 };
 
 export class UtxosSubject extends SubjectBase<UtxosFields, Utxo, RawUtxo> {
   metadata = {
     id: 'utxos',
     format:
-      'utxos.{block_height}.{tx_id}.{tx_index}.{input_index}.{utxo_type}.{utxo_id}.{contract_id}',
+      'utxos.{block_height}.{tx_id}.{tx_index}.{output_index}.{status}.{utxo_type}.{asset_id}.{utxo_id}.{from}.{to}.{contract_id}',
     parser: new UtxoParser(),
   };
 }

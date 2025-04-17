@@ -2,7 +2,7 @@ import { handleUnhandledError } from 'examples/helpers';
 import { BlocksSubject, Client, DeliverPolicy, FuelNetwork } from '../../src';
 
 async function main() {
-  const connection = await Client.connect(FuelNetwork.Local, 'test');
+  const connection = await Client.connect(FuelNetwork.Local, 'your_key');
   const subjects = [BlocksSubject.build()];
   const stream = await connection.subscribe(
     subjects,

@@ -77,10 +77,15 @@ const subscriptionActor = fromCallback<StreamEvent, null>(
         );
 
         cleanup = subscription.onMessage((data) => {
-          sendBack({ type: 'DATA', data });
+          try {
+            sendBack({ type: 'DATA', data });
+          } catch (err) {
+            console.error('Error sending stream data event:', err);
+          }
         });
 
         cleanupError = subscription.onMessageError((error) => {
+          console.error('Subscription error:', error);
           sendBack({ type: 'ERROR', error });
         });
       } catch (error) {
@@ -114,7 +119,10 @@ export const streamMachine = setup({
   actions: {
     newDataFromSubscription: assign({
       data: ({ context, event }) => {
-        if (event.type !== 'DATA') return context.data;
+        if (event.type !== 'DATA') {
+          return context.data;
+        }
+
         return [event.data, ...context.data.slice(0, 19)];
       },
     }),

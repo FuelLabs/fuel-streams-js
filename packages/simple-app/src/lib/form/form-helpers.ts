@@ -7,7 +7,11 @@ import {
   type SelectOption,
   type SubjectsDefinition,
   TransactionTypeOptions,
+  inputTypeOptions,
+  outputTypeOptions,
+  receiptTypeOptions,
   transactionStatusOptions,
+  utxoStatusOptions,
   utxoTypeOptions,
 } from '@fuels/streams/subjects-def';
 
@@ -45,6 +49,14 @@ export function getFieldOptions(
       return transactionStatusOptions;
     case 'UtxoType':
       return utxoTypeOptions;
+    case 'UtxoStatus':
+      return utxoStatusOptions;
+    case 'InputType':
+      return inputTypeOptions;
+    case 'OutputType':
+      return outputTypeOptions;
+    case 'ReceiptType':
+      return receiptTypeOptions;
     default:
       return undefined;
   }
@@ -210,7 +222,14 @@ export class SubjectBuilder {
   ): string {
     return format.replace(/\{(\w+)\}/g, (_, field) => {
       const value = selectedFields[field];
-      return value && value !== '' ? value : '*';
+
+      // Check if the field is set and has a non-empty value
+      if (value !== undefined && value !== '') {
+        return value;
+      }
+
+      // For missing or empty fields, use wildcard (*)
+      return '*';
     });
   }
 }

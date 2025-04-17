@@ -1,5 +1,6 @@
 import { Interface, type JsonAbi, bn as toBN } from 'fuels';
 import { evolve } from 'ramda';
+import snakify from 'snakify-ts';
 import type { EntityParser } from './modules/subject-base';
 import {
   type Block,
@@ -15,7 +16,10 @@ import {
   type OutputContractCreated,
   OutputType,
   type OutputVariable,
+  type Policies,
+  type Predicate,
   type RawBlock,
+  type RawCallReceipt,
   type RawChangeOutput,
   type RawCoinOutput,
   type RawContractCreated,
@@ -24,17 +28,27 @@ import {
   type RawInputCoin,
   type RawInputContract,
   type RawInputMessage,
+  type RawLogDataReceipt,
+  type RawLogReceipt,
+  type RawMessageOutReceipt,
+  type RawMintReceipt,
   type RawOutput,
+  type RawPanicReceipt,
+  type RawPredicate,
   type RawReceipt,
+  type RawReturnDataReceipt,
+  type RawReturnReceipt,
+  type RawScriptResultReceipt,
   type RawTransaction,
+  type RawTransferReceipt,
   type RawUtxo,
   type RawVariableOutput,
   type Receipt,
   ReceiptType,
   type Transaction,
+  type TxPointer,
   type Utxo,
 } from './types';
-
 const safeToBN = (value: any) => (value != null ? toBN(value) : value);
 
 export class BlockParser implements EntityParser<Block, RawBlock> {
@@ -44,13 +58,11 @@ export class BlockParser implements EntityParser<Block, RawBlock> {
       header: {
         daHeight: safeToBN,
         height: safeToBN,
-        stateTransitionBytecodeVersion: String,
-        transactionsCount: String,
-        messageReceiptCount: String,
-        consensusParametersVersion: String,
+        stateTransitionBytecodeVersion: safeToBN,
+        consensusParametersVersion: safeToBN,
       },
     };
-    return evolve(transformations, data) as Block;
+    return evolve(transformations, data) as unknown as Block;
   }
 }
 
@@ -61,16 +73,14 @@ export class InputCoinParser {
       type: () => InputType.Coin,
       amount: safeToBN,
       predicateGasUsed: safeToBN,
-      predicateDataLength: safeToBN,
-      predicateLength: safeToBN,
     };
 
     return evolve(transformations, {
       ...rest,
       txID: utxoId.txId,
       outputIndex: utxoId.outputIndex,
-      predicateDataLength: safeToBN(rest.predicateData?.length),
-      predicateLength: safeToBN(rest.predicate?.length),
+      predicateDataLength: rest.predicateData?.length,
+      predicateLength: rest.predicate?.length,
     }) as unknown as InputCoin;
   }
 }
@@ -99,12 +109,12 @@ export class InputMessageParser {
       type: () => InputType.Message,
       amount: safeToBN,
       predicateGasUsed: safeToBN,
-      predicateDataLength: safeToBN,
-      predicateLength: safeToBN,
     };
 
     return evolve(transformations, {
       ...data,
+      predicateDataLength: data.predicateData?.length,
+      predicateLength: data.predicate?.length,
     }) as unknown as InputMessage;
   }
 }
@@ -115,15 +125,18 @@ export class InputParser implements EntityParser<Input, RawInput> {
   private messageParser = new InputMessageParser();
 
   parse(data: RawInput): Input {
-    switch (data.type) {
-      case 'Coin':
-        return this.coinParser.parse(data);
-      case 'Contract':
-        return this.contractParser.parse(data);
-      case 'Message':
-        return this.messageParser.parse(data);
+    const type = snakify(data.type);
+    if (type === InputType.Coin) {
+      return this.coinParser.parse(data as RawInputCoin);
     }
-    throw new Error('Invalid input type');
+    if (type === InputType.Contract) {
+      return this.contractParser.parse(data as RawInputContract);
+    }
+    if (type === InputType.Message) {
+      return this.messageParser.parse(data as RawInputMessage);
+    }
+
+    throw new Error(`Unknown input type: ${type}`);
   }
 }
 
@@ -184,25 +197,42 @@ export class OutputParser implements EntityParser<Output, RawOutput> {
   private contractCreatedParser = new OutputContractCreatedParser();
 
   parse(data: RawOutput): Output {
-    switch (data.type) {
-      case 'Coin':
-        return this.coinParser.parse(data);
-      case 'Contract':
-        return this.contractParser.parse(data);
-      case 'Change':
-        return this.changeParser.parse(data);
-      case 'Variable':
-        return this.variableParser.parse(data);
-      case 'ContractCreated':
-        return this.contractCreatedParser.parse(data);
+    const type = snakify(data.type);
+    if (type === OutputType.Coin) {
+      return this.coinParser.parse(data as RawCoinOutput);
     }
-    throw new Error('Invalid output type');
+    if (type === OutputType.Contract) {
+      return this.contractParser.parse(data as RawContractOutput);
+    }
+    if (type === OutputType.Change) {
+      return this.changeParser.parse(data as RawChangeOutput);
+    }
+    if (type === OutputType.Variable) {
+      return this.variableParser.parse(data as RawVariableOutput);
+    }
+    if (type === OutputType.ContractCreated) {
+      return this.contractCreatedParser.parse(data as RawContractCreated);
+    }
+
+    throw new Error(`Unknown output type: ${type}`);
+  }
+}
+
+export class PredicateParser implements EntityParser<Predicate, RawPredicate> {
+  parse(data: RawPredicate): Predicate {
+    const transformations = {
+      txIndex: safeToBN(data.txIndex),
+      inputIndex: safeToBN(data.inputIndex),
+    };
+    return { ...data, ...transformations } as Predicate;
   }
 }
 
 export class ReceiptParser implements EntityParser<Receipt, RawReceipt> {
   parse(item: RawReceipt, abi?: JsonAbi): Receipt {
-    if (item.type === ReceiptType.Call) {
+    const type = snakify(item.type);
+
+    if (type === ReceiptType.Call) {
       return evolve(
         {
           amount: safeToBN,
@@ -212,22 +242,20 @@ export class ReceiptParser implements EntityParser<Receipt, RawReceipt> {
           pc: safeToBN,
           is: safeToBN,
         },
-        item,
+        item as unknown as RawCallReceipt,
       ) as unknown as Receipt;
     }
-
-    if (item.type === ReceiptType.Return || item.type === ReceiptType.Revert) {
+    if (type === ReceiptType.Return || type === ReceiptType.Revert) {
       return evolve(
         {
           val: safeToBN,
           pc: safeToBN,
           is: safeToBN,
         },
-        item,
+        item as unknown as RawReturnReceipt,
       ) as unknown as Receipt;
     }
-
-    if (item.type === ReceiptType.ReturnData) {
+    if (type === ReceiptType.ReturnData) {
       return evolve(
         {
           ptr: safeToBN,
@@ -235,15 +263,15 @@ export class ReceiptParser implements EntityParser<Receipt, RawReceipt> {
           pc: safeToBN,
           is: safeToBN,
         },
-        item,
+        item as unknown as RawReturnDataReceipt,
       ) as unknown as Receipt;
     }
-
-    if (item.type === ReceiptType.LogData) {
+    if (type === ReceiptType.LogData) {
       const contract = abi && new Interface(abi);
-      const data = item.data
-        ? contract?.decodeLog(item.data, item.rb)
-        : item.data;
+      const receipt = item as unknown as RawLogDataReceipt;
+      const data = receipt.data
+        ? contract?.decodeLog(receipt.data, receipt.rb)
+        : receipt.data;
       return evolve(
         {
           ptr: safeToBN,
@@ -252,21 +280,19 @@ export class ReceiptParser implements EntityParser<Receipt, RawReceipt> {
           is: safeToBN,
           data: () => data,
         },
-        item,
+        item as unknown as RawLogDataReceipt,
       ) as unknown as Receipt;
     }
-
-    if (item.type === ReceiptType.Panic) {
+    if (type === ReceiptType.Panic) {
       return evolve(
         {
           pc: safeToBN,
           is: safeToBN,
         },
-        item,
+        item as unknown as RawPanicReceipt,
       ) as unknown as Receipt;
     }
-
-    if (item.type === ReceiptType.Log) {
+    if (type === ReceiptType.Log) {
       return evolve(
         {
           ra: safeToBN,
@@ -276,55 +302,47 @@ export class ReceiptParser implements EntityParser<Receipt, RawReceipt> {
           pc: safeToBN,
           is: safeToBN,
         },
-        item,
+        item as unknown as RawLogReceipt,
       ) as unknown as Receipt;
     }
-
-    if (
-      item.type === ReceiptType.Transfer ||
-      item.type === ReceiptType.TransferOut
-    ) {
+    if (type === ReceiptType.Transfer || type === ReceiptType.TransferOut) {
       return evolve(
         {
           amount: safeToBN,
           pc: safeToBN,
           is: safeToBN,
         },
-        item,
+        item as unknown as RawTransferReceipt,
       ) as unknown as Receipt;
     }
-
-    if (item.type === ReceiptType.ScriptResult) {
+    if (type === ReceiptType.ScriptResult) {
       return evolve(
         {
           gasUsed: safeToBN,
         },
-        item,
+        item as unknown as RawScriptResultReceipt,
       ) as unknown as Receipt;
     }
-
-    if (item.type === ReceiptType.MessageOut) {
+    if (type === ReceiptType.MessageOut) {
       return evolve(
         {
           amount: safeToBN,
           len: safeToBN,
         },
-        item,
+        item as unknown as RawMessageOutReceipt,
       ) as unknown as Receipt;
     }
-
-    if (item.type === ReceiptType.Mint || item.type === ReceiptType.Burn) {
+    if (type === ReceiptType.Mint || type === ReceiptType.Burn) {
       return evolve(
         {
           val: safeToBN,
           pc: safeToBN,
           is: safeToBN,
         },
-        item,
+        item as unknown as RawMintReceipt,
       ) as unknown as Receipt;
     }
-
-    throw new Error(`Unknown receipt type: ${(item as any).type}`);
+    throw new Error(`Unknown receipt type: ${type}`);
   }
 }
 
@@ -335,7 +353,7 @@ const TRANSACTION_TYPE_MAP = {
   upgrade: 3,
   upload: 4,
   blob: 5,
-};
+} as const;
 
 export class TransactionParser
   implements EntityParser<Transaction, RawTransaction>
@@ -344,24 +362,26 @@ export class TransactionParser
   private outputParser = new OutputParser();
   private receiptParser = new ReceiptParser();
 
-  private toWitnesses(v: string[]) {
-    return v.map((data) => ({ dataLength: data.length, data }));
+  private toWitnesses(v: string[] | undefined) {
+    return v?.map((data) => ({ dataLength: data.length, data })) ?? [];
   }
 
-  private parseInputs(inputs: RawInput[]) {
-    return inputs.map((input) => this.inputParser.parse(input));
+  private parseInputs(inputs: RawInput[] | undefined) {
+    return inputs?.map((input) => this.inputParser.parse(input)) ?? [];
   }
 
-  private parseOutputs(outputs: RawOutput[]) {
-    return outputs.map((output) => this.outputParser.parse(output));
+  private parseOutputs(outputs: RawOutput[] | undefined) {
+    return outputs?.map((output) => this.outputParser.parse(output)) ?? [];
   }
 
   private parseReceipts(
     _tx: RawTransaction,
-    receipts: RawReceipt[],
+    receipts: RawReceipt[] | undefined,
     abi?: JsonAbi,
   ): Receipt[] {
-    return receipts.map((receipt) => this.receiptParser.parse(receipt, abi));
+    return (
+      receipts?.map((receipt) => this.receiptParser.parse(receipt, abi)) ?? []
+    );
   }
 
   parse(data: RawTransaction, abi?: JsonAbi): Transaction {
@@ -371,22 +391,31 @@ export class TransactionParser
       inputs: this.parseInputs.bind(this),
       outputs: this.parseOutputs.bind(this),
       receipts: this.parseReceipts.bind(this, data, data.receipts, abi),
-      bytecodeWitnessIndex: safeToBN,
       maturity: safeToBN,
       mintAmount: safeToBN,
       mintGasPrice: safeToBN,
       scriptGasLimit: safeToBN,
-      subsectionIndex: safeToBN,
-      subsectionsNumber: safeToBN,
       upgradePurpose: safeToBN,
+      policies: (policies: Policies) => ({
+        maxFee: safeToBN(policies?.maxFee),
+        witnessLimit: safeToBN(policies?.witnessLimit),
+        maturity: safeToBN(policies?.maturity),
+        maxSize: safeToBN(policies?.maxSize),
+      }),
+      txPointer: (txPointer: TxPointer) =>
+        txPointer
+          ? {
+              ...txPointer,
+              blockHeight: safeToBN(txPointer?.blockHeight),
+            }
+          : {},
+      txIndex: safeToBN(data.txIndex),
     };
 
     try {
-      const result = evolve(transformations, data) as Transaction;
-      console.log('Successfully parsed transaction');
-      return result;
+      return evolve(transformations, data) as unknown as Transaction;
     } catch (error) {
-      console.error('Transaction parsing failed:', error);
+      console.error('Transaction parsing failed:', error, data);
       throw error;
     }
   }
@@ -394,7 +423,22 @@ export class TransactionParser
 
 export class UtxoParser implements EntityParser<Utxo, RawUtxo> {
   parse(data: RawUtxo): Utxo {
-    const transformations = { amount: safeToBN };
+    const transformations = {
+      amount: safeToBN,
+    };
     return evolve(transformations, data) as Utxo;
   }
+}
+
+export function findParser<T extends EntityParser<any, any>>(id: string): T {
+  if (id.startsWith('blocks')) return new BlockParser() as unknown as T;
+  if (id.startsWith('transactions'))
+    return new TransactionParser() as unknown as T;
+  if (id.startsWith('inputs')) return new InputParser() as unknown as T;
+  if (id.startsWith('outputs')) return new OutputParser() as unknown as T;
+  if (id.startsWith('predicates')) return new PredicateParser() as unknown as T;
+  if (id.startsWith('receipts')) return new ReceiptParser() as unknown as T;
+  if (id.startsWith('utxos')) return new UtxoParser() as unknown as T;
+
+  throw new Error(`Parser not found for id: ${id}`);
 }

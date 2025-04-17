@@ -33,6 +33,15 @@ export type DaBlockHeight = number;
 export type MessageId = string;
 export type TxId = string;
 export type HexData = string;
+export type Salt = string;
+export type Amount = string;
+export type Nonce = string;
+export type Word = string;
+
+// Base interface for common fields
+interface BaseFields {
+  txIndex: number;
+}
 
 export type UtxoId = {
   txId: string;
@@ -54,6 +63,7 @@ export enum StreamNames {
   Receipts = 'receipts',
   Transactions = 'transactions',
   Utxos = 'utxos',
+  Predicates = 'predicates',
 }
 
 export enum ClientStatus {
@@ -82,6 +92,7 @@ export type RawBlock = {
   time: string;
   transactionIds: string[];
   version: 'V1';
+  producer: string;
   consensus: {
     type: 'Genesis' | 'PoAConsensus';
     signature?: string;
@@ -118,42 +129,46 @@ export type Block = FuelsBlock & {
 // Output Types
 // ----------------------------------------------------------------------------
 export enum OutputType {
-  Coin = 'Coin',
-  Contract = 'Contract',
-  Change = 'Change',
-  Variable = 'Variable',
-  ContractCreated = 'ContractCreated',
+  Coin = 'coin',
+  Contract = 'contract',
+  Change = 'change',
+  Variable = 'variable',
+  ContractCreated = 'contract_created',
 }
 
-export type RawCoinOutput = {
+export interface RawBaseOutput extends BaseFields {
+  outputIndex: number;
+}
+
+export type RawCoinOutput = RawBaseOutput & {
   type: OutputType.Coin;
   amount: number;
   assetId: string;
   to: string;
 };
 
-export type RawContractOutput = {
+export type RawContractOutput = RawBaseOutput & {
   type: OutputType.Contract;
   balanceRoot: string;
   stateRoot: string;
   inputIndex: number;
 };
 
-export type RawChangeOutput = {
+export type RawChangeOutput = RawBaseOutput & {
   type: OutputType.Change;
   amount: number;
   assetId: string;
   to: string;
 };
 
-export type RawVariableOutput = {
+export type RawVariableOutput = RawBaseOutput & {
   type: OutputType.Variable;
   amount: number;
   assetId: string;
   to: string;
 };
 
-export type RawContractCreated = {
+export type RawContractCreated = RawBaseOutput & {
   type: OutputType.ContractCreated;
   contractId: string;
   stateRoot: string;
@@ -177,12 +192,16 @@ export type Output = FuelsOutput;
 // Input Types
 // ----------------------------------------------------------------------------
 export enum InputType {
-  Coin = 'Coin',
-  Contract = 'Contract',
-  Message = 'Message',
+  Coin = 'coin',
+  Contract = 'contract',
+  Message = 'message',
 }
 
-export type RawInputCoin = {
+export interface RawBaseInput extends BaseFields {
+  inputIndex: number;
+}
+
+export type RawInputCoin = RawBaseInput & {
   type: InputType.Coin;
   amount: number;
   assetId: string;
@@ -190,14 +209,12 @@ export type RawInputCoin = {
   predicate: string;
   predicateData: string;
   predicateGasUsed: number;
-  predicateDataLength: number;
-  predicateLength: number;
   txPointer: TxPointer;
   utxoId: UtxoId;
   witnessIndex: number;
 };
 
-export type RawInputContract = {
+export type RawInputContract = RawBaseInput & {
   type: InputType.Contract;
   balanceRoot: string;
   stateRoot: string;
@@ -206,7 +223,7 @@ export type RawInputContract = {
   contractId: string;
 };
 
-export type RawInputMessage = {
+export type RawInputMessage = RawBaseInput & {
   type: InputType.Message;
   amount: number;
   data?: string;
@@ -214,8 +231,6 @@ export type RawInputMessage = {
   predicate: string;
   predicateData: string;
   predicateGasUsed: number;
-  predicateDataLength: number;
-  predicateLength: number;
   recipient: string;
   sender: string;
   witnessIndex: number;
@@ -231,22 +246,26 @@ export type Input = FuelsInput;
 // Receipt Types
 // ----------------------------------------------------------------------------
 export enum ReceiptType {
-  Call = 'Call',
-  Return = 'Return',
-  ReturnData = 'ReturnData',
-  Panic = 'Panic',
-  Revert = 'Revert',
-  Log = 'Log',
-  LogData = 'LogData',
-  Transfer = 'Transfer',
-  TransferOut = 'TransferOut',
-  ScriptResult = 'ScriptResult',
-  MessageOut = 'MessageOut',
-  Mint = 'Mint',
-  Burn = 'Burn',
+  Call = 'call',
+  Return = 'return',
+  ReturnData = 'return_data',
+  Panic = 'panic',
+  Revert = 'revert',
+  Log = 'log',
+  LogData = 'log_data',
+  Transfer = 'transfer',
+  TransferOut = 'transfer_out',
+  ScriptResult = 'script_result',
+  MessageOut = 'message_out',
+  Mint = 'mint',
+  Burn = 'burn',
 }
 
-export type RawCallReceipt = {
+export interface RawBaseReceipt extends BaseFields {
+  receiptIndex: number;
+}
+
+export type RawCallReceipt = RawBaseReceipt & {
   type: ReceiptType.Call;
   id: string;
   to: string;
@@ -259,7 +278,7 @@ export type RawCallReceipt = {
   is: string;
 };
 
-export type RawReturnReceipt = {
+export type RawReturnReceipt = RawBaseReceipt & {
   type: ReceiptType.Return;
   id: string;
   val: string;
@@ -267,7 +286,7 @@ export type RawReturnReceipt = {
   is: string;
 };
 
-export type RawReturnDataReceipt = {
+export type RawReturnDataReceipt = RawBaseReceipt & {
   type: ReceiptType.ReturnData;
   id: string;
   ptr: string;
@@ -278,7 +297,7 @@ export type RawReturnDataReceipt = {
   data?: string;
 };
 
-export type RawPanicReceipt = {
+export type RawPanicReceipt = RawBaseReceipt & {
   type: ReceiptType.Panic;
   id: string;
   reason: string;
@@ -287,7 +306,7 @@ export type RawPanicReceipt = {
   contractId?: string;
 };
 
-export type RawRevertReceipt = {
+export type RawRevertReceipt = RawBaseReceipt & {
   type: ReceiptType.Revert;
   id: string;
   ra: string;
@@ -295,7 +314,7 @@ export type RawRevertReceipt = {
   is: string;
 };
 
-export type RawLogReceipt = {
+export type RawLogReceipt = RawBaseReceipt & {
   type: ReceiptType.Log;
   id: string;
   ra: string;
@@ -306,7 +325,7 @@ export type RawLogReceipt = {
   is: string;
 };
 
-export type RawLogDataReceipt = {
+export type RawLogDataReceipt = RawBaseReceipt & {
   type: ReceiptType.LogData;
   id: string;
   ra: string;
@@ -319,7 +338,7 @@ export type RawLogDataReceipt = {
   data?: string;
 };
 
-export type RawTransferReceipt = {
+export type RawTransferReceipt = RawBaseReceipt & {
   type: ReceiptType.Transfer;
   id: string;
   to: string;
@@ -329,7 +348,7 @@ export type RawTransferReceipt = {
   is: string;
 };
 
-export type RawTransferOutReceipt = {
+export type RawTransferOutReceipt = RawBaseReceipt & {
   type: ReceiptType.TransferOut;
   id: string;
   to: string;
@@ -339,13 +358,13 @@ export type RawTransferOutReceipt = {
   is: string;
 };
 
-export type RawScriptResultReceipt = {
+export type RawScriptResultReceipt = RawBaseReceipt & {
   type: ReceiptType.ScriptResult;
   result: string;
   gasUsed: string;
 };
 
-export type RawMessageOutReceipt = {
+export type RawMessageOutReceipt = RawBaseReceipt & {
   type: ReceiptType.MessageOut;
   sender: string;
   recipient: string;
@@ -356,7 +375,7 @@ export type RawMessageOutReceipt = {
   data?: string;
 };
 
-export type RawMintReceipt = {
+export type RawMintReceipt = RawBaseReceipt & {
   type: ReceiptType.Mint;
   subId: string;
   contractId: string;
@@ -365,7 +384,7 @@ export type RawMintReceipt = {
   is: string;
 };
 
-export type RawBurnReceipt = {
+export type RawBurnReceipt = RawBaseReceipt & {
   type: ReceiptType.Burn;
   subId: string;
   contractId: string;
@@ -394,35 +413,81 @@ export type Receipt = FuelsReceipt;
 // ----------------------------------------------------------------------------
 // UTXO Types
 // ----------------------------------------------------------------------------
+export enum UtxoStatus {
+  Spent = 'spent',
+  Unspent = 'unspent',
+}
+
+export enum UtxoType {
+  Contract = 'contract',
+  Coin = 'coin',
+  Message = 'message',
+  InputContract = 'input_contract',
+  InputCoin = 'input_coin',
+  OutputCoin = 'output_coin',
+  OutputChange = 'output_change',
+  OutputVariable = 'output_variable',
+}
+
 export type RawUtxo = {
-  utxoId: UtxoId;
-  sender?: string;
-  recipient?: string;
-  nonce?: string;
-  data?: string;
-  amount?: number;
+  status: UtxoStatus;
+  type: UtxoType;
   txId: string;
+  utxoId: UtxoId;
+  from?: string;
+  to?: string;
+  amount?: number;
+  assetId?: string;
+  contractId?: string;
+  nonce?: string;
 };
 
 export type Utxo = {
-  utxoId: UtxoId;
-  sender?: string;
-  recipient?: string;
-  nonce?: string;
-  data?: string;
-  amount?: BN;
+  status: UtxoStatus;
+  type: UtxoType;
   txId: string;
+  utxoId: UtxoId;
+  from?: string;
+  to?: string;
+  amount?: BN;
+  assetId?: string;
+  contractId?: string;
+  nonce?: string;
 };
 
-export enum UtxoType {
-  Contract = 'Contract',
-  Coin = 'Coin',
-  Message = 'Message',
-}
+// ----------------------------------------------------------------------------
+// Predicate Types
+// ----------------------------------------------------------------------------
+export type RawPredicate = {
+  blobId?: string;
+  predicateAddress: string;
+  predicateBytecode: string;
+  txId: string;
+  txIndex: number;
+  inputIndex: number;
+  assetId: string;
+};
+
+export type Predicate = {
+  blobId?: string;
+  predicateAddress: string;
+  predicateBytecode: string;
+  txId: string;
+  txIndex: BN;
+  inputIndex: BN;
+  assetId: string;
+};
 
 // ----------------------------------------------------------------------------
 // Transaction Types
 // ----------------------------------------------------------------------------
+export type Policies = {
+  maxFee: number;
+  witnessLimit: number;
+  maturity: number;
+  maxSize: number;
+};
+
 export type RawTransaction = {
   id: string;
   type: TransactionType;
@@ -440,16 +505,12 @@ export type RawTransaction = {
   isScript: boolean;
   isUpgrade: boolean;
   isUpload: boolean;
+  isBlob: boolean;
   maturity?: number;
   mintAmount?: number;
   mintAssetId?: string;
   mintGasPrice?: number;
-  policies?: {
-    maxFee: number;
-    witnessLimit: number;
-    maturity: number;
-    maxSize: number;
-  };
+  policies?: Policies;
   proofSet: string[];
   rawPayload: string;
   receiptsRoot?: string;
@@ -465,6 +526,14 @@ export type RawTransaction = {
   upgradePurpose?: number;
   witnesses: string[];
   receipts: RawReceipt[];
+  scriptLength?: number;
+  scriptDataLength?: number;
+  storageSlotsCount: number;
+  proofSetCount: number;
+  witnessesCount: number;
+  inputsCount: number;
+  outputsCount: number;
+  txIndex: number;
 };
 
 export type Transaction = FuelsTransaction;
@@ -481,7 +550,7 @@ export enum TransactionType {
 export enum TransactionStatus {
   Failed = 'failed',
   Submitted = 'submitted',
-  SqueezedOut = 'squeezedOut',
+  SqueezedOut = 'squeezed_out',
   Success = 'success',
   None = 'none',
 }

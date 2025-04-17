@@ -1,17 +1,9 @@
-import { Interface, type JsonAbi } from 'fuels';
-import type {
-  EntityParser,
-  GenericRecord,
-  SubjectBase,
-} from '../modules/subject-base';
-import {
-  BlockParser,
-  InputParser,
-  OutputParser,
-  ReceiptParser,
-  TransactionParser,
-  UtxoParser,
-} from '../parsers';
+import camelize from 'camelize-ts';
+import type { JsonAbi } from 'fuels';
+import snakify from 'snakify-ts';
+import { v4 as uuidv4 } from 'uuid';
+import type { GenericRecord, SubjectBase } from '../modules/subject-base';
+import { findParser } from '../parsers';
 import type { DeliverPolicy } from './deliver-policy';
 import { ClientError } from './error';
 import { getWsUrl } from './networks';
@@ -31,8 +23,6 @@ export interface ConnectionOpts {
   apiKey: string | null;
 }
 
-type ParserMap = Map<string, EntityParser<any, any>>;
-
 interface SubscriptionIterator<T extends GenericRecord, R extends GenericRecord>
   extends AsyncIterableIterator<ClientResponse<T, R>> {
   onMessage: (handler: (data: ClientResponse<T, R>) => void) => () => void;
@@ -44,7 +34,6 @@ export class Connection {
   private messageHandlers: Map<string, (data: any) => void>;
   private messageErrors: Map<string, (error: Error) => void>;
   private disconnectHandlers: Set<() => void>;
-  private parserMap: ParserMap = new Map();
   private isClosing = false;
   private contractAbi?: JsonAbi;
 
@@ -67,7 +56,9 @@ export class Connection {
         }
 
         if ('response' in msg) {
-          this.messageHandlers.forEach((handler) => handler(msg.response));
+          this.messageHandlers.forEach((handler) => {
+            handler(msg.response);
+          });
         }
       } catch (err) {
         const clientError = this.handleError(err);
@@ -99,7 +90,7 @@ export class Connection {
 
   private parseJsonMessage(data: string): ServerMessage {
     try {
-      return JSON.parse(data);
+      return camelize<ServerMessage>(JSON.parse(data));
     } catch (err) {
       throw ClientError.JsonParseError(err as SyntaxError);
     }
@@ -134,18 +125,15 @@ export class Connection {
     T extends GenericRecord,
     R extends GenericRecord,
   >(): SubscriptionIterator<T, R> {
-    const handlerId = `multi_${Array.from(this.parserMap.keys()).join('_')}`;
     const abi = this.contractAbi;
+    const handlerId = uuidv4();
     return {
       next: () => {
         return new Promise<IteratorResult<ClientResponse<T, R>, any>>(
           (resolve, reject) => {
             const handler = (data: StreamResponse<R>) => {
               try {
-                const parser = this.parserMap.get(data.type);
-                if (!parser) {
-                  throw ClientError.ParserNotFound(data.type);
-                }
+                const parser = findParser(data.type);
                 resolve({
                   done: false,
                   value: {
@@ -176,16 +164,17 @@ export class Connection {
       onMessage: (handler) => {
         const messageHandler = (data: StreamResponse<R>) => {
           try {
-            const parser = this.parserMap.get(data.type);
-            if (!parser) {
-              throw ClientError.ParserNotFound(data.type);
-            }
+            const parser = findParser(data.type);
+
+            const parsedPayload = parser.parse(data.payload, abi);
+
             handler({
               ...data,
-              payload: parser.parse(data.payload, abi),
+              payload: parsedPayload,
               rawPayload: data.payload,
             });
           } catch (err) {
+            console.error('Error parsing message:', err);
             this.handleError(err);
           }
         };
@@ -212,14 +201,7 @@ export class Connection {
     deliverPolicy: DeliverPolicy,
   ): Promise<SubscriptionIterator<Entity, RawEntity>> {
     try {
-      const payloads = subjects.map((subject) => {
-        const payload = subject.toPayload();
-        this.parserMap.set(
-          payload.subject,
-          subject.parser as EntityParser<Entity, RawEntity>,
-        );
-        return payload;
-      });
+      const payloads = subjects.map((subject) => subject.toPayload());
 
       await this.sendMessage({
         subscribe: payloads,
@@ -251,10 +233,6 @@ export class Connection {
       };
 
       await this.sendMessage(message);
-      payloads.forEach((payload) => {
-        this.parserMap.set(payload.subject, this.findParser(payload.subject));
-      });
-
       return this.createSubscriptionIterator<T, RawT>();
     } catch (err) {
       if (err instanceof ClientError) {
@@ -286,30 +264,6 @@ export class Connection {
     }
   }
 
-  private findParser(subject: string): EntityParser<any, any> {
-    const parserMap: Record<string, new () => EntityParser<any, any>> = {
-      block: BlockParser,
-      transaction: TransactionParser,
-      input: InputParser,
-      output: OutputParser,
-      receipt: ReceiptParser,
-      utxo: UtxoParser,
-    };
-
-    const matchingKey = Object.keys(parserMap).find((key) =>
-      subject.includes(key),
-    );
-    if (!matchingKey) {
-      throw ClientError.ParserNotFound(subject);
-    }
-
-    try {
-      return new parserMap[matchingKey]();
-    } catch (err) {
-      throw ClientError.ParserInitializationError(matchingKey, err as Error);
-    }
-  }
-
   private canSendMessage(): boolean {
     return !this.isClosing && this.ws.readyState === this.ws.OPEN;
   }
@@ -335,7 +289,8 @@ export class Connection {
           );
         }, 5000);
 
-        this.ws.send(JSON.stringify(message));
+        const msg = JSON.stringify(snakify(message));
+        this.ws.send(msg);
         clearTimeout(timeoutId);
         resolve();
       } catch (err) {
@@ -382,7 +337,6 @@ export class Connection {
   reset() {
     this.messageHandlers.clear();
     this.messageErrors.clear();
-    this.parserMap.clear();
   }
 }
 

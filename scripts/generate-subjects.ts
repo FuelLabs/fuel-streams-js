@@ -153,6 +153,12 @@ function mapRustTypeToTS(rustType: string): string {
     u16: 'number',
     u32: 'number',
     u64: 'number',
+    u128: 'number',
+    i8: 'number',
+    i16: 'number',
+    i32: 'number',
+    i64: 'number',
+    i128: 'number',
   };
 
   return typeMap[rustType] || rustType;
@@ -257,6 +263,8 @@ function getUsedTypes(fields: Record<string, any>): Set<string> {
         'TxId',
         'HexData',
         'TransactionType',
+        'UtxoId',
+        'UtxoStatus',
       ].includes(mappedType)
     ) {
       usedTypes.add(mappedType);

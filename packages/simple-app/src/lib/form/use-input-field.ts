@@ -1,7 +1,11 @@
 import type { FormField, SelectOption } from '@fuels/streams/subjects-def';
 import {
   TransactionTypeOptions,
+  inputTypeOptions,
+  outputTypeOptions,
+  receiptTypeOptions,
   transactionStatusOptions,
+  utxoStatusOptions,
   utxoTypeOptions,
 } from '@fuels/streams/subjects-def';
 import { useMemo } from 'react';
@@ -12,22 +16,33 @@ function formatLabel(id: string): string {
   return v.titleCase(v.replaceAll(id, '_', ' '));
 }
 
-function getFieldOptions(type: string): readonly SelectOption[] | undefined {
-  switch (type) {
+function getFieldOptions(
+  field: FormField,
+): readonly SelectOption[] | undefined {
+  switch (field.type) {
     case 'TransactionType':
       return TransactionTypeOptions;
     case 'TransactionStatus':
       return transactionStatusOptions;
     case 'UtxoType':
       return utxoTypeOptions;
+    case 'UtxoStatus':
+      return utxoStatusOptions;
+    case 'InputType':
+      return inputTypeOptions;
+    case 'OutputType':
+      return outputTypeOptions;
+    case 'ReceiptType':
+      return receiptTypeOptions;
     default:
       return undefined;
   }
 }
 
 export function useInputField(field: FormField) {
+  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   const computedValues = useMemo(() => {
-    const predefinedOptions = getFieldOptions(field.type);
+    const predefinedOptions = getFieldOptions(field);
     const hasOptions = field.options || predefinedOptions;
     const formattedLabel = formatLabel(field.id);
     const inputType = getFieldType(field.type);

@@ -29,7 +29,7 @@ describe('SubjectBuilder', () => {
     expectedPayload,
   }: {
     module: string;
-    variant: string;
+    variant: string | null;
     fields: Record<string, string>;
     expectedSubject: string;
     expectedPayload: {
@@ -84,8 +84,8 @@ describe('SubjectBuilder', () => {
           },
         },
         {
-          fields: { producer: '0x123', height: '100' },
-          expectedSubject: 'blocks.0x123.100',
+          fields: { producer: '0x123', height: '100', da_height: '*' },
+          expectedSubject: 'blocks.0x123.*.100',
           expectedPayload: {
             subject: 'blocks',
             params: {
@@ -112,7 +112,7 @@ describe('SubjectBuilder', () => {
             block_height: '100',
             tx_id: '0x123',
             tx_index: '1',
-            tx_status: 'success',
+            status: 'success',
             tx_type: 'script',
           },
           expectedSubject: 'transactions.100.0x123.1.success.script',
@@ -122,7 +122,7 @@ describe('SubjectBuilder', () => {
               block_height: '100',
               tx_id: '0x123',
               tx_index: '1',
-              tx_status: 'success',
+              status: 'success',
               tx_type: 'script',
             },
           },
@@ -140,7 +140,7 @@ describe('SubjectBuilder', () => {
             expect(
               testModuleVariant({
                 module: name,
-                variant: '',
+                variant: null,
                 fields,
                 expectedSubject,
                 expectedPayload,

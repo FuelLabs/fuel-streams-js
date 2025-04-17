@@ -15,9 +15,16 @@ export const transactionStatusOptions = [
 ] as const;
 
 export const utxoTypeOptions = [
-  { value: 'contract', label: 'Contract' },
-  { value: 'coin', label: 'Coin' },
-  { value: 'message', label: 'Message' },
+  { value: 'input_contract', label: 'Input Contract' },
+  { value: 'input_coin', label: 'Input Coin' },
+  { value: 'output_change', label: 'Output Change' },
+  { value: 'output_variable', label: 'Output Variable' },
+  { value: 'output_contract_created', label: 'Output Contract Created' },
+] as const;
+
+export const utxoStatusOptions = [
+  { value: 'spent', label: 'Spent' },
+  { value: 'unspent', label: 'Unspent' },
 ] as const;
 
 export const inputTypeOptions = [
@@ -115,8 +122,7 @@ export const subjectsDefinitions: SubjectsDefinition = {
     id: 'transactions',
     entity: 'Transaction',
     subject: 'TransactionsSubject',
-    format:
-      'transactions.{block_height}.{tx_id}.{tx_index}.{tx_status}.{tx_type}',
+    format: 'transactions.{block_height}.{tx_id}.{tx_index}.{status}.{tx_type}',
     wildcard: 'transactions.>',
     fields: {
       block_height: {
@@ -129,10 +135,10 @@ export const subjectsDefinitions: SubjectsDefinition = {
           'The ID of the transaction (32 byte string prefixed by 0x)',
       },
       tx_index: {
-        type: 'u32',
+        type: 'i32',
         description: 'The index of the transaction within the block',
       },
-      tx_status: {
+      status: {
         type: 'TransactionStatus',
         description:
           'The status of the transaction (success, failure, or submitted)',
@@ -165,11 +171,11 @@ export const subjectsDefinitions: SubjectsDefinition = {
           'The ID of the transaction containing this input (32 byte string prefixed by 0x)',
       },
       tx_index: {
-        type: 'u32',
+        type: 'i32',
         description: 'The index of the transaction within the block',
       },
       input_index: {
-        type: 'u32',
+        type: 'i32',
         description: 'The index of this input within the transaction',
       },
     },
@@ -192,11 +198,11 @@ export const subjectsDefinitions: SubjectsDefinition = {
               'The ID of the transaction containing this coin input (32 byte string prefixed by 0x)',
           },
           tx_index: {
-            type: 'u32',
+            type: 'i32',
             description: 'The index of the transaction within the block',
           },
           input_index: {
-            type: 'u32',
+            type: 'i32',
             description: 'The index of this input within the transaction',
           },
           owner: {
@@ -230,11 +236,11 @@ export const subjectsDefinitions: SubjectsDefinition = {
               'The ID of the transaction containing this contract input (32 byte string prefixed by 0x)',
           },
           tx_index: {
-            type: 'u32',
+            type: 'i32',
             description: 'The index of the transaction within the block',
           },
           input_index: {
-            type: 'u32',
+            type: 'i32',
             description: 'The index of this input within the transaction',
           },
           contract: {
@@ -263,11 +269,11 @@ export const subjectsDefinitions: SubjectsDefinition = {
               'The ID of the transaction containing this message input (32 byte string prefixed by 0x)',
           },
           tx_index: {
-            type: 'u32',
+            type: 'i32',
             description: 'The index of the transaction within the block',
           },
           input_index: {
-            type: 'u32',
+            type: 'i32',
             description: 'The index of this input within the transaction',
           },
           sender: {
@@ -307,11 +313,11 @@ export const subjectsDefinitions: SubjectsDefinition = {
           'The ID of the transaction containing this output (32 byte string prefixed by 0x)',
       },
       tx_index: {
-        type: 'u32',
+        type: 'i32',
         description: 'The index of the transaction within the block',
       },
       output_index: {
-        type: 'u32',
+        type: 'i32',
         description: 'The index of this output within the transaction',
       },
     },
@@ -334,11 +340,11 @@ export const subjectsDefinitions: SubjectsDefinition = {
               'The ID of the transaction containing this coin output (32 byte string prefixed by 0x)',
           },
           tx_index: {
-            type: 'u32',
+            type: 'i32',
             description: 'The index of the transaction within the block',
           },
           output_index: {
-            type: 'u32',
+            type: 'i32',
             description: 'The index of this output within the transaction',
           },
           to: {
@@ -372,11 +378,11 @@ export const subjectsDefinitions: SubjectsDefinition = {
               'The ID of the transaction containing this contract output (32 byte string prefixed by 0x)',
           },
           tx_index: {
-            type: 'u32',
+            type: 'i32',
             description: 'The index of the transaction within the block',
           },
           output_index: {
-            type: 'u32',
+            type: 'i32',
             description: 'The index of this output within the transaction',
           },
           contract: {
@@ -405,11 +411,11 @@ export const subjectsDefinitions: SubjectsDefinition = {
               'The ID of the transaction containing this change output (32 byte string prefixed by 0x)',
           },
           tx_index: {
-            type: 'u32',
+            type: 'i32',
             description: 'The index of the transaction within the block',
           },
           output_index: {
-            type: 'u32',
+            type: 'i32',
             description: 'The index of this output within the transaction',
           },
           to: {
@@ -443,11 +449,11 @@ export const subjectsDefinitions: SubjectsDefinition = {
               'The ID of the transaction containing this variable output (32 byte string prefixed by 0x)',
           },
           tx_index: {
-            type: 'u32',
+            type: 'i32',
             description: 'The index of the transaction within the block',
           },
           output_index: {
-            type: 'u32',
+            type: 'i32',
             description: 'The index of this output within the transaction',
           },
           to: {
@@ -481,11 +487,11 @@ export const subjectsDefinitions: SubjectsDefinition = {
               'The ID of the transaction containing this contract creation output (32 byte string prefixed by 0x)',
           },
           tx_index: {
-            type: 'u32',
+            type: 'i32',
             description: 'The index of the transaction within the block',
           },
           output_index: {
-            type: 'u32',
+            type: 'i32',
             description: 'The index of this output within the transaction',
           },
           contract: {
@@ -494,6 +500,47 @@ export const subjectsDefinitions: SubjectsDefinition = {
               'The ID of the created contract (32 byte string prefixed by 0x)',
           },
         },
+      },
+    },
+  },
+  predicates: {
+    id: 'predicates',
+    entity: 'Predicate',
+    subject: 'PredicatesSubject',
+    format:
+      'predicates.{block_height}.{tx_id}.{tx_index}.{input_index}.{blob_id}.{predicate_address}.{asset}',
+    wildcard: 'predicates.>',
+    fields: {
+      block_height: {
+        type: 'BlockHeight',
+        description: 'The height of the block containing this predicate',
+      },
+      tx_id: {
+        type: 'TxId',
+        description:
+          'The ID of the transaction containing this predicate (32 byte string prefixed by 0x)',
+      },
+      tx_index: {
+        type: 'i32',
+        description: 'The index of the transaction within the block',
+      },
+      input_index: {
+        type: 'i32',
+        description:
+          'The index of this input within the transaction that had this predicate',
+      },
+      blob_id: {
+        type: 'HexData',
+        description: 'The ID of the blob containing the predicate bytecode',
+      },
+      predicate_address: {
+        type: 'Address',
+        description:
+          'The address of the predicate (32 byte string prefixed by 0x)',
+      },
+      asset: {
+        type: 'AssetId',
+        description: 'The asset ID of the coin (32 byte string prefixed by 0x)',
       },
     },
   },
@@ -519,11 +566,11 @@ export const subjectsDefinitions: SubjectsDefinition = {
           'The ID of the transaction containing this receipt (32 byte string prefixed by 0x)',
       },
       tx_index: {
-        type: 'u32',
+        type: 'i32',
         description: 'The index of the transaction within the block',
       },
       receipt_index: {
-        type: 'u32',
+        type: 'i32',
         description: 'The index of this receipt within the transaction',
       },
     },
@@ -546,11 +593,11 @@ export const subjectsDefinitions: SubjectsDefinition = {
               'The ID of the transaction containing this call receipt (32 byte string prefixed by 0x)',
           },
           tx_index: {
-            type: 'u32',
+            type: 'i32',
             description: 'The index of the transaction within the block',
           },
           receipt_index: {
-            type: 'u32',
+            type: 'i32',
             description: 'The index of this receipt within the transaction',
           },
           from: {
@@ -589,11 +636,11 @@ export const subjectsDefinitions: SubjectsDefinition = {
               'The ID of the transaction containing this return receipt (32 byte string prefixed by 0x)',
           },
           tx_index: {
-            type: 'u32',
+            type: 'i32',
             description: 'The index of the transaction within the block',
           },
           receipt_index: {
-            type: 'u32',
+            type: 'i32',
             description: 'The index of this receipt within the transaction',
           },
           contract: {
@@ -622,11 +669,11 @@ export const subjectsDefinitions: SubjectsDefinition = {
               'The ID of the transaction containing this return data receipt (32 byte string prefixed by 0x)',
           },
           tx_index: {
-            type: 'u32',
+            type: 'i32',
             description: 'The index of the transaction within the block',
           },
           receipt_index: {
-            type: 'u32',
+            type: 'i32',
             description: 'The index of this receipt within the transaction',
           },
           contract: {
@@ -655,11 +702,11 @@ export const subjectsDefinitions: SubjectsDefinition = {
               'The ID of the transaction containing this panic receipt (32 byte string prefixed by 0x)',
           },
           tx_index: {
-            type: 'u32',
+            type: 'i32',
             description: 'The index of the transaction within the block',
           },
           receipt_index: {
-            type: 'u32',
+            type: 'i32',
             description: 'The index of this receipt within the transaction',
           },
           contract: {
@@ -688,11 +735,11 @@ export const subjectsDefinitions: SubjectsDefinition = {
               'The ID of the transaction containing this revert receipt (32 byte string prefixed by 0x)',
           },
           tx_index: {
-            type: 'u32',
+            type: 'i32',
             description: 'The index of the transaction within the block',
           },
           receipt_index: {
-            type: 'u32',
+            type: 'i32',
             description: 'The index of this receipt within the transaction',
           },
           contract: {
@@ -720,11 +767,11 @@ export const subjectsDefinitions: SubjectsDefinition = {
               'The ID of the transaction containing this log receipt (32 byte string prefixed by 0x)',
           },
           tx_index: {
-            type: 'u32',
+            type: 'i32',
             description: 'The index of the transaction within the block',
           },
           receipt_index: {
-            type: 'u32',
+            type: 'i32',
             description: 'The index of this receipt within the transaction',
           },
           contract: {
@@ -753,11 +800,11 @@ export const subjectsDefinitions: SubjectsDefinition = {
               'The ID of the transaction containing this log data receipt (32 byte string prefixed by 0x)',
           },
           tx_index: {
-            type: 'u32',
+            type: 'i32',
             description: 'The index of the transaction within the block',
           },
           receipt_index: {
-            type: 'u32',
+            type: 'i32',
             description: 'The index of this receipt within the transaction',
           },
           contract: {
@@ -786,11 +833,11 @@ export const subjectsDefinitions: SubjectsDefinition = {
               'The ID of the transaction containing this transfer receipt (32 byte string prefixed by 0x)',
           },
           tx_index: {
-            type: 'u32',
+            type: 'i32',
             description: 'The index of the transaction within the block',
           },
           receipt_index: {
-            type: 'u32',
+            type: 'i32',
             description: 'The index of this receipt within the transaction',
           },
           from: {
@@ -829,11 +876,11 @@ export const subjectsDefinitions: SubjectsDefinition = {
               'The ID of the transaction containing this transfer out receipt (32 byte string prefixed by 0x)',
           },
           tx_index: {
-            type: 'u32',
+            type: 'i32',
             description: 'The index of the transaction within the block',
           },
           receipt_index: {
-            type: 'u32',
+            type: 'i32',
             description: 'The index of this receipt within the transaction',
           },
           from: {
@@ -872,11 +919,11 @@ export const subjectsDefinitions: SubjectsDefinition = {
               'The ID of the transaction containing this script result receipt (32 byte string prefixed by 0x)',
           },
           tx_index: {
-            type: 'u32',
+            type: 'i32',
             description: 'The index of the transaction within the block',
           },
           receipt_index: {
-            type: 'u32',
+            type: 'i32',
             description: 'The index of this receipt within the transaction',
           },
         },
@@ -900,11 +947,11 @@ export const subjectsDefinitions: SubjectsDefinition = {
               'The ID of the transaction containing this message out receipt (32 byte string prefixed by 0x)',
           },
           tx_index: {
-            type: 'u32',
+            type: 'i32',
             description: 'The index of the transaction within the block',
           },
           receipt_index: {
-            type: 'u32',
+            type: 'i32',
             description: 'The index of this receipt within the transaction',
           },
           sender: {
@@ -937,11 +984,11 @@ export const subjectsDefinitions: SubjectsDefinition = {
               'The ID of the transaction containing this mint receipt (32 byte string prefixed by 0x)',
           },
           tx_index: {
-            type: 'u32',
+            type: 'i32',
             description: 'The index of the transaction within the block',
           },
           receipt_index: {
-            type: 'u32',
+            type: 'i32',
             description: 'The index of this receipt within the transaction',
           },
           contract: {
@@ -974,11 +1021,11 @@ export const subjectsDefinitions: SubjectsDefinition = {
               'The ID of the transaction containing this burn receipt (32 byte string prefixed by 0x)',
           },
           tx_index: {
-            type: 'u32',
+            type: 'i32',
             description: 'The index of the transaction within the block',
           },
           receipt_index: {
-            type: 'u32',
+            type: 'i32',
             description: 'The index of this receipt within the transaction',
           },
           contract: {
@@ -1000,7 +1047,7 @@ export const subjectsDefinitions: SubjectsDefinition = {
     entity: 'Utxo',
     subject: 'UtxosSubject',
     format:
-      'utxos.{block_height}.{tx_id}.{tx_index}.{input_index}.{utxo_type}.{utxo_id}.{contract_id}',
+      'utxos.{block_height}.{tx_id}.{tx_index}.{output_index}.{status}.{utxo_type}.{asset_id}.{utxo_id}.{from}.{to}.{contract_id}',
     wildcard: 'utxos.>',
     fields: {
       block_height: {
@@ -1013,26 +1060,44 @@ export const subjectsDefinitions: SubjectsDefinition = {
           'The ID of the transaction containing this UTXO (32 byte string prefixed by 0x)',
       },
       tx_index: {
-        type: 'u32',
+        type: 'i32',
         description: 'The index of the transaction within the block',
       },
-      input_index: {
-        type: 'u32',
-        description: 'The index of the input within the transaction',
+      output_index: {
+        type: 'i32',
+        description: 'The index of the output within the transaction',
       },
       utxo_type: {
         type: 'UtxoType',
         description: 'The type of UTXO (coin, message, or contract)',
       },
+      asset_id: {
+        type: 'AssetId',
+        description: 'The ID of the asset associated with this UTXO',
+      },
       utxo_id: {
-        type: 'HexData',
+        type: 'UtxoId',
         description:
           'The unique identifier for this UTXO (32 byte string prefixed by 0x)',
+      },
+      from: {
+        type: 'Address',
+        description:
+          'The address of the sender (32 byte string prefixed by 0x)',
+      },
+      to: {
+        type: 'Address',
+        description:
+          'The address of the recipient (32 byte string prefixed by 0x)',
       },
       contract_id: {
         type: 'ContractId',
         description:
           'The ID of the contract that returned (32 byte string prefixed by 0x)',
+      },
+      status: {
+        type: 'UtxoStatus',
+        description: 'The status of the UTXO (unspent or spent)',
       },
     },
   },

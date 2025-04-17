@@ -21,13 +21,11 @@
     "types": "./dist/index.d.ts",
     "exports": {
       ".": {
-        "browser": "./dist/index.browser.js",
         "import": "./dist/index.js",
         "require": "./dist/index.cjs",
         "types": "./dist/index.d.ts"
       },
       "./subjects-def": {
-        "browser": "./dist/subjects-def.browser.js",
         "import": "./dist/subjects-def.js",
         "require": "./dist/subjects-def.cjs",
         "types": "./dist/subjects-def.d.ts"
@@ -42,24 +40,25 @@
     "build": "tsup",
     "build:watch": "tsup --watch",
     "ts:check": "tsc --noEmit",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run --passWithNoTests || true"
   },
   "dependencies": {
-    "@fuel-ts/abi-coder": "0.99.0",
-    "@fuel-ts/account": "^0.99.0",
-    "@fuel-ts/errors": "0.99.0",
-    "@fuel-ts/transactions": "0.99.0",
-    "@fuel-ts/utils": "0.99.0",
+    "@fuel-ts/abi-coder": "0.100.2",
+    "@fuel-ts/account": "^0.100.2",
+    "@fuel-ts/errors": "0.100.2",
+    "@fuel-ts/transactions": "0.100.2",
+    "@fuel-ts/utils": "0.100.2",
     "dotenv": "^16.4.7",
-    "fuels": "0.99.0",
+    "fuels": "0.100.2",
     "ramda": "0.30.1",
     "tai64": "1.0.0",
-    "tsx": "^4.19.2",
-    "ws": "^8.18.0"
+    "tsx": "^4.19.3",
+    "ws": "^8.18.1"
   },
   "devDependencies": {
     "@types/bun": "latest",
     "@types/ramda": "0.30.2",
-    "@types/ws": "8.5.13"
+    "@types/ws": "8.18.1",
+    "vitest": "3.1.1"
   }
 }

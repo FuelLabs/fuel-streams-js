@@ -21,7 +21,7 @@ type TransactionsFields = {
   blockHeight: BlockHeight;
   txId: TxId;
   txIndex: number;
-  txStatus: TransactionStatus;
+  status: TransactionStatus;
   txType: TransactionType;
 };
 
@@ -32,8 +32,7 @@ export class TransactionsSubject extends SubjectBase<
 > {
   metadata = {
     id: 'transactions',
-    format:
-      'transactions.{block_height}.{tx_id}.{tx_index}.{tx_status}.{tx_type}',
+    format: 'transactions.{block_height}.{tx_id}.{tx_index}.{status}.{tx_type}',
     parser: new TransactionParser(),
   };
 }

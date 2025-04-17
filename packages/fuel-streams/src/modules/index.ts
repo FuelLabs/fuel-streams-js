@@ -7,5 +7,6 @@ export * from './blocks/subjects';
 export * from './transactions/subjects';
 export * from './inputs/subjects';
 export * from './outputs/subjects';
+export * from './predicates/subjects';
 export * from './receipts/subjects';
 export * from './utxos/subjects';
