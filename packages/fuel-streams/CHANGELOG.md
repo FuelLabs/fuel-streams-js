@@ -1,5 +1,11 @@
 # @fuels/streams
 
+## 0.8.0
+
+### Minor Changes
+
+- [`58390e6`](https://github.com/FuelLabs/fuel-streams-js/commit/58390e67471b14f9df5c63d5530e4aab1387195e) Thanks [@pedronauck](https://github.com/pedronauck)! - Feat: adjustments for the new data
+
 ## 0.7.1
 
 ### Patch Changes
