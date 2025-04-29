@@ -8,7 +8,7 @@ import {
 } from '@/components/ui/select';
 import { Spinner } from '@/components/ui/spinner';
 import { useConnection } from '@/lib/stream/use-connection';
-import { ChevronsLeftRightEllipsis, Github } from 'lucide-react';
+import { ChevronsLeftRightEllipsis, ExternalLink, Github } from 'lucide-react';
 import { ThemeToggle } from './theme-toggle';
 
 export function Header() {
@@ -17,8 +17,8 @@ export function Header() {
 
   return (
     <header className="border-b">
-      <div className="flex h-14 items-center justify-between px-6">
-        <div className="flex items-center gap-4 text-mono uppercase font-medium flex-1">
+      <div className="flex h-14 items-center px-6">
+        <div className="flex items-center gap-4 text-mono uppercase font-medium">
           {/* biome-ignore lint/a11y/noSvgWithoutTitle: <explanation> */}
           <svg
             viewBox="0 0 344 344"
@@ -34,6 +34,18 @@ export function Header() {
             ALPHA
           </span>
         </div>
+        <nav className="flex items-center gap-4 ml-6 flex-1">
+          <a
+            target="_blank"
+            rel="noreferrer"
+            href="https://api-rest-mainnet.fuel.network/swagger-ui/"
+            className="flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
+          >
+            Rest API
+            <ExternalLink size={14} />
+          </a>
+        </nav>
+
         <div className="flex items-center gap-2">
           <Select
             value={network}
