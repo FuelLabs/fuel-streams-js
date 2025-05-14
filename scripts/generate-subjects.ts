@@ -159,6 +159,8 @@ function mapRustTypeToTS(rustType: string): string {
     i32: 'number',
     i64: 'number',
     i128: 'number',
+    MessageType: 'MessageType',
+    Nonce: 'Nonce',
   };
 
   return typeMap[rustType] || rustType;
@@ -265,6 +267,8 @@ function getUsedTypes(fields: Record<string, any>): Set<string> {
         'TransactionType',
         'UtxoId',
         'UtxoStatus',
+        'MessageType',
+        'Nonce',
       ].includes(mappedType)
     ) {
       usedTypes.add(mappedType);

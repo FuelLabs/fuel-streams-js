@@ -145,389 +145,433 @@ The SDK supports different delivery policies for controlling how you receive dat
 #### `BlocksSubject`
 
 - `producer (String)`
-  - The address of the producer that created the block
+	- The address of the producer that created the block
 - `da_height (String)`
-  - The height of the DA block as unsigned 64 bit integer
+	- The height of the DA block as unsigned 64 bit integer
 - `height (Number)`
-  - The height of the block as unsigned 64 bit integer
+	- The height of the block as unsigned 64 bit integer
 
 ### Transaction
 
 #### `TransactionsSubject`
 
 - `block_height (Number)`
-  - The height of the block containing this transaction
+	- The height of the block containing this transaction
 - `tx_id (String)`
-  - The ID of the transaction (32 byte string prefixed by 0x)
-- `tx_index (Number)`
-  - The index of the transaction within the block
-- `tx_status (String)`
-  - The status of the transaction (success, failure, or submitted)
+	- The ID of the transaction (32 byte string prefixed by 0x)
+- `tx_index (String)`
+	- The index of the transaction within the block
+- `status (String)`
+	- The status of the transaction (success, failure, or submitted)
 - `tx_type (String)`
-  - The type of transaction (create, mint, script)
+	- The type of transaction (create, mint, script)
 
 ### Input
 
 #### `InputsSubject`
 
 - `input_type (String)`
-  - The type of input (coin, contract, or message)
+	- The type of input (coin, contract, or message)
 - `block_height (Number)`
-  - The height of the block containing this input
+	- The height of the block containing this input
 - `tx_id (String)`
-  - The ID of the transaction containing this input (32 byte string prefixed by 0x)
-- `tx_index (Number)`
-  - The index of the transaction within the block
-- `input_index (Number)`
-  - The index of this input within the transaction
+	- The ID of the transaction containing this input (32 byte string prefixed by 0x)
+- `tx_index (String)`
+	- The index of the transaction within the block
+- `input_index (String)`
+	- The index of this input within the transaction
 
 #### `InputsCoinSubject`
 
 - `block_height (Number)`
-  - The height of the block containing this coin input
+	- The height of the block containing this coin input
 - `tx_id (String)`
-  - The ID of the transaction containing this coin input (32 byte string prefixed by 0x)
-- `tx_index (Number)`
-  - The index of the transaction within the block
-- `input_index (Number)`
-  - The index of this input within the transaction
+	- The ID of the transaction containing this coin input (32 byte string prefixed by 0x)
+- `tx_index (String)`
+	- The index of the transaction within the block
+- `input_index (String)`
+	- The index of this input within the transaction
 - `owner (String)`
-  - The address of the coin owner (32 byte string prefixed by 0x)
+	- The address of the coin owner (32 byte string prefixed by 0x)
 - `asset (String)`
-  - The asset ID of the coin (32 byte string prefixed by 0x)
+	- The asset ID of the coin (32 byte string prefixed by 0x)
 
 #### `InputsContractSubject`
 
 - `block_height (Number)`
-  - The height of the block containing this contract input
+	- The height of the block containing this contract input
 - `tx_id (String)`
-  - The ID of the transaction containing this contract input (32 byte string prefixed by 0x)
-- `tx_index (Number)`
-  - The index of the transaction within the block
-- `input_index (Number)`
-  - The index of this input within the transaction
+	- The ID of the transaction containing this contract input (32 byte string prefixed by 0x)
+- `tx_index (String)`
+	- The index of the transaction within the block
+- `input_index (String)`
+	- The index of this input within the transaction
 - `contract (String)`
-  - The ID of the contract being called (32 byte string prefixed by 0x)
+	- The ID of the contract being called (32 byte string prefixed by 0x)
 
 #### `InputsMessageSubject`
 
 - `block_height (Number)`
-  - The height of the block containing this message input
+	- The height of the block containing this message input
 - `tx_id (String)`
-  - The ID of the transaction containing this message input (32 byte string prefixed by 0x)
-- `tx_index (Number)`
-  - The index of the transaction within the block
-- `input_index (Number)`
-  - The index of this input within the transaction
+	- The ID of the transaction containing this message input (32 byte string prefixed by 0x)
+- `tx_index (String)`
+	- The index of the transaction within the block
+- `input_index (String)`
+	- The index of this input within the transaction
 - `sender (String)`
-  - The address that sent the message (32 byte string prefixed by 0x)
+	- The address that sent the message (32 byte string prefixed by 0x)
 - `recipient (String)`
-  - The address that will receive the message (32 byte string prefixed by 0x)
+	- The address that will receive the message (32 byte string prefixed by 0x)
 
 ### Output
 
 #### `OutputsSubject`
 
 - `output_type (String)`
-  - The type of output (coin, contract, change, variable, or contract_created)
+	- The type of output (coin, contract, change, variable, or contract_created)
 - `block_height (Number)`
-  - The height of the block containing this output
+	- The height of the block containing this output
 - `tx_id (String)`
-  - The ID of the transaction containing this output (32 byte string prefixed by 0x)
-- `tx_index (Number)`
-  - The index of the transaction within the block
-- `output_index (Number)`
-  - The index of this output within the transaction
+	- The ID of the transaction containing this output (32 byte string prefixed by 0x)
+- `tx_index (String)`
+	- The index of the transaction within the block
+- `output_index (String)`
+	- The index of this output within the transaction
 
 #### `OutputsCoinSubject`
 
 - `block_height (Number)`
-  - The height of the block containing this coin output
+	- The height of the block containing this coin output
 - `tx_id (String)`
-  - The ID of the transaction containing this coin output (32 byte string prefixed by 0x)
-- `tx_index (Number)`
-  - The index of the transaction within the block
-- `output_index (Number)`
-  - The index of this output within the transaction
+	- The ID of the transaction containing this coin output (32 byte string prefixed by 0x)
+- `tx_index (String)`
+	- The index of the transaction within the block
+- `output_index (String)`
+	- The index of this output within the transaction
 - `to (String)`
-  - The recipient address of the coin output (32 byte string prefixed by 0x)
+	- The recipient address of the coin output (32 byte string prefixed by 0x)
 - `asset (String)`
-  - The asset ID of the coin (32 byte string prefixed by 0x)
+	- The asset ID of the coin (32 byte string prefixed by 0x)
 
 #### `OutputsContractSubject`
 
 - `block_height (Number)`
-  - The height of the block containing this contract output
+	- The height of the block containing this contract output
 - `tx_id (String)`
-  - The ID of the transaction containing this contract output (32 byte string prefixed by 0x)
-- `tx_index (Number)`
-  - The index of the transaction within the block
-- `output_index (Number)`
-  - The index of this output within the transaction
+	- The ID of the transaction containing this contract output (32 byte string prefixed by 0x)
+- `tx_index (String)`
+	- The index of the transaction within the block
+- `output_index (String)`
+	- The index of this output within the transaction
 - `contract (String)`
-  - The ID of the contract (32 byte string prefixed by 0x)
+	- The ID of the contract (32 byte string prefixed by 0x)
 
 #### `OutputsChangeSubject`
 
 - `block_height (Number)`
-  - The height of the block containing this change output
+	- The height of the block containing this change output
 - `tx_id (String)`
-  - The ID of the transaction containing this change output (32 byte string prefixed by 0x)
-- `tx_index (Number)`
-  - The index of the transaction within the block
-- `output_index (Number)`
-  - The index of this output within the transaction
+	- The ID of the transaction containing this change output (32 byte string prefixed by 0x)
+- `tx_index (String)`
+	- The index of the transaction within the block
+- `output_index (String)`
+	- The index of this output within the transaction
 - `to (String)`
-  - The recipient address of the change output (32 byte string prefixed by 0x)
+	- The recipient address of the change output (32 byte string prefixed by 0x)
 - `asset (String)`
-  - The asset ID of the change output (32 byte string prefixed by 0x)
+	- The asset ID of the change output (32 byte string prefixed by 0x)
 
 #### `OutputsVariableSubject`
 
 - `block_height (Number)`
-  - The height of the block containing this variable output
+	- The height of the block containing this variable output
 - `tx_id (String)`
-  - The ID of the transaction containing this variable output (32 byte string prefixed by 0x)
-- `tx_index (Number)`
-  - The index of the transaction within the block
-- `output_index (Number)`
-  - The index of this output within the transaction
+	- The ID of the transaction containing this variable output (32 byte string prefixed by 0x)
+- `tx_index (String)`
+	- The index of the transaction within the block
+- `output_index (String)`
+	- The index of this output within the transaction
 - `to (String)`
-  - The recipient address of the variable output (32 byte string prefixed by 0x)
+	- The recipient address of the variable output (32 byte string prefixed by 0x)
 - `asset (String)`
-  - The asset ID of the variable output (32 byte string prefixed by 0x)
+	- The asset ID of the variable output (32 byte string prefixed by 0x)
 
 #### `OutputsContractCreatedSubject`
 
 - `block_height (Number)`
-  - The height of the block containing this contract creation output
+	- The height of the block containing this contract creation output
 - `tx_id (String)`
-  - The ID of the transaction containing this contract creation output (32 byte string prefixed by 0x)
-- `tx_index (Number)`
-  - The index of the transaction within the block
-- `output_index (Number)`
-  - The index of this output within the transaction
+	- The ID of the transaction containing this contract creation output (32 byte string prefixed by 0x)
+- `tx_index (String)`
+	- The index of the transaction within the block
+- `output_index (String)`
+	- The index of this output within the transaction
 - `contract (String)`
-  - The ID of the created contract (32 byte string prefixed by 0x)
+	- The ID of the created contract (32 byte string prefixed by 0x)
+
+### Predicate
+
+#### `PredicatesSubject`
+
+- `block_height (Number)`
+	- The height of the block containing this predicate
+- `tx_id (String)`
+	- The ID of the transaction containing this predicate (32 byte string prefixed by 0x)
+- `tx_index (String)`
+	- The index of the transaction within the block
+- `input_index (String)`
+	- The index of this input within the transaction that had this predicate
+- `blob_id (String)`
+	- The ID of the blob containing the predicate bytecode
+- `predicate_address (String)`
+	- The address of the predicate (32 byte string prefixed by 0x)
+- `asset (String)`
+	- The asset ID of the coin (32 byte string prefixed by 0x)
 
 ### Receipt
 
 #### `ReceiptsSubject`
 
 - `receipt_type (String)`
-  - The type of receipt
+	- The type of receipt
 - `block_height (Number)`
-  - The height of the block containing this receipt
+	- The height of the block containing this receipt
 - `tx_id (String)`
-  - The ID of the transaction containing this receipt (32 byte string prefixed by 0x)
-- `tx_index (Number)`
-  - The index of the transaction within the block
-- `receipt_index (Number)`
-  - The index of this receipt within the transaction
+	- The ID of the transaction containing this receipt (32 byte string prefixed by 0x)
+- `tx_index (String)`
+	- The index of the transaction within the block
+- `receipt_index (String)`
+	- The index of this receipt within the transaction
 
 #### `ReceiptsCallSubject`
 
 - `block_height (Number)`
-  - The height of the block containing this call receipt
+	- The height of the block containing this call receipt
 - `tx_id (String)`
-  - The ID of the transaction containing this call receipt (32 byte string prefixed by 0x)
-- `tx_index (Number)`
-  - The index of the transaction within the block
-- `receipt_index (Number)`
-  - The index of this receipt within the transaction
+	- The ID of the transaction containing this call receipt (32 byte string prefixed by 0x)
+- `tx_index (String)`
+	- The index of the transaction within the block
+- `receipt_index (String)`
+	- The index of this receipt within the transaction
 - `from (String)`
-  - The contract ID that initiated the call (32 byte string prefixed by 0x)
+	- The contract ID that initiated the call (32 byte string prefixed by 0x)
 - `to (String)`
-  - The contract ID that was called (32 byte string prefixed by 0x)
+	- The contract ID that was called (32 byte string prefixed by 0x)
 - `asset (String)`
-  - The asset ID involved in the call (32 byte string prefixed by 0x)
+	- The asset ID involved in the call (32 byte string prefixed by 0x)
 
 #### `ReceiptsReturnSubject`
 
 - `block_height (Number)`
-  - The height of the block containing this return receipt
+	- The height of the block containing this return receipt
 - `tx_id (String)`
-  - The ID of the transaction containing this return receipt (32 byte string prefixed by 0x)
-- `tx_index (Number)`
-  - The index of the transaction within the block
-- `receipt_index (Number)`
-  - The index of this receipt within the transaction
+	- The ID of the transaction containing this return receipt (32 byte string prefixed by 0x)
+- `tx_index (String)`
+	- The index of the transaction within the block
+- `receipt_index (String)`
+	- The index of this receipt within the transaction
 - `contract (String)`
-  - The ID of the contract that returned (32 byte string prefixed by 0x)
+	- The ID of the contract that returned (32 byte string prefixed by 0x)
 
 #### `ReceiptsReturnDataSubject`
 
 - `block_height (Number)`
-  - The height of the block containing this return data receipt
+	- The height of the block containing this return data receipt
 - `tx_id (String)`
-  - The ID of the transaction containing this return data receipt (32 byte string prefixed by 0x)
-- `tx_index (Number)`
-  - The index of the transaction within the block
-- `receipt_index (Number)`
-  - The index of this receipt within the transaction
+	- The ID of the transaction containing this return data receipt (32 byte string prefixed by 0x)
+- `tx_index (String)`
+	- The index of the transaction within the block
+- `receipt_index (String)`
+	- The index of this receipt within the transaction
 - `contract (String)`
-  - The ID of the contract that returned data (32 byte string prefixed by 0x)
+	- The ID of the contract that returned data (32 byte string prefixed by 0x)
 
 #### `ReceiptsPanicSubject`
 
 - `block_height (Number)`
-  - The height of the block containing this panic receipt
+	- The height of the block containing this panic receipt
 - `tx_id (String)`
-  - The ID of the transaction containing this panic receipt (32 byte string prefixed by 0x)
-- `tx_index (Number)`
-  - The index of the transaction within the block
-- `receipt_index (Number)`
-  - The index of this receipt within the transaction
+	- The ID of the transaction containing this panic receipt (32 byte string prefixed by 0x)
+- `tx_index (String)`
+	- The index of the transaction within the block
+- `receipt_index (String)`
+	- The index of this receipt within the transaction
 - `contract (String)`
-  - The ID of the contract that panicked (32 byte string prefixed by 0x)
+	- The ID of the contract that panicked (32 byte string prefixed by 0x)
 
 #### `ReceiptsRevertSubject`
 
 - `block_height (Number)`
-  - The height of the block containing this revert receipt
+	- The height of the block containing this revert receipt
 - `tx_id (String)`
-  - The ID of the transaction containing this revert receipt (32 byte string prefixed by 0x)
-- `tx_index (Number)`
-  - The index of the transaction within the block
-- `receipt_index (Number)`
-  - The index of this receipt within the transaction
+	- The ID of the transaction containing this revert receipt (32 byte string prefixed by 0x)
+- `tx_index (String)`
+	- The index of the transaction within the block
+- `receipt_index (String)`
+	- The index of this receipt within the transaction
 - `contract (String)`
-  - The ID of the contract that reverted (32 byte string prefixed by 0x)
+	- The ID of the contract that reverted (32 byte string prefixed by 0x)
 
 #### `ReceiptsLogSubject`
 
 - `block_height (Number)`
-  - The height of the block containing this log receipt
+	- The height of the block containing this log receipt
 - `tx_id (String)`
-  - The ID of the transaction containing this log receipt (32 byte string prefixed by 0x)
-- `tx_index (Number)`
-  - The index of the transaction within the block
-- `receipt_index (Number)`
-  - The index of this receipt within the transaction
+	- The ID of the transaction containing this log receipt (32 byte string prefixed by 0x)
+- `tx_index (String)`
+	- The index of the transaction within the block
+- `receipt_index (String)`
+	- The index of this receipt within the transaction
 - `contract (String)`
-  - The ID of the contract that emitted the log (32 byte string prefixed by 0x)
+	- The ID of the contract that emitted the log (32 byte string prefixed by 0x)
 
 #### `ReceiptsLogDataSubject`
 
 - `block_height (Number)`
-  - The height of the block containing this log data receipt
+	- The height of the block containing this log data receipt
 - `tx_id (String)`
-  - The ID of the transaction containing this log data receipt (32 byte string prefixed by 0x)
-- `tx_index (Number)`
-  - The index of the transaction within the block
-- `receipt_index (Number)`
-  - The index of this receipt within the transaction
+	- The ID of the transaction containing this log data receipt (32 byte string prefixed by 0x)
+- `tx_index (String)`
+	- The index of the transaction within the block
+- `receipt_index (String)`
+	- The index of this receipt within the transaction
 - `contract (String)`
-  - The ID of the contract that emitted the log data (32 byte string prefixed by 0x)
+	- The ID of the contract that emitted the log data (32 byte string prefixed by 0x)
 
 #### `ReceiptsTransferSubject`
 
 - `block_height (Number)`
-  - The height of the block containing this transfer receipt
+	- The height of the block containing this transfer receipt
 - `tx_id (String)`
-  - The ID of the transaction containing this transfer receipt (32 byte string prefixed by 0x)
-- `tx_index (Number)`
-  - The index of the transaction within the block
-- `receipt_index (Number)`
-  - The index of this receipt within the transaction
+	- The ID of the transaction containing this transfer receipt (32 byte string prefixed by 0x)
+- `tx_index (String)`
+	- The index of the transaction within the block
+- `receipt_index (String)`
+	- The index of this receipt within the transaction
 - `from (String)`
-  - The contract ID that initiated the transfer (32 byte string prefixed by 0x)
+	- The contract ID that initiated the transfer (32 byte string prefixed by 0x)
 - `to (String)`
-  - The contract ID that received the transfer (32 byte string prefixed by 0x)
+	- The contract ID that received the transfer (32 byte string prefixed by 0x)
 - `asset (String)`
-  - The asset ID being transferred (32 byte string prefixed by 0x)
+	- The asset ID being transferred (32 byte string prefixed by 0x)
 
 #### `ReceiptsTransferOutSubject`
 
 - `block_height (Number)`
-  - The height of the block containing this transfer out receipt
+	- The height of the block containing this transfer out receipt
 - `tx_id (String)`
-  - The ID of the transaction containing this transfer out receipt (32 byte string prefixed by 0x)
-- `tx_index (Number)`
-  - The index of the transaction within the block
-- `receipt_index (Number)`
-  - The index of this receipt within the transaction
+	- The ID of the transaction containing this transfer out receipt (32 byte string prefixed by 0x)
+- `tx_index (String)`
+	- The index of the transaction within the block
+- `receipt_index (String)`
+	- The index of this receipt within the transaction
 - `from (String)`
-  - The contract ID that initiated the transfer out (32 byte string prefixed by 0x)
+	- The contract ID that initiated the transfer out (32 byte string prefixed by 0x)
 - `to_address (String)`
-  - The address that received the transfer (32 byte string prefixed by 0x)
+	- The address that received the transfer (32 byte string prefixed by 0x)
 - `asset (String)`
-  - The asset ID being transferred (32 byte string prefixed by 0x)
+	- The asset ID being transferred (32 byte string prefixed by 0x)
 
 #### `ReceiptsScriptResultSubject`
 
 - `block_height (Number)`
-  - The height of the block containing this script result receipt
+	- The height of the block containing this script result receipt
 - `tx_id (String)`
-  - The ID of the transaction containing this script result receipt (32 byte string prefixed by 0x)
-- `tx_index (Number)`
-  - The index of the transaction within the block
-- `receipt_index (Number)`
-  - The index of this receipt within the transaction
+	- The ID of the transaction containing this script result receipt (32 byte string prefixed by 0x)
+- `tx_index (String)`
+	- The index of the transaction within the block
+- `receipt_index (String)`
+	- The index of this receipt within the transaction
 
 #### `ReceiptsMessageOutSubject`
 
 - `block_height (Number)`
-  - The height of the block containing this message out receipt
+	- The height of the block containing this message out receipt
 - `tx_id (String)`
-  - The ID of the transaction containing this message out receipt (32 byte string prefixed by 0x)
-- `tx_index (Number)`
-  - The index of the transaction within the block
-- `receipt_index (Number)`
-  - The index of this receipt within the transaction
+	- The ID of the transaction containing this message out receipt (32 byte string prefixed by 0x)
+- `tx_index (String)`
+	- The index of the transaction within the block
+- `receipt_index (String)`
+	- The index of this receipt within the transaction
 - `sender (String)`
-  - The address that sent the message (32 byte string prefixed by 0x)
+	- The address that sent the message (32 byte string prefixed by 0x)
 - `recipient (String)`
-  - The address that will receive the message (32 byte string prefixed by 0x)
+	- The address that will receive the message (32 byte string prefixed by 0x)
 
 #### `ReceiptsMintSubject`
 
 - `block_height (Number)`
-  - The height of the block containing this mint receipt
+	- The height of the block containing this mint receipt
 - `tx_id (String)`
-  - The ID of the transaction containing this mint receipt (32 byte string prefixed by 0x)
-- `tx_index (Number)`
-  - The index of the transaction within the block
-- `receipt_index (Number)`
-  - The index of this receipt within the transaction
+	- The ID of the transaction containing this mint receipt (32 byte string prefixed by 0x)
+- `tx_index (String)`
+	- The index of the transaction within the block
+- `receipt_index (String)`
+	- The index of this receipt within the transaction
 - `contract (String)`
-  - The ID of the contract that performed the mint (32 byte string prefixed by 0x)
+	- The ID of the contract that performed the mint (32 byte string prefixed by 0x)
 - `sub_id (String)`
-  - The sub identifier of the minted asset (32 byte string prefixed by 0x)
+	- The sub identifier of the minted asset (32 byte string prefixed by 0x)
 
 #### `ReceiptsBurnSubject`
 
 - `block_height (Number)`
-  - The height of the block containing this burn receipt
+	- The height of the block containing this burn receipt
 - `tx_id (String)`
-  - The ID of the transaction containing this burn receipt (32 byte string prefixed by 0x)
-- `tx_index (Number)`
-  - The index of the transaction within the block
-- `receipt_index (Number)`
-  - The index of this receipt within the transaction
+	- The ID of the transaction containing this burn receipt (32 byte string prefixed by 0x)
+- `tx_index (String)`
+	- The index of the transaction within the block
+- `receipt_index (String)`
+	- The index of this receipt within the transaction
 - `contract (String)`
-  - The ID of the contract that performed the burn (32 byte string prefixed by 0x)
+	- The ID of the contract that performed the burn (32 byte string prefixed by 0x)
 - `sub_id (String)`
-  - The sub identifier of the burned asset (32 byte string prefixed by 0x)
+	- The sub identifier of the burned asset (32 byte string prefixed by 0x)
 
 ### Utxo
 
 #### `UtxosSubject`
 
 - `block_height (Number)`
-  - The height of the block containing this UTXO
+	- The height of the block containing this UTXO
 - `tx_id (String)`
-  - The ID of the transaction containing this UTXO (32 byte string prefixed by 0x)
-- `tx_index (Number)`
-  - The index of the transaction within the block
-- `input_index (Number)`
-  - The index of the input within the transaction
+	- The ID of the transaction containing this UTXO (32 byte string prefixed by 0x)
+- `tx_index (String)`
+	- The index of the transaction within the block
+- `output_index (String)`
+	- The index of the output within the transaction
 - `utxo_type (String)`
-  - The type of UTXO (coin, message, or contract)
+	- The type of UTXO (coin, message, or contract)
+- `asset_id (String)`
+	- The ID of the asset associated with this UTXO
 - `utxo_id (String)`
-  - The unique identifier for this UTXO (32 byte string prefixed by 0x)
+	- The unique identifier for this UTXO (32 byte string prefixed by 0x)
+- `from (String)`
+	- The address of the sender (32 byte string prefixed by 0x)
+- `to (String)`
+	- The address of the recipient (32 byte string prefixed by 0x)
 - `contract_id (String)`
-  - The ID of the contract that returned (32 byte string prefixed by 0x)
+	- The ID of the contract that returned (32 byte string prefixed by 0x)
+- `status (String)`
+	- The status of the UTXO (unspent or spent)
+
+### Message
+
+#### `MessagesSubject`
+
+- `message_type (String)`
+	- The type of message (imported or consumed)
+- `block_height (Number)`
+	- The height of the block containing this message
+- `message_index (String)`
+	- The index of the message within the block
+- `sender (String)`
+	- The address that sent the message (32 byte string prefixed by 0x)
+- `recipient (String)`
+	- The address that will receive the message (32 byte string prefixed by 0x)
+- `nonce (String)`
+	- The nonce of the message (32 byte string prefixed by 0x)
 
 <!-- end filters list -->
 

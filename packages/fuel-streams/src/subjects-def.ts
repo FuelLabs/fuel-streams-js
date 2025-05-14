@@ -14,6 +14,16 @@ export const transactionStatusOptions = [
   { value: 'success', label: 'Success' },
 ] as const;
 
+export const messageTypeOptions = [
+  { value: 'imported', label: 'Imported' },
+  { value: 'consumed', label: 'Consumed' },
+] as const;
+
+export const messageStatusOptions = [
+  { value: 'spent', label: 'Spent' },
+  { value: 'unspent', label: 'Unspent' },
+] as const;
+
 export const utxoTypeOptions = [
   { value: 'input_contract', label: 'Input Contract' },
   { value: 'input_coin', label: 'Input Coin' },
@@ -1098,6 +1108,42 @@ export const subjectsDefinitions: SubjectsDefinition = {
       status: {
         type: 'UtxoStatus',
         description: 'The status of the UTXO (unspent or spent)',
+      },
+    },
+  },
+  messages: {
+    id: 'messages',
+    entity: 'Message',
+    subject: 'MessagesSubject',
+    format:
+      'messages.{message_type}.{block_height}.{message_index}.{sender}.{recipient}.{nonce}',
+    wildcard: 'messages.>',
+    fields: {
+      message_type: {
+        type: 'MessageType',
+        description: 'The type of message (imported or consumed)',
+      },
+      block_height: {
+        type: 'BlockHeight',
+        description: 'The height of the block containing this message',
+      },
+      message_index: {
+        type: 'i32',
+        description: 'The index of the message within the block',
+      },
+      sender: {
+        type: 'Address',
+        description:
+          'The address that sent the message (32 byte string prefixed by 0x)',
+      },
+      recipient: {
+        type: 'Address',
+        description:
+          'The address that will receive the message (32 byte string prefixed by 0x)',
+      },
+      nonce: {
+        type: 'Nonce',
+        description: 'The nonce of the message (32 byte string prefixed by 0x)',
       },
     },
   },

@@ -9,6 +9,7 @@ import {
   type InputContract,
   type InputMessage,
   InputType,
+  type Message,
   type Output,
   type OutputChange,
   type OutputCoin,
@@ -30,6 +31,7 @@ import {
   type RawInputMessage,
   type RawLogDataReceipt,
   type RawLogReceipt,
+  type RawMessage,
   type RawMessageOutReceipt,
   type RawMintReceipt,
   type RawOutput,
@@ -430,6 +432,17 @@ export class UtxoParser implements EntityParser<Utxo, RawUtxo> {
   }
 }
 
+export class MessageParser implements EntityParser<Message, RawMessage> {
+  parse(data: RawMessage): Message {
+    const transformations = {
+      amount: safeToBN,
+      daHeight: safeToBN,
+      messageIndex: safeToBN,
+    };
+    return evolve(transformations, data) as Message;
+  }
+}
+
 export function findParser<T extends EntityParser<any, any>>(id: string): T {
   if (id.startsWith('blocks')) return new BlockParser() as unknown as T;
   if (id.startsWith('transactions'))
@@ -439,6 +452,7 @@ export function findParser<T extends EntityParser<any, any>>(id: string): T {
   if (id.startsWith('predicates')) return new PredicateParser() as unknown as T;
   if (id.startsWith('receipts')) return new ReceiptParser() as unknown as T;
   if (id.startsWith('utxos')) return new UtxoParser() as unknown as T;
+  if (id.startsWith('messages')) return new MessageParser() as unknown as T;
 
   throw new Error(`Parser not found for id: ${id}`);
 }

@@ -64,6 +64,7 @@ export enum StreamNames {
   Transactions = 'transactions',
   Utxos = 'utxos',
   Predicates = 'predicates',
+  Messages = 'messages',
 }
 
 export enum ClientStatus {
@@ -554,3 +555,44 @@ export enum TransactionStatus {
   Success = 'success',
   None = 'none',
 }
+
+// ----------------------------------------------------------------------------
+// Message Types
+// ----------------------------------------------------------------------------
+export enum MessageStatus {
+  Unspent = 'unspent',
+  Spent = 'spent',
+}
+
+export enum MessageType {
+  Imported = 'imported',
+  Consumed = 'consumed',
+}
+
+export type RawMessage = {
+  id: string;
+  amount: number;
+  sender: string;
+  recipient: string;
+  nonce: string;
+  data?: string;
+  daHeight: number;
+  status: MessageStatus;
+  txId?: string;
+  messageType: MessageType;
+  messageIndex: number;
+};
+
+export type Message = {
+  id: string;
+  amount: BN;
+  sender: string;
+  recipient: string;
+  nonce: string;
+  data?: string;
+  daHeight: BN;
+  status: MessageStatus;
+  txId?: string;
+  messageType: MessageType;
+  messageIndex: number;
+};

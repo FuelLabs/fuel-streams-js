@@ -2,6 +2,7 @@ import type { FormField, SelectOption } from '@fuels/streams/subjects-def';
 import {
   TransactionTypeOptions,
   inputTypeOptions,
+  messageTypeOptions,
   outputTypeOptions,
   receiptTypeOptions,
   transactionStatusOptions,
@@ -34,6 +35,8 @@ function getFieldOptions(
       return outputTypeOptions;
     case 'ReceiptType':
       return receiptTypeOptions;
+    case 'MessageType':
+      return messageTypeOptions;
     default:
       return undefined;
   }

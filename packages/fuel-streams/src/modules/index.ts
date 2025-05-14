@@ -10,3 +10,4 @@ export * from './outputs/subjects';
 export * from './predicates/subjects';
 export * from './receipts/subjects';
 export * from './utxos/subjects';
+export * from './messages/subjects';
