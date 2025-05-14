@@ -1,5 +1,11 @@
 # @fuels/streams
 
+## 0.9.0
+
+### Minor Changes
+
+- [`ee48a51`](https://github.com/FuelLabs/fuel-streams-js/commit/ee48a5102c8e97df475e95936de62f50dd352c8c) Thanks [@pedronauck](https://github.com/pedronauck)! - Feat: add messages
+
 ## 0.8.0
 
 ### Minor Changes
