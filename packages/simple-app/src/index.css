@@ -96,3 +96,10 @@
     @apply bg-background text-foreground;
   }
 }
+
+#root {
+  overflow-y: hidden;
+  box-sizing: border-box;
+  height: 100vh;
+  width: 100vw;
+}

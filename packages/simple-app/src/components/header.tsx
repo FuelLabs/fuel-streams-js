@@ -38,7 +38,7 @@ export function Header() {
           <a
             target="_blank"
             rel="noreferrer"
-            href="https://api-rest-mainnet.fuel.network/swagger-ui/"
+            href={`https://api-rest-${network}.fuel.network/swagger-ui/`}
             className="flex items-center justify-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
           >
             Rest API
@@ -70,6 +70,9 @@ export function Header() {
             <SelectContent>
               <SelectItem value="mainnet" aria-label="Fuel Ignition">
                 Fuel Ignition
+              </SelectItem>
+              <SelectItem value="testnet" aria-label="Fuel Testnet">
+                Fuel Testnet
               </SelectItem>
               {isDev && (
                 <SelectItem value="local" aria-label="Fuel Local">
