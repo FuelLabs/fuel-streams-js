@@ -4,6 +4,7 @@ export enum FuelNetwork {
   Local = 'local',
   Staging = 'staging',
   Mainnet = 'mainnet',
+  Testnet = 'testnet',
 }
 
 export type SubjectPayload = {
