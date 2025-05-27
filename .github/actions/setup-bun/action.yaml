@@ -14,7 +14,7 @@ runs:
       name: Install Bun
       with:
         bun-version: ${{ inputs.bun-version }}
-        cache: true
+        cache: false
 
     - name: Install dependencies
       shell: bash
