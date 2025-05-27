@@ -1,5 +1,11 @@
 # @fuels/streams
 
+## 0.9.1
+
+### Patch Changes
+
+- [#47](https://github.com/FuelLabs/fuel-streams-js/pull/47) [`70a29b2`](https://github.com/FuelLabs/fuel-streams-js/commit/70a29b23ca0c6a69fb8dd9932fdd6da7155e23c6) Thanks [@luizstacio](https://github.com/luizstacio)! - Add support for testnet network
+
 ## 0.9.0
 
 ### Minor Changes
